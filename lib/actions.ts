@@ -268,18 +268,26 @@ export async function updateBookingStatusAction(formData: FormData) {
   revalidatePath("/admin/studio");
 }
 
-export async function updateCompanySettingsAction(formData: FormData) {
+export async function updateCompanySettingsAction(_prev: { error?: string; success?: string } | FormData | undefined, maybeFormData?: FormData) {
   await requireAdmin();
-  const input = companySettingsSchema.parse(values(formData));
+  const formData = maybeFormData ?? (_prev instanceof FormData ? _prev : null);
+  if (!formData) return { error: "Settings form data is missing." };
+  const parsed = companySettingsSchema.safeParse(values(formData));
+  if (!parsed.success) return { error: "Please check the settings fields and try again." };
   const prisma = getPrisma();
-  if (!prisma) throw new Error("Database is not configured.");
-  await Promise.all(Object.entries(input).map(([key, value]) => prisma.companySettings.upsert({
-    where: { key },
-    update: { value: value == null ? "" : String(value) },
-    create: { key, value: value == null ? "" : String(value) },
-  })));
-  revalidatePath("/admin/settings");
-  revalidatePath("/admin/contracts");
+  if (!prisma) return { error: "Database is not configured." };
+  try {
+    await Promise.all(Object.entries(parsed.data).map(([key, value]) => prisma.companySettings.upsert({
+      where: { key },
+      update: { value: value == null ? "" : String(value) },
+      create: { key, value: value == null ? "" : String(value) },
+    })));
+    revalidatePath("/admin/settings");
+    revalidatePath("/admin/contracts");
+    return { success: "Settings saved successfully." };
+  } catch {
+    return { error: "Could not save settings. Please try again." };
+  }
 }
 
 export async function createMeetingBookingAction(formData: FormData) {
