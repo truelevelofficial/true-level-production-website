@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { hash } from "bcryptjs";
-import { clearAdminSession, createAdminSession, ensureUserAccount, isAdminEmail, requireAdmin, validateAdminCredentials } from "./auth";
+import { clearAdminSession, createAdminSession, ensureUserAccount, getSessionEmail, isAdminEmail, requireAdmin, validateAdminCredentials } from "./auth";
 import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
 import { adminBookingSchema, contractSchema, expenseSchema, meetingBookingSchema, paymentSchema, studioBookingSchema } from "./validation";
