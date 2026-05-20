@@ -1,8 +1,10 @@
 import { createStudioBookingAction } from "@/lib/actions";
 import { studioSetups } from "@/lib/constants";
 import { Field, inputClass, PageShell, SubmitButton } from "@/components/form-fields";
+import { requireAuth } from "@/lib/auth";
 
-export default function StudioBookingPage() {
+export default async function StudioBookingPage() {
+  await requireAuth();
   return (
     <PageShell eyebrow="Studio Booking" title="Reserve the scene." text="Choose your setup, timing, duration, and production purpose. Conflicting slots are blocked for pending and approved bookings.">
       <form action={createStudioBookingAction} className="grid gap-5 rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm md:grid-cols-2">

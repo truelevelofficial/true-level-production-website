@@ -28,7 +28,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
         <p className="text-xs font-black uppercase tracking-[0.22em] text-[#0B7CFF]">True Level Account</p>
         <h1 className="text-4xl font-black uppercase leading-none tracking-[-0.06em]">Account</h1>
         <p className="rounded-2xl bg-[#F7F8FB] p-4 text-sm font-bold text-[#06111F]/65">Logged in as {email}</p>
-        {admin ? <a className="rounded-full bg-[#0B7CFF] px-6 py-4 text-center text-sm font-black uppercase tracking-[0.14em] text-white" href="/admin/bookings">Open Dashboard</a> : <p className="rounded-2xl bg-blue-50 p-4 text-sm font-bold text-blue-700">Your account is active. Dashboard access requires this email to be added as an admin.</p>}
+        {admin ? <a className="rounded-full bg-[#0B7CFF] px-6 py-4 text-center text-sm font-black uppercase tracking-[0.14em] text-white" href="/admin/bookings">Open Dashboard</a> : <a className="rounded-full bg-[#0B7CFF] px-6 py-4 text-center text-sm font-black uppercase tracking-[0.14em] text-white" href="/book">Book a Service</a>}
       </div>
     </main>
   );

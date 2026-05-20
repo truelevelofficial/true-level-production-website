@@ -31,7 +31,7 @@ export async function loginAction(_prev: { error?: string } | undefined, formDat
   if (!(await validateAdminCredentials(email, password))) return { error: "Invalid email or password." };
   await createAdminSession(email.trim().toLowerCase());
   if (await isAdminEmail(email)) redirect("/admin/bookings");
-  redirect("/account");
+  redirect("/book");
 }
 
 export async function signupAction(_prev: { error?: string } | undefined, formData: FormData) {
@@ -55,7 +55,8 @@ export async function signupAction(_prev: { error?: string } | undefined, formDa
     return { error: "Account database table is not ready. Run db:push, then try again." };
   }
   await createAdminSession(email);
-  redirect("/account");
+  if (await isAdminEmail(email)) redirect("/admin/bookings");
+  redirect("/book");
 }
 
 export async function logoutAction() {

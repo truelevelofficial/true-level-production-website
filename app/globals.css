@@ -17,3 +17,12 @@ body {
 a {
   text-decoration: none;
 }
+
+@keyframes marquee {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}

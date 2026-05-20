@@ -1,8 +1,10 @@
 import { createMeetingBookingAction } from "@/lib/actions";
 import { services } from "@/lib/constants";
 import { Field, inputClass, PageShell, SubmitButton } from "@/components/form-fields";
+import { requireAuth } from "@/lib/auth";
 
 export default async function MeetingBookingPage({ searchParams }: { searchParams: Promise<{ type?: string }> }) {
+  await requireAuth();
   const params = await searchParams;
   const type = params.type === "COMPANY_MEETING" ? "COMPANY_MEETING" : "GOOGLE_MEETING";
   return (

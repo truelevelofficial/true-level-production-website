@@ -74,6 +74,10 @@ export async function requireAdmin() {
   if (!(await isAdminAuthenticated())) redirect("/account");
 }
 
+export async function requireAuth() {
+  if (!(await isAuthenticated())) redirect("/account");
+}
+
 export async function createAdminSession(email: string) {
   const store = await cookies();
   const payload = encodeSessionPayload({ email, expires: Date.now() + 1000 * 60 * 60 * 10 });

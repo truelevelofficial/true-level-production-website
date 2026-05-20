@@ -239,8 +239,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-y border-[#06111F]/10 bg-[#0B7CFF] py-5 text-white">
-        <div className="flex gap-12 overflow-hidden whitespace-nowrap text-5xl font-black uppercase tracking-[-0.06em] md:text-7xl">
+      <section className="overflow-hidden border-y border-[#06111F]/10 bg-[#0B7CFF] py-5 text-white">
+        <div className="animate-marquee flex gap-12 whitespace-nowrap text-5xl font-black uppercase tracking-[-0.06em] md:text-7xl">
+          <span>Film</span><span>UGC</span><span>Studio</span><span>Reels</span><span>Campaigns</span><span>Events</span><span>Design</span><span>Cyclorama</span>
           <span>Film</span><span>UGC</span><span>Studio</span><span>Reels</span><span>Campaigns</span><span>Events</span><span>Design</span><span>Cyclorama</span>
         </div>
       </section>
