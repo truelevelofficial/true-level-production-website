@@ -1,9 +1,10 @@
 import { ReactNode } from "react";
+import Link from "next/link";
 import { logoutAction } from "@/lib/actions";
 import { getUnreadNotificationCount } from "@/lib/admin-data";
 
 const links = [
-  ["/admin/bookings", "Bookings"],
+  ["/admin/bookings", "Management"],
   ["/admin/meetings", "Meetings"],
   ["/admin/studio", "Studio"],
   ["/admin/clients", "Clients"],
@@ -21,7 +22,7 @@ export async function AdminShell({ title, children }: { title: string; children:
           <div className="flex items-center gap-4">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.22em] text-[#0B7CFF]">True Level Operations</p>
-              <h1 className="mt-1 text-3xl font-black uppercase tracking-[-0.05em]">{title}</h1>
+              <Link className="mt-1 block text-3xl font-black uppercase tracking-[-0.05em] transition hover:text-[#0B7CFF]" href="/">{title}</Link>
             </div>
             {notificationCount > 0 ? <div className="rounded-full bg-red-600 px-3 py-1 text-xs font-black text-white">{notificationCount}</div> : null}
           </div>
@@ -39,8 +40,8 @@ export async function AdminShell({ title, children }: { title: string; children:
 export function SetupNotice() {
   return (
     <div className="rounded-[2rem] border border-amber-200 bg-amber-50 p-6 text-amber-950">
-      <h2 className="text-2xl font-black uppercase tracking-[-0.04em]">Database setup required</h2>
-      <p className="mt-3 leading-7">Add `DATABASE_URL`, `DIRECT_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `ADMIN_SESSION_SECRET` in Vercel/local env, then run `npm.cmd run db:push` to create the Supabase PostgreSQL tables.</p>
+      <h2 className="text-2xl font-black uppercase tracking-[-0.04em]">Database tables required</h2>
+      <p className="mt-3 leading-7">The management features are ready, but Supabase tables are not created yet. Confirm `DATABASE_URL` and `DIRECT_URL` in Vercel, then run `npm.cmd run db:push` to activate bookings, clients, accounting, contracts, and notifications.</p>
     </div>
   );
 }

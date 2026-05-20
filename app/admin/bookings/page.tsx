@@ -11,10 +11,25 @@ export default async function AdminBookingsPage() {
   await requireAdmin();
   const [summary, bookings] = await Promise.all([getAdminSummary(), getBookings()]);
   return (
-    <AdminShell title="Bookings">
-      {!hasDatabase() ? <SetupNotice /> : null}
-      {summary ? <div className="mb-6 grid gap-4 md:grid-cols-4"><Card title="All bookings" value={String(summary.bookings)} /><Card title="Pending" value={String(summary.pending)} /><Card title="Revenue" value={`${summary.revenue} EGP`} /><Card title="Net profit" value={`${summary.profit} EGP`} /></div> : null}
+    <AdminShell title="Management">
+      {!hasDatabase() || !summary ? <div className="mb-6"><SetupNotice /></div> : null}
+      <div className="mb-6 grid gap-4 md:grid-cols-4">
+        <Card title="All bookings" value={String(summary?.bookings ?? 0)} />
+        <Card title="Pending" value={String(summary?.pending ?? 0)} />
+        <Card title="Revenue" value={`${summary?.revenue ?? 0} EGP`} />
+        <Card title="Net profit" value={`${summary?.profit ?? 0} EGP`} />
+      </div>
       <a className="mb-4 inline-flex rounded-full border border-[#06111F]/10 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]" href="/admin/export/bookings">Export Bookings CSV</a>
+      {bookings.length === 0 ? (
+        <div className="mb-6 grid gap-4 md:grid-cols-3">
+          <a className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/meetings"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Meetings</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Manage client meetings</h2></a>
+          <a className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/studio"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Studio</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Manage studio rentals</h2></a>
+          <a className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/accounting"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Accounting</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Track money flow</h2></a>
+          <a className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/clients"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Clients</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">View client records</h2></a>
+          <a className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/contracts"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Contracts</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Generate contract drafts</h2></a>
+          <a className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/book"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Public booking</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Test booking flow</h2></a>
+        </div>
+      ) : null}
       <div className="grid gap-4">
         {bookings.map((booking) => <form action={updateBookingAction} className="grid gap-4 rounded-[2rem] border border-[#06111F]/10 bg-white p-5 shadow-sm lg:grid-cols-6" key={booking.id}>
           <input name="bookingId" type="hidden" value={booking.id} />
