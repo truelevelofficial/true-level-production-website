@@ -9,6 +9,7 @@ const oauthErrors: Record<string, string> = {
   google_token_missing: "Google did not return an access token.",
   google_user_failed: "Could not read your Google profile.",
   google_email_unverified: "Your Google email must be verified.",
+  google_callback_failed: "Google login failed on the server. Try again or use email login.",
 };
 
 export default async function AccountPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
