@@ -180,7 +180,10 @@ export default function Home() {
             <a className="hover:text-[#0B7CFF]" href="#work">Work</a>
             <a className="hover:text-[#0B7CFF]" href="#packages">Packages</a>
           </nav>
-          <Button href="/book">Book</Button>
+          <div className="flex items-center gap-2">
+            <Button href="/admin" variant="secondary">Account</Button>
+            <Button href="/book">Book</Button>
+          </div>
         </div>
       </header>
 
