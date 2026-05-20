@@ -15,6 +15,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
+import { isAdminAuthenticated } from "@/lib/auth";
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -166,7 +167,9 @@ function VisualCard({ title, label, className = "" }: { title: string; label: st
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const isAdmin = await isAdminAuthenticated();
+
   return (
     <main className="min-h-screen overflow-hidden bg-[#F7F8FB] text-[#06111F] selection:bg-[#0B7CFF] selection:text-white">
       <div className="pointer-events-none fixed inset-0 z-50 opacity-[0.28] [background-image:radial-gradient(circle_at_1px_1px,rgba(6,17,31,0.16)_1px,transparent_0)] [background-size:22px_22px]" />
@@ -179,6 +182,7 @@ export default function Home() {
             <a className="hover:text-[#0B7CFF]" href="#studio">Studio</a>
             <a className="hover:text-[#0B7CFF]" href="#work">Work</a>
             <a className="hover:text-[#0B7CFF]" href="#packages">Packages</a>
+            {isAdmin ? <a className="text-[#0B7CFF] hover:text-[#06111F]" href="/admin/bookings">Management</a> : null}
           </nav>
           <div className="flex items-center gap-2">
             <Button href="/account" variant="secondary">Account</Button>
