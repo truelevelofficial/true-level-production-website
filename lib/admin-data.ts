@@ -86,7 +86,7 @@ export async function getContracts() {
   const prisma = getPrisma();
   if (!prisma) return [];
   try {
-    return await prisma.contract.findMany({ include: { client: true }, orderBy: { createdAt: "desc" }, take: 100 });
+    return await prisma.contract.findMany({ include: { client: true, booking: true }, orderBy: { createdAt: "desc" }, take: 100 });
   } catch {
     return [];
   }

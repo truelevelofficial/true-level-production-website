@@ -148,4 +148,5 @@ export const contractSchema = z.object({
   confidentialityClause: requiredText,
   latePaymentClause: requiredText,
   additionalNotes: optionalText,
+  bodyOverride: z.string().trim().max(30000).optional().or(z.literal("")),
 });

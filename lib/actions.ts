@@ -478,7 +478,7 @@ export async function createContractAction(formData: FormData) {
       type: input.type,
       status: input.status,
       title: generated.title,
-      body: generated.body,
+      body: input.bodyOverride || generated.body,
       clientId: client.id,
       totalPrice: input.totalPrice,
       deposit: input.depositAmount,

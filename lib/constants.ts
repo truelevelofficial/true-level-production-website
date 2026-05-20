@@ -32,6 +32,13 @@ export const expenseCategoryArabic: Record<string, string> = {
 };
 export const contractStatuses = ["DRAFT", "SENT", "SIGNED", "CANCELLED"] as const;
 
+export const contractStatusArabic: Record<string, string> = {
+  DRAFT: "مسودة",
+  SENT: "مرسل",
+  SIGNED: "موقع",
+  CANCELLED: "ملغي",
+};
+
 export const services = [
   "Brand Films",
   "Creative Direction",
@@ -75,12 +82,12 @@ export const adminStudioStatuses = ["PENDING", "APPROVED", "COMPLETED", "CANCELL
 export const studioDurationTypes = ["HOURLY", "HALF_DAY", "FULL_DAY"] as const;
 
 export const contractTypes = [
-  ["STUDIO_RENTAL", "Studio Rental Agreement"],
-  ["VIDEO_PRODUCTION", "Video Production Agreement"],
-  ["UGC_CREATOR_CAMPAIGN", "UGC Creator Campaign Agreement"],
-  ["EVENT_COVERAGE", "Event Coverage Agreement"],
-  ["MONTHLY_CONTENT_MANAGEMENT", "Monthly Content Management Agreement"],
-  ["GENERAL_SERVICE", "General Service Agreement"],
+  ["STUDIO_RENTAL", "عقد تأجير استوديو"],
+  ["VIDEO_PRODUCTION", "عقد إنتاج فيديو"],
+  ["UGC_CREATOR_CAMPAIGN", "عقد حملة UGC"],
+  ["EVENT_COVERAGE", "عقد تغطية فعالية"],
+  ["MONTHLY_CONTENT_MANAGEMENT", "عقد إدارة محتوى شهري"],
+  ["GENERAL_SERVICE", "عقد خدمات عام"],
 ] as const;
 
 export const contractTypeValues = ["STUDIO_RENTAL", "VIDEO_PRODUCTION", "UGC_CREATOR_CAMPAIGN", "EVENT_COVERAGE", "MONTHLY_CONTENT_MANAGEMENT", "GENERAL_SERVICE"] as const;
