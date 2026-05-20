@@ -96,6 +96,7 @@ model Client {
   payments    Payment[]
   expenses    Expense[]
   contracts   Contract[]
+  notifications Notification[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -129,6 +130,7 @@ model Booking {
   invoices        Invoice[]
   payments        Payment[]
   contracts       Contract[]
+  notifications   Notification[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -233,4 +235,17 @@ model CompanySettings {
   value     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String
+  title     String
+  message   String?
+  clientId  String?
+  client    Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  bookingId String?
+  booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

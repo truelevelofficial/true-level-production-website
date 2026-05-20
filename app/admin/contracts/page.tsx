@@ -47,7 +47,10 @@ export default async function ContractsPage() {
           <p className="text-sm font-bold text-[#0B7CFF]">{contract.status}</p>
           <h2 className="mt-2 text-2xl font-black">{contract.title}</h2>
           <pre className="mt-4 whitespace-pre-wrap rounded-2xl bg-[#F7F8FB] p-4 text-sm leading-7 text-[#06111F]/70">{contract.body}</pre>
-          <p className="mt-4 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]/45">Use browser print to export as PDF.</p>
+          <div className="mt-4 flex gap-3">
+            <a className="rounded-full bg-[#0B7CFF] px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white" href={`/admin/export/contract/${contract.id}`}>Download DOCX</a>
+            <span className="rounded-full border border-[#06111F]/10 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]/45">Use browser print for PDF</span>
+          </div>
         </article>)}
       </div>
     </AdminShell>

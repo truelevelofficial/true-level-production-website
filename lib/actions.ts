@@ -7,6 +7,8 @@ import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
 import { adminBookingSchema, contractSchema, expenseSchema, meetingBookingSchema, paymentSchema, studioBookingSchema } from "./validation";
 import { generateArabicContract } from "./contracts";
+import { createCalendarEventWithMeet } from "./google-calendar";
+import { notifyNewBooking, notifyBookingStatusChange } from "./notifications";
 
 function values(formData: FormData) {
   return Object.fromEntries(formData.entries());
@@ -55,6 +57,7 @@ export async function createMeetingBookingAction(formData: FormData) {
       notes: input.notes || null,
     },
   });
+  await notifyNewBooking(client.fullName, input.meetingType === "GOOGLE_MEETING" ? "Google Meeting" : "Company Meeting", client.email);
   redirect("/booking-success");
 }
 
@@ -93,6 +96,7 @@ export async function createStudioBookingAction(formData: FormData) {
       notes: input.notes || null,
     },
   });
+  await notifyNewBooking(client.fullName, `Studio (${input.studioSetup})`, client.email);
   redirect("/booking-success");
 }
 
@@ -101,6 +105,22 @@ export async function updateBookingAction(formData: FormData) {
   const input = adminBookingSchema.parse(values(formData));
   const prisma = getPrisma();
   if (!prisma) throw new Error("Database is not configured.");
+
+  const current = await prisma.booking.findUnique({ where: { id: input.bookingId }, include: { client: true } });
+  if (!current) throw new Error("Booking not found.");
+
+  let meetingLink = input.meetingLink;
+  if (input.status === "APPROVED" && current.type === "GOOGLE_MEETING" && !meetingLink) {
+    const link = await createCalendarEventWithMeet({
+      summary: `Meeting with ${current.client.fullName}`,
+      description: current.notes || "True Level Production meeting",
+      startTime: current.startTime,
+      endTime: current.endTime,
+      attendeeEmail: current.client.email,
+    });
+    if (link) meetingLink = link;
+  }
+
   const price = input.price ?? 0;
   const deposit = input.deposit ?? 0;
   const discount = input.discount ?? 0;
@@ -113,10 +133,14 @@ export async function updateBookingAction(formData: FormData) {
       discount,
       remainingAmount: Math.max(price - deposit - discount, 0),
       paymentStatus: input.paymentStatus,
-      meetingLink: input.meetingLink || null,
+      meetingLink: meetingLink || null,
       internalNotes: input.internalNotes || null,
     },
   });
+
+  if (input.status !== current.status) {
+    await notifyBookingStatusChange(current.client.email, current.client.fullName, current.type, input.status, meetingLink || undefined);
+  }
   revalidatePath("/admin/bookings");
   revalidatePath("/admin/meetings");
   revalidatePath("/admin/studio");

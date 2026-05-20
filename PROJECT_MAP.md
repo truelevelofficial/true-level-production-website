@@ -24,10 +24,8 @@
 - `prisma/schema.prisma`: PostgreSQL schema for admin users, clients, bookings, accounting, contracts, templates, and settings.
 
 ## [ORPHANS & PENDING]
-- Add real Supabase `DATABASE_URL` and `DIRECT_URL`, then run `npm.cmd run db:push`.
-- Add production `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and long `ADMIN_SESSION_SECRET`.
-- Email notifications are not active until Resend/SMTP credentials are provided.
-- Google Meet links are manually entered by admin in v1; full Google Calendar integration is pending credentials.
-- Contract export is browser print/PDF in v1; DOCX export is pending a dedicated package decision.
 - Replace portfolio placeholders with real media when approved.
 - Confirm final production contact email/phone/location before launch if these values change.
+- Email: Add `RESEND_API_KEY` and `ADMIN_NOTIFY_EMAIL` for live email notifications on booking creation and status changes.
+- Google Meet: Add `GOOGLE_SERVICE_ACCOUNT_EMAIL` and `GOOGLE_PRIVATE_KEY` to auto-generate Meet links when approving Google Meeting bookings. Otherwise, the admin can enter links manually.
+- Run `npm.cmd run db:push` to add the `Notification` table to the existing database.

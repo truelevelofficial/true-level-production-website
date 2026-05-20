@@ -48,4 +48,10 @@ export async function getContracts() {
   return prisma.contract.findMany({ include: { client: true }, orderBy: { createdAt: "desc" }, take: 100 });
 }
 
+export async function getUnreadNotificationCount() {
+  const prisma = getPrisma();
+  if (!prisma) return 0;
+  return prisma.notification.count({ where: { read: false } });
+}
+
 export { hasDatabase };
