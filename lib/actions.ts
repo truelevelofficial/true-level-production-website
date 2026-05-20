@@ -55,10 +55,6 @@ export async function signupAction(_prev: { error?: string } | undefined, formDa
   redirect("/admin/bookings");
 }
 
-export async function googleLoginAction() {
-  return { error: "Google login needs Google OAuth credentials before it can be enabled." };
-}
-
 export async function logoutAction() {
   await clearAdminSession();
   redirect("/admin");

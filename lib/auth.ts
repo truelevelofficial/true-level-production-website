@@ -47,6 +47,19 @@ export async function createAdminSession(email: string) {
   });
 }
 
+export function isGoogleOAuthEnabled() {
+  return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+}
+
+export async function canUseAdminEmail(email: string) {
+  const normalized = email.trim().toLowerCase();
+  if (process.env.ADMIN_EMAIL?.trim().toLowerCase() === normalized) return true;
+  const prisma = getPrisma();
+  if (!prisma) return false;
+  const admin = await prisma.adminUser.findUnique({ where: { email: normalized }, select: { id: true } });
+  return Boolean(admin);
+}
+
 export async function clearAdminSession() {
   const store = await cookies();
   store.delete(cookieName);
