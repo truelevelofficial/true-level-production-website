@@ -63,6 +63,24 @@ export async function getClients() {
   }
 }
 
+export async function getClientById(id: string) {
+  const prisma = getPrisma();
+  if (!prisma) return null;
+  try {
+    return await prisma.client.findUnique({
+      where: { id },
+      include: {
+        bookings: { orderBy: { createdAt: "desc" }, take: 100 },
+        contracts: { orderBy: { createdAt: "desc" }, take: 50 },
+        payments: { orderBy: { date: "desc" }, take: 100 },
+        expenses: { orderBy: { date: "desc" }, take: 100 },
+      },
+    });
+  } catch {
+    return null;
+  }
+}
+
 export async function getAccounting() {
   const prisma = getPrisma();
   if (!prisma) return null;

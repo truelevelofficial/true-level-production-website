@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { adminMeetingTypes, bookingStatuses, clientTypes, contractStatuses, contractTypeValues, expenseCategories, paymentMethods, paymentStatuses, services, studioDurationTypes, studioSetups } from "./constants";
+import { adminMeetingTypes, bookingStatuses, clientTypes, contractStatuses, contractTypeValues, expenseCategories, leadSources, paymentMethods, paymentStatuses, pipelineStatuses, services, studioDurationTypes, studioSetups } from "./constants";
 
 const requiredText = z.string().trim().min(2).max(500);
 const optionalText = z.string().trim().max(3000).optional().or(z.literal(""));
@@ -17,7 +17,11 @@ export const manualClientSchema = z.object({
   ...clientFields,
   address: z.string().trim().max(300).optional().or(z.literal("")),
   taxId: z.string().trim().max(100).optional().or(z.literal("")),
+  commercialRegistrationNumber: z.string().trim().max(120).optional().or(z.literal("")),
   clientType: z.enum(clientTypes).optional().or(z.literal("")),
+  leadSource: z.enum(leadSources).optional().or(z.literal("")),
+  pipelineStatus: z.enum(pipelineStatuses).optional().or(z.literal("")),
+  assignedTeamMember: z.string().trim().max(120).optional().or(z.literal("")),
   notes: optionalText,
 });
 

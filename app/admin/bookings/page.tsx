@@ -1,4 +1,5 @@
 import { AdminShell, Card, SetupNotice } from "@/components/admin-shell";
+import Link from "next/link";
 import { inputClass } from "@/components/form-fields";
 import { updateBookingAction } from "@/lib/actions";
 import { bookingStatuses, paymentStatuses } from "@/lib/constants";
@@ -36,11 +37,11 @@ export default async function AdminBookingsPage({ searchParams }: { searchParams
         <Card title="This month expenses" value={`${summary?.monthExpenses ?? 0} EGP`} />
       </div>
       <div className="mb-6 flex flex-wrap gap-2">
-        <a className="rounded-full border border-[#06111F]/10 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]" href="/admin/clients">Add client manually</a>
-        <a className="rounded-full border border-[#06111F]/10 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]" href="/admin/meetings">Add meeting manually</a>
-        <a className="rounded-full border border-[#06111F]/10 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]" href="/admin/studio">Add studio booking manually</a>
-        <a className="rounded-full border border-[#06111F]/10 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]" href="/admin/accounting">Add income / expense</a>
-        <a className="rounded-full border border-[#06111F]/10 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]" href="/admin/contracts">Generate contract</a>
+        <Link className="rounded-full border border-[#06111F]/10 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]" href="/admin/clients">Add client manually</Link>
+        <Link className="rounded-full border border-[#06111F]/10 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]" href="/admin/meetings">Add meeting manually</Link>
+        <Link className="rounded-full border border-[#06111F]/10 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]" href="/admin/studio">Add studio booking manually</Link>
+        <Link className="rounded-full border border-[#06111F]/10 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]" href="/admin/accounting">Add income / expense</Link>
+        <Link className="rounded-full border border-[#06111F]/10 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]" href="/admin/contracts">Generate contract</Link>
         <a className="rounded-full bg-[#0B7CFF] px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white" href="/admin/export/bookings">Export Bookings CSV</a>
         <a className="rounded-full bg-[#0B7CFF] px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white" href="/admin/export/accounting">Export Accounting CSV</a>
       </div>
@@ -55,12 +56,12 @@ export default async function AdminBookingsPage({ searchParams }: { searchParams
       </form>
       {bookings.length === 0 ? (
         <div className="mb-6 grid gap-4 md:grid-cols-3">
-          <a className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/meetings"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Meetings</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Manage client meetings</h2></a>
-          <a className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/studio"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Studio</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Manage studio rentals</h2></a>
-          <a className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/accounting"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Accounting</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Track money flow</h2></a>
-          <a className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/clients"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Clients</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">View client records</h2></a>
-          <a className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/contracts"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Contracts</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Generate contract drafts</h2></a>
-          <a className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/book"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Public booking</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Test booking flow</h2></a>
+          <Link className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/meetings"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Meetings</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Manage client meetings</h2></Link>
+          <Link className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/studio"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Studio</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Manage studio rentals</h2></Link>
+          <Link className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/accounting"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Accounting</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Track money flow</h2></Link>
+          <Link className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/clients"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Clients</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">View client records</h2></Link>
+          <Link className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/admin/contracts"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Contracts</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Generate contract drafts</h2></Link>
+          <Link className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#0B7CFF]/40" href="/book"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Public booking</p><h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em]">Test booking flow</h2></Link>
         </div>
       ) : null}
       <div className="grid gap-4">

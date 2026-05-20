@@ -102,7 +102,11 @@ model Client {
   email       String    @unique
   address     String?
   taxId       String?
+  commercialRegistrationNumber String?
   clientType  String?
+  leadSource  String?
+  pipelineStatus String?
+  assignedTeamMember String?
   notes       String?
   bookings    Booking[]
   invoices    Invoice[]

@@ -62,12 +62,21 @@ export const clientTypes = [
   "Agency",
   "Creator",
   "Restaurant",
+  "Cafe",
   "Fashion brand",
   "Beauty brand",
+  "Skincare brand",
   "E-commerce",
   "Event organizer",
+  "Startup",
+  "Coach",
+  "Consultant",
+  "Clinic",
   "Other",
 ] as const;
+
+export const leadSources = ["Instagram", "Facebook", "TikTok", "Website", "WhatsApp", "Referral", "Existing Client", "Event", "Cold Outreach", "Paid Ads", "Other"] as const;
+export const pipelineStatuses = ["New Lead", "Contacted", "Meeting Scheduled", "Proposal Sent", "Negotiation", "Won", "Lost"] as const;
 
 export const adminMeetingTypes = [
   "Google Meeting",

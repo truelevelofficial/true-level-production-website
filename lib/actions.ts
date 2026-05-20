@@ -137,7 +137,11 @@ export async function createClientAction(formData: FormData) {
       whatsapp: input.whatsapp || null,
       address: input.address || null,
       taxId: input.taxId || null,
+      commercialRegistrationNumber: input.commercialRegistrationNumber || null,
       clientType: input.clientType || null,
+      leadSource: input.leadSource || null,
+      pipelineStatus: input.pipelineStatus || "New Lead",
+      assignedTeamMember: input.assignedTeamMember || null,
       notes: input.notes || null,
     },
     create: {
@@ -148,7 +152,11 @@ export async function createClientAction(formData: FormData) {
       email: input.email,
       address: input.address || null,
       taxId: input.taxId || null,
+      commercialRegistrationNumber: input.commercialRegistrationNumber || null,
       clientType: input.clientType || null,
+      leadSource: input.leadSource || null,
+      pipelineStatus: input.pipelineStatus || "New Lead",
+      assignedTeamMember: input.assignedTeamMember || null,
       notes: input.notes || null,
     },
   });
@@ -170,7 +178,11 @@ export async function updateClientAction(formData: FormData) {
       email: input.email,
       address: input.address || null,
       taxId: input.taxId || null,
+      commercialRegistrationNumber: input.commercialRegistrationNumber || null,
       clientType: input.clientType || null,
+      leadSource: input.leadSource || null,
+      pipelineStatus: input.pipelineStatus || "New Lead",
+      assignedTeamMember: input.assignedTeamMember || null,
       notes: input.notes || null,
     },
   });
@@ -277,16 +289,20 @@ export async function updateCompanySettingsAction(_prev: { error?: string; succe
   const prisma = getPrisma();
   if (!prisma) return { error: "Database is not configured." };
   try {
-    await Promise.all(Object.entries(parsed.data).map(([key, value]) => prisma.companySettings.upsert({
-      where: { key },
-      update: { value: value == null ? "" : String(value) },
-      create: { key, value: value == null ? "" : String(value) },
-    })));
+    for (const [key, value] of Object.entries(parsed.data)) {
+      await prisma.companySettings.upsert({
+        where: { key },
+        update: { value: value == null ? "" : String(value) },
+        create: { key, value: value == null ? "" : String(value) },
+      });
+    }
     revalidatePath("/admin/settings");
     revalidatePath("/admin/contracts");
     return { success: "Settings saved successfully." };
-  } catch {
-    return { error: "Could not save settings. Please try again." };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown settings save error";
+    console.error("Company settings save failed", { message });
+    return { error: "Could not save settings. Check database connection and try again." };
   }
 }
 
