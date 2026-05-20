@@ -59,6 +59,44 @@ export async function signupAction(_prev: { error?: string } | undefined, formDa
   redirect("/");
 }
 
+export async function updateProfileAction(_prev: { error?: string; success?: string } | undefined, formData: FormData) {
+  const email = await getSessionEmail();
+  if (!email) return { error: "Not logged in." };
+  const name = String(formData.get("name") || "").trim();
+  if (name.length < 2) return { error: "Name must be at least 2 characters." };
+  const prisma = getPrisma();
+  if (!prisma) return { error: "Database is not configured." };
+  try {
+    await prisma.user.update({ where: { email }, data: { name } });
+    return { success: "Profile updated." };
+  } catch {
+    return { error: "Could not update profile." };
+  }
+}
+
+export async function changePasswordAction(_prev: { error?: string; success?: string } | undefined, formData: FormData) {
+  const email = await getSessionEmail();
+  if (!email) return { error: "Not logged in." };
+  const current = String(formData.get("currentPassword") || "");
+  const newPass = String(formData.get("newPassword") || "");
+  const confirm = String(formData.get("confirmPassword") || "");
+  if (newPass.length < 8) return { error: "New password must be at least 8 characters." };
+  if (newPass !== confirm) return { error: "Passwords do not match." };
+  const prisma = getPrisma();
+  if (!prisma) return { error: "Database is not configured." };
+  try {
+    const user = await prisma.user.findUnique({ where: { email }, select: { passwordHash: true } });
+    if (!user?.passwordHash) return { error: "Cannot change password for this account." };
+    const { compare } = await import("bcryptjs");
+    if (!(await compare(current, user.passwordHash))) return { error: "Current password is incorrect." };
+    const { hash } = await import("bcryptjs");
+    await prisma.user.update({ where: { email }, data: { passwordHash: await hash(newPass, 12) } });
+    return { success: "Password changed." };
+  } catch {
+    return { error: "Could not change password." };
+  }
+}
+
 export async function logoutAction() {
   await clearAdminSession();
   redirect("/admin");
