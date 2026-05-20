@@ -6,7 +6,7 @@ import { hash } from "bcryptjs";
 import { clearAdminSession, createAdminSession, ensureUserAccount, getSessionEmail, isAdminEmail, requireAdmin, validateAdminCredentials } from "./auth";
 import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
-import { adminBookingSchema, contractSchema, expenseSchema, meetingBookingSchema, paymentSchema, studioBookingSchema } from "./validation";
+import { adminBookingSchema, contractSchema, expenseSchema, manualClientSchema, meetingBookingSchema, paymentSchema, studioBookingSchema } from "./validation";
 import { generateArabicContract } from "./contracts";
 import { createCalendarEventWithMeet } from "./google-calendar";
 import { notifyNewBooking, notifyBookingStatusChange } from "./notifications";
@@ -100,6 +100,34 @@ export async function changePasswordAction(_prev: { error?: string; success?: st
 export async function logoutAction() {
   await clearAdminSession();
   redirect("/admin");
+}
+
+export async function createClientAction(formData: FormData) {
+  await requireAdmin();
+  const input = manualClientSchema.parse(values(formData));
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  await prisma.client.upsert({
+    where: { email: input.email },
+    update: {
+      fullName: input.fullName,
+      companyName: input.companyName || null,
+      phone: input.phone,
+      address: input.address || null,
+      taxId: input.taxId || null,
+      notes: input.notes || null,
+    },
+    create: {
+      fullName: input.fullName,
+      companyName: input.companyName || null,
+      phone: input.phone,
+      email: input.email,
+      address: input.address || null,
+      taxId: input.taxId || null,
+      notes: input.notes || null,
+    },
+  });
+  revalidatePath("/admin/clients");
 }
 
 export async function createMeetingBookingAction(formData: FormData) {

@@ -12,6 +12,13 @@ export const clientFields = {
   email: z.string().trim().email().max(200),
 };
 
+export const manualClientSchema = z.object({
+  ...clientFields,
+  address: z.string().trim().max(300).optional().or(z.literal("")),
+  taxId: z.string().trim().max(100).optional().or(z.literal("")),
+  notes: optionalText,
+});
+
 export const meetingBookingSchema = z.object({
   ...clientFields,
   meetingType: z.enum(["GOOGLE_MEETING", "COMPANY_MEETING"]),
