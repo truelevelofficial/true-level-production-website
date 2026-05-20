@@ -14,6 +14,18 @@ function sign(value: string) {
   return createHmac("sha256", secret()).update(value).digest("hex");
 }
 
+function encodeSessionPayload(payload: { email: string; expires: number }) {
+  return Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
+}
+
+function decodeSessionPayload(value: string) {
+  try {
+    return JSON.parse(Buffer.from(value, "base64url").toString("utf8")) as { email?: string; expires?: number };
+  } catch {
+    return null;
+  }
+}
+
 function safeEqual(a: string, b: string) {
   const left = Buffer.from(a);
   const right = Buffer.from(b);
@@ -24,10 +36,15 @@ export async function isAdminAuthenticated() {
   const store = await cookies();
   const value = store.get(cookieName)?.value;
   if (!value) return false;
-  const [email, expires, signature] = value.split(".");
-  if (!email || !expires || !signature) return false;
-  if (Number(expires) < Date.now()) return false;
-  return safeEqual(sign(`${email}.${expires}`), signature);
+  const separatorIndex = value.lastIndexOf(".");
+  if (separatorIndex === -1) return false;
+
+  const payload = value.slice(0, separatorIndex);
+  const signature = value.slice(separatorIndex + 1);
+  const decoded = decodeSessionPayload(payload);
+  if (!decoded?.email || !decoded.expires || !signature) return false;
+  if (decoded.expires < Date.now()) return false;
+  return safeEqual(sign(payload), signature);
 }
 
 export async function requireAdmin() {
@@ -36,8 +53,7 @@ export async function requireAdmin() {
 
 export async function createAdminSession(email: string) {
   const store = await cookies();
-  const expires = String(Date.now() + 1000 * 60 * 60 * 10);
-  const payload = `${email}.${expires}`;
+  const payload = encodeSessionPayload({ email, expires: Date.now() + 1000 * 60 * 60 * 10 });
   store.set(cookieName, `${payload}.${sign(payload)}`, {
     httpOnly: true,
     sameSite: "lax",
