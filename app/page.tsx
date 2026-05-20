@@ -15,7 +15,8 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { isAdminAuthenticated } from "@/lib/auth";
+import { getSessionEmail, isAdminAuthenticated } from "@/lib/auth";
+import { UserMenu } from "@/components/user-menu";
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -168,7 +169,8 @@ function VisualCard({ title, label, className = "" }: { title: string; label: st
 }
 
 export default async function Home() {
-  const isAdmin = await isAdminAuthenticated();
+  const sessionEmail = await getSessionEmail();
+  const isAdmin = sessionEmail ? await isAdminAuthenticated() : false;
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#F7F8FB] text-[#06111F] selection:bg-[#0B7CFF] selection:text-white">
@@ -185,7 +187,7 @@ export default async function Home() {
             {isAdmin ? <a className="text-[#0B7CFF] hover:text-[#06111F]" href="/admin/bookings">Management</a> : null}
           </nav>
           <div className="flex items-center gap-2">
-            <Button href="/account" variant="secondary">Account</Button>
+            {sessionEmail ? <UserMenu email={sessionEmail} /> : <Button href="/account" variant="secondary">Account</Button>}
             <Button href="/book">Book</Button>
           </div>
         </div>
