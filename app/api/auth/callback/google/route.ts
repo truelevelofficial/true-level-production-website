@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { authorizeGoogleAdminEmail, createAdminSession, isGoogleOAuthEnabled } from "@/lib/auth";
+import { bootstrapFirstGoogleAdmin, createAdminSession, ensureUserAccount, isAdminEmail, isGoogleOAuthEnabled } from "@/lib/auth";
 
 type GoogleUser = {
   email?: string;
@@ -54,8 +54,10 @@ export async function GET(request: NextRequest) {
   if (!userResponse.ok) return NextResponse.redirect(adminUrl(request, "google_user_failed"));
   const user = (await userResponse.json()) as GoogleUser;
   if (!user.email || user.email_verified === false) return NextResponse.redirect(adminUrl(request, "google_email_unverified"));
-  if (!(await authorizeGoogleAdminEmail(user.email, user.name))) return NextResponse.redirect(adminUrl(request, "google_admin_denied"));
 
-  await createAdminSession(user.email.toLowerCase());
-  return NextResponse.redirect(new URL("/admin/bookings", request.url));
+  const email = user.email.toLowerCase();
+  await ensureUserAccount(email, user.name, "google");
+  await bootstrapFirstGoogleAdmin(email, user.name);
+  await createAdminSession(email);
+  return NextResponse.redirect(new URL((await isAdminEmail(email)) ? "/admin/bookings" : "/account", request.url));
 }

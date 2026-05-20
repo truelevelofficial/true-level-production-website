@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { hash } from "bcryptjs";
-import { clearAdminSession, createAdminSession, requireAdmin, validateAdminCredentials } from "./auth";
+import { clearAdminSession, createAdminSession, ensureUserAccount, isAdminEmail, requireAdmin, validateAdminCredentials } from "./auth";
 import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
 import { adminBookingSchema, contractSchema, expenseSchema, meetingBookingSchema, paymentSchema, studioBookingSchema } from "./validation";
@@ -29,8 +29,9 @@ export async function loginAction(_prev: { error?: string } | undefined, formDat
   const email = String(formData.get("email") || "").trim();
   const password = String(formData.get("password") || "");
   if (!(await validateAdminCredentials(email, password))) return { error: "Invalid email or password." };
-  await createAdminSession(email);
-  redirect("/admin/bookings");
+  await createAdminSession(email.trim().toLowerCase());
+  if (await isAdminEmail(email)) redirect("/admin/bookings");
+  redirect("/account");
 }
 
 export async function signupAction(_prev: { error?: string } | undefined, formData: FormData) {
@@ -45,14 +46,13 @@ export async function signupAction(_prev: { error?: string } | undefined, formDa
 
   const prisma = getPrisma();
   if (!prisma) return { error: "Database is not configured." };
-  const existingAdmins = await prisma.adminUser.count();
-  if (existingAdmins > 0) return { error: "Signup is closed. Ask the owner to create your admin account." };
+  const existingUser = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+  if (existingUser) return { error: "This email already has an account. Please login." };
 
-  await prisma.adminUser.create({
-    data: { name, email, passwordHash: await hash(password, 12), role: "OWNER" },
-  });
+  await prisma.user.create({ data: { name, email, passwordHash: await hash(password, 12), provider: "credentials" } });
+  await ensureUserAccount(email, name);
   await createAdminSession(email);
-  redirect("/admin/bookings");
+  redirect("/account");
 }
 
 export async function logoutAction() {

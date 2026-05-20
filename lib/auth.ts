@@ -32,23 +32,42 @@ function safeEqual(a: string, b: string) {
   return left.length === right.length && timingSafeEqual(left, right);
 }
 
-export async function isAdminAuthenticated() {
+export async function getSessionEmail() {
   const store = await cookies();
   const value = store.get(cookieName)?.value;
-  if (!value) return false;
+  if (!value) return null;
   const separatorIndex = value.lastIndexOf(".");
-  if (separatorIndex === -1) return false;
+  if (separatorIndex === -1) return null;
 
   const payload = value.slice(0, separatorIndex);
   const signature = value.slice(separatorIndex + 1);
   const decoded = decodeSessionPayload(payload);
-  if (!decoded?.email || !decoded.expires || !signature) return false;
-  if (decoded.expires < Date.now()) return false;
-  return safeEqual(sign(payload), signature);
+  if (!decoded?.email || !decoded.expires || !signature) return null;
+  if (decoded.expires < Date.now()) return null;
+  if (!safeEqual(sign(payload), signature)) return null;
+  return decoded.email;
+}
+
+export async function isAuthenticated() {
+  return Boolean(await getSessionEmail());
+}
+
+export async function isAdminEmail(email: string) {
+  const normalized = email.trim().toLowerCase();
+  if (process.env.ADMIN_EMAIL?.trim().toLowerCase() === normalized) return true;
+  const prisma = getPrisma();
+  if (!prisma) return false;
+  const admin = await prisma.adminUser.findUnique({ where: { email: normalized }, select: { id: true } });
+  return Boolean(admin);
+}
+
+export async function isAdminAuthenticated() {
+  const email = await getSessionEmail();
+  return email ? isAdminEmail(email) : false;
 }
 
 export async function requireAdmin() {
-  if (!(await isAdminAuthenticated())) redirect("/admin");
+  if (!(await isAdminAuthenticated())) redirect("/account");
 }
 
 export async function createAdminSession(email: string) {
@@ -67,27 +86,26 @@ export function isGoogleOAuthEnabled() {
   return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 }
 
-export async function authorizeGoogleAdminEmail(email: string, name?: string) {
+export async function ensureUserAccount(email: string, name?: string, provider = "credentials") {
   const normalized = email.trim().toLowerCase();
-  if (process.env.ADMIN_EMAIL?.trim().toLowerCase() === normalized) return true;
   const prisma = getPrisma();
-  if (!prisma) return false;
-
-  const admin = await prisma.adminUser.findUnique({ where: { email: normalized }, select: { id: true } });
-  if (admin) return true;
-
-  const adminCount = await prisma.adminUser.count();
-  if (adminCount > 0) return false;
-
-  await prisma.adminUser.create({
-    data: {
-      email: normalized,
-      name: name || normalized.split("@")[0],
-      passwordHash: await hash(randomBytes(32).toString("hex"), 12),
-      role: "OWNER",
-    },
+  if (!prisma) return;
+  await prisma.user.upsert({
+    where: { email: normalized },
+    update: { name: name || undefined, provider },
+    create: { email: normalized, name: name || null, provider },
   });
-  return true;
+}
+
+export async function bootstrapFirstGoogleAdmin(email: string, name?: string) {
+  const prisma = getPrisma();
+  if (!prisma) return;
+  const adminCount = await prisma.adminUser.count();
+  if (adminCount === 0) {
+    await prisma.adminUser.create({
+      data: { email: email.trim().toLowerCase(), name: name || null, passwordHash: await hash(randomBytes(32).toString("hex"), 12), role: "OWNER" },
+    });
+  }
 }
 
 export async function clearAdminSession() {
@@ -96,9 +114,13 @@ export async function clearAdminSession() {
 }
 
 export async function validateAdminCredentials(email: string, password: string) {
+  const normalized = email.trim().toLowerCase();
   const prisma = getPrisma();
   if (prisma) {
-    const admin = await prisma.adminUser.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email: normalized } });
+    if (user?.passwordHash && (await compare(password, user.passwordHash))) return true;
+
+    const admin = await prisma.adminUser.findUnique({ where: { email: normalized } });
     if (admin && (await compare(password, admin.passwordHash))) return true;
   }
 
