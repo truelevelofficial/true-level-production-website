@@ -11,7 +11,7 @@ type GoogleUser = {
 };
 
 function baseUrl(request: NextRequest) {
-  return process.env.NEXTAUTH_URL || request.nextUrl.origin;
+  return (process.env.NEXTAUTH_URL || request.nextUrl.origin).replace(/\/$/, "");
 }
 
 function accountUrl(request: NextRequest, error?: string) {
@@ -28,7 +28,6 @@ export async function GET(request: NextRequest) {
     const state = request.nextUrl.searchParams.get("state");
     const store = await cookies();
     const expectedState = store.get("tl_google_oauth_state")?.value;
-    store.delete("tl_google_oauth_state");
 
     if (!code || !state || !expectedState || state !== expectedState) {
       return NextResponse.redirect(accountUrl(request, "invalid_google_state"));
@@ -64,7 +63,7 @@ export async function GET(request: NextRequest) {
     await createAdminSession(email);
     return NextResponse.redirect(new URL((await isAdminEmail(email)) ? "/admin/bookings" : "/account", request.url));
   } catch (error) {
-    console.error("Google OAuth callback failed", error);
+    console.error("Google OAuth callback failed", error instanceof Error ? { name: error.name, message: error.message } : { message: "Unknown error" });
     return NextResponse.redirect(accountUrl(request, "google_callback_failed"));
   }
 }

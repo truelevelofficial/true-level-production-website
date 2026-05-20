@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isGoogleOAuthEnabled } from "@/lib/auth";
 
 function baseUrl(request: NextRequest) {
-  return process.env.NEXTAUTH_URL || request.nextUrl.origin;
+  return (process.env.NEXTAUTH_URL || request.nextUrl.origin).replace(/\/$/, "");
 }
 
 export async function GET(request: NextRequest) {
