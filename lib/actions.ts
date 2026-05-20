@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { hash } from "bcryptjs";
 import { clearAdminSession, createAdminSession, requireAdmin, validateAdminCredentials } from "./auth";
 import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
@@ -27,9 +28,35 @@ async function upsertClient(data: { fullName: string; companyName?: string; phon
 export async function loginAction(_prev: { error?: string } | undefined, formData: FormData) {
   const email = String(formData.get("email") || "").trim();
   const password = String(formData.get("password") || "");
-  if (!validateAdminCredentials(email, password)) return { error: "Invalid admin credentials or missing ADMIN_EMAIL/ADMIN_PASSWORD." };
+  if (!(await validateAdminCredentials(email, password))) return { error: "Invalid email or password." };
   await createAdminSession(email);
   redirect("/admin/bookings");
+}
+
+export async function signupAction(_prev: { error?: string } | undefined, formData: FormData) {
+  const name = String(formData.get("name") || "").trim();
+  const email = String(formData.get("email") || "").trim().toLowerCase();
+  const password = String(formData.get("password") || "");
+  const confirmPassword = String(formData.get("confirmPassword") || "");
+  if (name.length < 2) return { error: "Name is required." };
+  if (!email.includes("@")) return { error: "Valid email is required." };
+  if (password.length < 8) return { error: "Password must be at least 8 characters." };
+  if (password !== confirmPassword) return { error: "Passwords do not match." };
+
+  const prisma = getPrisma();
+  if (!prisma) return { error: "Database is not configured." };
+  const existingAdmins = await prisma.adminUser.count();
+  if (existingAdmins > 0) return { error: "Signup is closed. Ask the owner to create your admin account." };
+
+  await prisma.adminUser.create({
+    data: { name, email, passwordHash: await hash(password, 12), role: "OWNER" },
+  });
+  await createAdminSession(email);
+  redirect("/admin/bookings");
+}
+
+export async function googleLoginAction() {
+  return { error: "Google login needs Google OAuth credentials before it can be enabled." };
 }
 
 export async function logoutAction() {

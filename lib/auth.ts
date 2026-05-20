@@ -1,6 +1,8 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { compare } from "bcryptjs";
+import { getPrisma } from "./prisma";
 
 const cookieName = "tl_admin_session";
 
@@ -50,7 +52,13 @@ export async function clearAdminSession() {
   store.delete(cookieName);
 }
 
-export function validateAdminCredentials(email: string, password: string) {
+export async function validateAdminCredentials(email: string, password: string) {
+  const prisma = getPrisma();
+  if (prisma) {
+    const admin = await prisma.adminUser.findUnique({ where: { email } });
+    if (admin && (await compare(password, admin.passwordHash))) return true;
+  }
+
   const expectedEmail = process.env.ADMIN_EMAIL;
   const expectedPassword = process.env.ADMIN_PASSWORD;
   if (!expectedEmail || !expectedPassword) return false;
