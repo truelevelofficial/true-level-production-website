@@ -51,7 +51,11 @@ export async function getContracts() {
 export async function getUnreadNotificationCount() {
   const prisma = getPrisma();
   if (!prisma) return 0;
-  return prisma.notification.count({ where: { read: false } });
+  try {
+    return await prisma.notification.count({ where: { read: false } });
+  } catch {
+    return 0;
+  }
 }
 
 export { hasDatabase };
