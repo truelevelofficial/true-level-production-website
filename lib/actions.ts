@@ -46,11 +46,14 @@ export async function signupAction(_prev: { error?: string } | undefined, formDa
 
   const prisma = getPrisma();
   if (!prisma) return { error: "Database is not configured." };
-  const existingUser = await prisma.user.findUnique({ where: { email }, select: { id: true } });
-  if (existingUser) return { error: "This email already has an account. Please login." };
+  try {
+    const existingUser = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+    if (existingUser) return { error: "This email already has an account. Please login." };
 
-  await prisma.user.create({ data: { name, email, passwordHash: await hash(password, 12), provider: "credentials" } });
-  await ensureUserAccount(email, name);
+    await prisma.user.create({ data: { name, email, passwordHash: await hash(password, 12), provider: "credentials" } });
+  } catch {
+    return { error: "Account database table is not ready. Run db:push, then try again." };
+  }
   await createAdminSession(email);
   redirect("/account");
 }

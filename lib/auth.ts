@@ -57,8 +57,12 @@ export async function isAdminEmail(email: string) {
   if (process.env.ADMIN_EMAIL?.trim().toLowerCase() === normalized) return true;
   const prisma = getPrisma();
   if (!prisma) return false;
-  const admin = await prisma.adminUser.findUnique({ where: { email: normalized }, select: { id: true } });
-  return Boolean(admin);
+  try {
+    const admin = await prisma.adminUser.findUnique({ where: { email: normalized }, select: { id: true } });
+    return Boolean(admin);
+  } catch {
+    return false;
+  }
 }
 
 export async function isAdminAuthenticated() {
@@ -90,21 +94,29 @@ export async function ensureUserAccount(email: string, name?: string, provider =
   const normalized = email.trim().toLowerCase();
   const prisma = getPrisma();
   if (!prisma) return;
-  await prisma.user.upsert({
-    where: { email: normalized },
-    update: { name: name || undefined, provider },
-    create: { email: normalized, name: name || null, provider },
-  });
+  try {
+    await prisma.user.upsert({
+      where: { email: normalized },
+      update: { name: name || undefined, provider },
+      create: { email: normalized, name: name || null, provider },
+    });
+  } catch {
+    // The account session can still work if the new User table has not been pushed yet.
+  }
 }
 
 export async function bootstrapFirstGoogleAdmin(email: string, name?: string) {
   const prisma = getPrisma();
   if (!prisma) return;
-  const adminCount = await prisma.adminUser.count();
-  if (adminCount === 0) {
-    await prisma.adminUser.create({
-      data: { email: email.trim().toLowerCase(), name: name || null, passwordHash: await hash(randomBytes(32).toString("hex"), 12), role: "OWNER" },
-    });
+  try {
+    const adminCount = await prisma.adminUser.count();
+    if (adminCount === 0) {
+      await prisma.adminUser.create({
+        data: { email: email.trim().toLowerCase(), name: name || null, passwordHash: await hash(randomBytes(32).toString("hex"), 12), role: "OWNER" },
+      });
+    }
+  } catch {
+    // Admin bootstrap is best-effort; explicit ADMIN_EMAIL still grants dashboard access.
   }
 }
 
@@ -117,11 +129,19 @@ export async function validateAdminCredentials(email: string, password: string) 
   const normalized = email.trim().toLowerCase();
   const prisma = getPrisma();
   if (prisma) {
-    const user = await prisma.user.findUnique({ where: { email: normalized } });
-    if (user?.passwordHash && (await compare(password, user.passwordHash))) return true;
+    try {
+      const user = await prisma.user.findUnique({ where: { email: normalized } });
+      if (user?.passwordHash && (await compare(password, user.passwordHash))) return true;
+    } catch {
+      // User table may not exist until db:push runs.
+    }
 
-    const admin = await prisma.adminUser.findUnique({ where: { email: normalized } });
-    if (admin && (await compare(password, admin.passwordHash))) return true;
+    try {
+      const admin = await prisma.adminUser.findUnique({ where: { email: normalized } });
+      if (admin && (await compare(password, admin.passwordHash))) return true;
+    } catch {
+      // Fall back to env credentials below.
+    }
   }
 
   const expectedEmail = process.env.ADMIN_EMAIL;
