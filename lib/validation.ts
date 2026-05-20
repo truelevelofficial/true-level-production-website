@@ -105,6 +105,9 @@ export const paymentSchema = z.object({
   date: z.string().trim().min(10),
 });
 
+export const paymentUpdateSchema = paymentSchema.extend({ paymentId: z.string().min(1) });
+export const paymentDeleteSchema = z.object({ paymentId: z.string().min(1) });
+
 export const expenseSchema = z.object({
   amount: z.coerce.number().positive().max(100000000),
   category: z.enum(expenseCategories),
@@ -113,6 +116,9 @@ export const expenseSchema = z.object({
   clientId: z.string().optional().or(z.literal("")),
   date: z.string().trim().min(10),
 });
+
+export const expenseUpdateSchema = expenseSchema.extend({ expenseId: z.string().min(1) });
+export const expenseDeleteSchema = z.object({ expenseId: z.string().min(1) });
 
 export const contractSchema = z.object({
   type: z.enum(contractTypeValues),

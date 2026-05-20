@@ -1,7 +1,35 @@
 export const bookingStatuses = ["PENDING", "APPROVED", "REJECTED", "COMPLETED", "CANCELLED"] as const;
 export const paymentStatuses = ["UNPAID", "PARTIALLY_PAID", "PAID", "REFUNDED"] as const;
 export const paymentMethods = ["CASH", "BANK_TRANSFER", "VODAFONE_CASH", "INSTAPAY", "OTHER"] as const;
-export const expenseCategories = ["RENT", "SALARIES", "EQUIPMENT", "ADS", "UTILITIES", "TRANSPORTATION", "FREELANCERS", "MAINTENANCE", "OTHER"] as const;
+export const expenseCategories = ["RENT", "SALARIES", "EQUIPMENT", "ADS", "UTILITIES", "TRANSPORTATION", "FREELANCERS", "MAINTENANCE", "OFFICE_SUPPLIES", "OTHER"] as const;
+
+export const paymentStatusArabic: Record<string, string> = {
+  UNPAID: "غير مدفوع",
+  PARTIALLY_PAID: "مدفوع جزئيا",
+  PAID: "مدفوع",
+  REFUNDED: "مسترد",
+};
+
+export const paymentMethodArabic: Record<string, string> = {
+  CASH: "Cash",
+  BANK_TRANSFER: "Bank Transfer",
+  VODAFONE_CASH: "Vodafone Cash",
+  INSTAPAY: "Instapay",
+  OTHER: "Other",
+};
+
+export const expenseCategoryArabic: Record<string, string> = {
+  RENT: "Rent",
+  SALARIES: "Salaries",
+  EQUIPMENT: "Equipment",
+  ADS: "Ads",
+  UTILITIES: "Utilities",
+  TRANSPORTATION: "Transportation",
+  FREELANCERS: "Freelancers",
+  MAINTENANCE: "Maintenance",
+  OFFICE_SUPPLIES: "Office supplies",
+  OTHER: "Other",
+};
 export const contractStatuses = ["DRAFT", "SENT", "SIGNED", "CANCELLED"] as const;
 
 export const services = [

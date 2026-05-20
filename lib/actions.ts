@@ -6,7 +6,7 @@ import { hash } from "bcryptjs";
 import { clearAdminSession, createAdminSession, ensureUserAccount, getSessionEmail, isAdminEmail, requireAdmin, validateAdminCredentials } from "./auth";
 import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
-import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, contractSchema, expenseSchema, manualClientSchema, meetingBookingSchema, paymentSchema, studioBookingSchema } from "./validation";
+import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, contractSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, studioBookingSchema } from "./validation";
 import { generateArabicContract } from "./contracts";
 import { createCalendarEventWithMeet } from "./google-calendar";
 import { notifyNewBooking, notifyBookingStatusChange } from "./notifications";
@@ -385,6 +385,35 @@ export async function createPaymentAction(formData: FormData) {
   revalidatePath("/admin/accounting");
 }
 
+export async function updatePaymentAction(formData: FormData) {
+  await requireAdmin();
+  const input = paymentUpdateSchema.parse(values(formData));
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  await prisma.payment.update({
+    where: { id: input.paymentId },
+    data: {
+      amount: input.amount,
+      method: input.method,
+      status: input.status,
+      description: input.description || null,
+      clientId: input.clientId || null,
+      bookingId: input.bookingId || null,
+      date: dateOnly(input.date),
+    },
+  });
+  revalidatePath("/admin/accounting");
+}
+
+export async function deletePaymentAction(formData: FormData) {
+  await requireAdmin();
+  const input = paymentDeleteSchema.parse(values(formData));
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  await prisma.payment.delete({ where: { id: input.paymentId } });
+  revalidatePath("/admin/accounting");
+}
+
 export async function createExpenseAction(formData: FormData) {
   await requireAdmin();
   const input = expenseSchema.parse(values(formData));
@@ -400,6 +429,34 @@ export async function createExpenseAction(formData: FormData) {
       date: dateOnly(input.date),
     },
   });
+  revalidatePath("/admin/accounting");
+}
+
+export async function updateExpenseAction(formData: FormData) {
+  await requireAdmin();
+  const input = expenseUpdateSchema.parse(values(formData));
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  await prisma.expense.update({
+    where: { id: input.expenseId },
+    data: {
+      amount: input.amount,
+      category: input.category,
+      method: input.method,
+      description: input.description,
+      clientId: input.clientId || null,
+      date: dateOnly(input.date),
+    },
+  });
+  revalidatePath("/admin/accounting");
+}
+
+export async function deleteExpenseAction(formData: FormData) {
+  await requireAdmin();
+  const input = expenseDeleteSchema.parse(values(formData));
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  await prisma.expense.delete({ where: { id: input.expenseId } });
   revalidatePath("/admin/accounting");
 }
 
