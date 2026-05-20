@@ -1,7 +1,7 @@
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { compare } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import { getPrisma } from "./prisma";
 
 const cookieName = "tl_admin_session";
@@ -51,13 +51,27 @@ export function isGoogleOAuthEnabled() {
   return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 }
 
-export async function canUseAdminEmail(email: string) {
+export async function authorizeGoogleAdminEmail(email: string, name?: string) {
   const normalized = email.trim().toLowerCase();
   if (process.env.ADMIN_EMAIL?.trim().toLowerCase() === normalized) return true;
   const prisma = getPrisma();
   if (!prisma) return false;
+
   const admin = await prisma.adminUser.findUnique({ where: { email: normalized }, select: { id: true } });
-  return Boolean(admin);
+  if (admin) return true;
+
+  const adminCount = await prisma.adminUser.count();
+  if (adminCount > 0) return false;
+
+  await prisma.adminUser.create({
+    data: {
+      email: normalized,
+      name: name || normalized.split("@")[0],
+      passwordHash: await hash(randomBytes(32).toString("hex"), 12),
+      role: "OWNER",
+    },
+  });
+  return true;
 }
 
 export async function clearAdminSession() {

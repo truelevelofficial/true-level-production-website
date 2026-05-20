@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { loginAction, signupAction } from "@/lib/actions";
 import { inputClass, SubmitButton } from "./form-fields";
 
-export function AdminLogin({ googleEnabled }: { googleEnabled: boolean }) {
+export function AdminLogin({ googleEnabled, oauthError }: { googleEnabled: boolean; oauthError?: string }) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [state, action] = useActionState(loginAction, undefined);
   const [signupState, signup] = useActionState(signupAction, undefined);
@@ -37,6 +37,7 @@ export function AdminLogin({ googleEnabled }: { googleEnabled: boolean }) {
           Continue With Google
         </a>
       ) : null}
+      {oauthError ? <p className="rounded-2xl bg-red-50 p-3 text-sm font-bold text-red-700">{oauthError}</p> : null}
 
       <p className="text-center text-sm font-bold text-[#06111F]/55">
         {mode === "login" ? "Don’t have an account?" : "Already have an account?"}{" "}
