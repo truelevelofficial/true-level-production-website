@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "True Level Production",
   description:
     "Creative production company and studio for brand films, reels, UGC, event coverage, campaign assets, and studio shoots.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
