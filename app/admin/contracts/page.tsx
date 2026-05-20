@@ -2,13 +2,13 @@ import { AdminShell, SetupNotice } from "@/components/admin-shell";
 import { Field, inputClass } from "@/components/form-fields";
 import { createContractAction } from "@/lib/actions";
 import { contractStatusArabic, contractStatuses, contractTypes, services } from "@/lib/constants";
-import { getBookings, getClients, getContracts, hasDatabase } from "@/lib/admin-data";
+import { getBookings, getClients, getCompanySettings, getContracts, hasDatabase } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
 
 export default async function ContractsPage({ searchParams }: { searchParams: Promise<{ status?: string; clientId?: string }> }) {
   await requireAdmin();
   const params = await searchParams;
-  const [contracts, clients, bookings] = await Promise.all([getContracts(), getClients(), getBookings()]);
+  const [contracts, clients, bookings, settings] = await Promise.all([getContracts(), getClients(), getBookings(), getCompanySettings()]);
   const filtered = contracts.filter((contract) => (!params.status || contract.status === params.status) && (!params.clientId || contract.clientId === params.clientId));
   return (
     <AdminShell title="العقود">
@@ -30,7 +30,7 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
         <Field label="عنوان العميل"><input className={inputClass} name="clientAddress" /></Field>
         <Field label="رقم الهاتف"><input className={inputClass} name="clientPhone" required /></Field>
         <Field label="البريد الإلكتروني"><input className={inputClass} name="clientEmail" required type="email" /></Field>
-        <Field label="ممثل True Level"><input className={inputClass} name="representativeName" required /></Field>
+        <Field label="ممثل True Level"><input className={inputClass} defaultValue={settings.defaultContractRepresentative || ""} name="representativeName" required /></Field>
         <Field label="نوع الخدمة"><select className={inputClass} name="serviceType">{services.map((service) => <option key={service}>{service}</option>)}</select></Field>
         <Field label="تاريخ بداية المشروع"><input className={inputClass} name="projectStartDate" required type="date" /></Field>
         <Field label="تاريخ نهاية المشروع"><input className={inputClass} name="projectEndDate" required type="date" /></Field>
@@ -42,8 +42,8 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
         <Field label="عدد التعديلات"><input className={inputClass} defaultValue="2" name="revisionRounds" required type="number" /></Field>
         <Field label="وصف المشروع"><textarea className={inputClass} name="projectDescription" required /></Field>
         <Field label="البنود والتسليمات"><textarea className={inputClass} name="deliverables" required /></Field>
-        <Field label="شروط الدفع"><textarea className={inputClass} name="paymentTerms" required /></Field>
-        <Field label="سياسة الإلغاء"><textarea className={inputClass} name="cancellationPolicy" required /></Field>
+        <Field label="شروط الدفع"><textarea className={inputClass} defaultValue={settings.defaultPaymentTerms || ""} name="paymentTerms" required /></Field>
+        <Field label="سياسة الإلغاء"><textarea className={inputClass} defaultValue={settings.defaultCancellationPolicy || ""} name="cancellationPolicy" required /></Field>
         <Field label="مدة التسليم"><textarea className={inputClass} name="deliveryTimeline" required /></Field>
         <Field label="حقوق الاستخدام"><textarea className={inputClass} name="usageRights" required /></Field>
         <Field label="السرية"><textarea className={inputClass} name="confidentialityClause" required /></Field>

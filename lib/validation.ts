@@ -63,6 +63,25 @@ export const bookingStatusUpdateSchema = z.object({
   status: z.enum(bookingStatuses),
 });
 
+export const companySettingsSchema = z.object({
+  companyName: z.string().trim().max(200).optional().or(z.literal("")),
+  companyLegalName: z.string().trim().max(200).optional().or(z.literal("")),
+  companyAddress: z.string().trim().max(500).optional().or(z.literal("")),
+  companyPhone: z.string().trim().max(80).optional().or(z.literal("")),
+  companyEmail: z.string().trim().email().optional().or(z.literal("")),
+  taxNumber: z.string().trim().max(120).optional().or(z.literal("")),
+  commercialRegistrationNumber: z.string().trim().max(120).optional().or(z.literal("")),
+  defaultContractRepresentative: z.string().trim().max(200).optional().or(z.literal("")),
+  defaultCurrency: z.string().trim().max(20).optional().or(z.literal("")),
+  studioHourlyPrice: z.coerce.number().min(0).optional(),
+  studioHalfDayPrice: z.coerce.number().min(0).optional(),
+  studioFullDayPrice: z.coerce.number().min(0).optional(),
+  defaultDepositPercentage: z.coerce.number().min(0).max(100).optional(),
+  defaultCancellationPolicy: z.string().trim().max(3000).optional().or(z.literal("")),
+  defaultPaymentTerms: z.string().trim().max(3000).optional().or(z.literal("")),
+  notificationEmail: z.string().trim().email().optional().or(z.literal("")),
+});
+
 export const meetingBookingSchema = z.object({
   ...clientFields,
   meetingType: z.enum(["GOOGLE_MEETING", "COMPANY_MEETING"]),

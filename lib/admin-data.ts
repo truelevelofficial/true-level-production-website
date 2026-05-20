@@ -102,4 +102,15 @@ export async function getUnreadNotificationCount() {
   }
 }
 
+export async function getCompanySettings() {
+  const prisma = getPrisma();
+  if (!prisma) return {} as Record<string, string>;
+  try {
+    const rows = await prisma.companySettings.findMany();
+    return Object.fromEntries(rows.map((row) => [row.key, row.value]));
+  } catch {
+    return {} as Record<string, string>;
+  }
+}
+
 export { hasDatabase };

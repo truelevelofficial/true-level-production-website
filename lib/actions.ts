@@ -6,7 +6,7 @@ import { hash } from "bcryptjs";
 import { clearAdminSession, createAdminSession, ensureUserAccount, getSessionEmail, isAdminEmail, requireAdmin, validateAdminCredentials } from "./auth";
 import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
-import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, contractSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, studioBookingSchema } from "./validation";
+import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, companySettingsSchema, contractSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, studioBookingSchema } from "./validation";
 import { generateArabicContract } from "./contracts";
 import { createCalendarEventWithMeet } from "./google-calendar";
 import { notifyNewBooking, notifyBookingStatusChange } from "./notifications";
@@ -255,6 +255,20 @@ export async function updateBookingStatusAction(formData: FormData) {
   revalidatePath("/admin/bookings");
   revalidatePath("/admin/meetings");
   revalidatePath("/admin/studio");
+}
+
+export async function updateCompanySettingsAction(formData: FormData) {
+  await requireAdmin();
+  const input = companySettingsSchema.parse(values(formData));
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  await Promise.all(Object.entries(input).map(([key, value]) => prisma.companySettings.upsert({
+    where: { key },
+    update: { value: value == null ? "" : String(value) },
+    create: { key, value: value == null ? "" : String(value) },
+  })));
+  revalidatePath("/admin/settings");
+  revalidatePath("/admin/contracts");
 }
 
 export async function createMeetingBookingAction(formData: FormData) {
