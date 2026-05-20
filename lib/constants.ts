@@ -22,6 +22,30 @@ export const studioSetups = [
   "Custom Setup",
 ] as const;
 
+export const clientTypes = [
+  "Brand",
+  "Agency",
+  "Creator",
+  "Restaurant",
+  "Fashion brand",
+  "Beauty brand",
+  "E-commerce",
+  "Event organizer",
+  "Other",
+] as const;
+
+export const adminMeetingTypes = [
+  "Google Meeting",
+  "In-company meeting",
+  "Client visit",
+  "Project briefing",
+  "Follow-up meeting",
+] as const;
+
+export const adminMeetingStatuses = ["PENDING", "APPROVED", "COMPLETED", "CANCELLED", "REJECTED"] as const;
+export const adminStudioStatuses = ["PENDING", "APPROVED", "COMPLETED", "CANCELLED"] as const;
+export const studioDurationTypes = ["HOURLY", "HALF_DAY", "FULL_DAY"] as const;
+
 export const contractTypes = [
   ["STUDIO_RENTAL", "Studio Rental Agreement"],
   ["VIDEO_PRODUCTION", "Video Production Agreement"],

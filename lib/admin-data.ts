@@ -4,16 +4,32 @@ export async function getAdminSummary() {
   const prisma = getPrisma();
   if (!prisma) return null;
   try {
-    const [bookings, clients, payments, expenses, pending] = await Promise.all([
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const tomorrowStart = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const nextMonthStart = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const [bookings, clients, payments, expenses, pending, approved, completed, cancelled, todayMeetings, monthStudioBookings, monthPayments, monthExpenses, pendingBalances] = await Promise.all([
       prisma.booking.count(),
       prisma.client.count(),
       prisma.payment.findMany({ select: { amount: true } }),
       prisma.expense.findMany({ select: { amount: true } }),
       prisma.booking.count({ where: { status: "PENDING" } }),
+      prisma.booking.count({ where: { status: "APPROVED" } }),
+      prisma.booking.count({ where: { status: "COMPLETED" } }),
+      prisma.booking.count({ where: { status: "CANCELLED" } }),
+      prisma.booking.count({ where: { type: { in: ["GOOGLE_MEETING", "COMPANY_MEETING"] }, startTime: { gte: todayStart, lt: tomorrowStart } } }),
+      prisma.booking.count({ where: { type: "STUDIO", startTime: { gte: monthStart, lt: nextMonthStart } } }),
+      prisma.payment.findMany({ where: { date: { gte: monthStart, lt: nextMonthStart } }, select: { amount: true } }),
+      prisma.expense.findMany({ where: { date: { gte: monthStart, lt: nextMonthStart } }, select: { amount: true } }),
+      prisma.booking.findMany({ where: { paymentStatus: { in: ["UNPAID", "PARTIALLY_PAID"] } }, select: { remainingAmount: true } }),
     ]);
     const revenue = payments.reduce((sum, item) => sum + Number(item.amount), 0);
     const cost = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
-    return { bookings, clients, revenue, expenses: cost, pending, profit: revenue - cost };
+    const monthRevenue = monthPayments.reduce((sum, item) => sum + Number(item.amount), 0);
+    const monthCost = monthExpenses.reduce((sum, item) => sum + Number(item.amount), 0);
+    const pendingPayments = pendingBalances.reduce((sum, item) => sum + Number(item.remainingAmount ?? 0), 0);
+    return { bookings, clients, revenue, expenses: cost, pending, approved, completed, cancelled, profit: revenue - cost, pendingPayments, todayMeetings, monthStudioBookings, monthRevenue, monthExpenses: monthCost };
   } catch {
     return null;
   }
@@ -33,7 +49,15 @@ export async function getClients() {
   const prisma = getPrisma();
   if (!prisma) return [];
   try {
-    return await prisma.client.findMany({ include: { bookings: { orderBy: { createdAt: "desc" }, take: 5 } }, orderBy: { createdAt: "desc" }, take: 200 });
+    return await prisma.client.findMany({
+      include: {
+        bookings: { orderBy: { createdAt: "desc" }, take: 10 },
+        contracts: { orderBy: { createdAt: "desc" }, take: 5 },
+        payments: { orderBy: { date: "desc" }, take: 20 },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    });
   } catch {
     return [];
   }

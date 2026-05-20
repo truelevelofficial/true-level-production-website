@@ -97,9 +97,11 @@ model Client {
   fullName    String
   companyName String?
   phone       String
+  whatsapp    String?
   email       String    @unique
   address     String?
   taxId       String?
+  clientType  String?
   notes       String?
   bookings    Booking[]
   invoices    Invoice[]
@@ -126,7 +128,10 @@ model Booking {
   durationHours   Int?
   serviceType     String?
   studioSetup     String?
+  bookingSubtype  String?
   meetingType     String?
+  meetingLocation String?
+  assignedTeamMember String?
   bookingPurpose  String?
   peopleCount     Int?
   price           Decimal?      @db.Decimal(12, 2)

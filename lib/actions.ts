@@ -6,7 +6,7 @@ import { hash } from "bcryptjs";
 import { clearAdminSession, createAdminSession, ensureUserAccount, getSessionEmail, isAdminEmail, requireAdmin, validateAdminCredentials } from "./auth";
 import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
-import { adminBookingSchema, contractSchema, expenseSchema, manualClientSchema, meetingBookingSchema, paymentSchema, studioBookingSchema } from "./validation";
+import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, contractSchema, expenseSchema, manualClientSchema, meetingBookingSchema, paymentSchema, studioBookingSchema } from "./validation";
 import { generateArabicContract } from "./contracts";
 import { createCalendarEventWithMeet } from "./google-calendar";
 import { notifyNewBooking, notifyBookingStatusChange } from "./notifications";
@@ -15,14 +15,24 @@ function values(formData: FormData) {
   return Object.fromEntries(formData.entries());
 }
 
-async function upsertClient(data: { fullName: string; companyName?: string; phone: string; email: string }) {
+async function upsertClient(data: { fullName: string; companyName?: string; phone: string; whatsapp?: string; email: string; clientType?: string }) {
   const prisma = getPrisma();
   if (!prisma) throw new Error("Database is not configured. Add DATABASE_URL before using forms.");
   return prisma.client.upsert({
     where: { email: data.email },
-    update: { fullName: data.fullName, companyName: data.companyName || null, phone: data.phone },
-    create: { fullName: data.fullName, companyName: data.companyName || null, phone: data.phone, email: data.email },
+    update: { fullName: data.fullName, companyName: data.companyName || null, phone: data.phone, whatsapp: data.whatsapp || null, clientType: data.clientType || undefined },
+    create: { fullName: data.fullName, companyName: data.companyName || null, phone: data.phone, whatsapp: data.whatsapp || null, email: data.email, clientType: data.clientType || null },
   });
+}
+
+async function getOrCreateAdminClient(input: { clientId?: string; fullName: string; companyName?: string; phone: string; whatsapp?: string; email: string }) {
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  if (input.clientId) {
+    const client = await prisma.client.findUnique({ where: { id: input.clientId } });
+    if (client) return client;
+  }
+  return upsertClient(input);
 }
 
 export async function loginAction(_prev: { error?: string } | undefined, formData: FormData) {
@@ -113,21 +123,138 @@ export async function createClientAction(formData: FormData) {
       fullName: input.fullName,
       companyName: input.companyName || null,
       phone: input.phone,
+      whatsapp: input.whatsapp || null,
       address: input.address || null,
       taxId: input.taxId || null,
+      clientType: input.clientType || null,
       notes: input.notes || null,
     },
     create: {
       fullName: input.fullName,
       companyName: input.companyName || null,
       phone: input.phone,
+      whatsapp: input.whatsapp || null,
       email: input.email,
       address: input.address || null,
       taxId: input.taxId || null,
+      clientType: input.clientType || null,
       notes: input.notes || null,
     },
   });
   revalidatePath("/admin/clients");
+}
+
+export async function updateClientAction(formData: FormData) {
+  await requireAdmin();
+  const input = clientUpdateSchema.parse(values(formData));
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  await prisma.client.update({
+    where: { id: input.clientId },
+    data: {
+      fullName: input.fullName,
+      companyName: input.companyName || null,
+      phone: input.phone,
+      whatsapp: input.whatsapp || null,
+      email: input.email,
+      address: input.address || null,
+      taxId: input.taxId || null,
+      clientType: input.clientType || null,
+      notes: input.notes || null,
+    },
+  });
+  revalidatePath("/admin/clients");
+}
+
+export async function deleteClientAction(formData: FormData) {
+  await requireAdmin();
+  const input = clientDeleteSchema.parse(values(formData));
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  await prisma.client.delete({ where: { id: input.clientId } });
+  revalidatePath("/admin/clients");
+}
+
+export async function createAdminMeetingAction(formData: FormData) {
+  await requireAdmin();
+  const input = adminMeetingSchema.parse(values(formData));
+  const client = await getOrCreateAdminClient(input);
+  const startTime = combineDateTime(input.date, input.time);
+  const endTime = endAfterHours(startTime, input.durationHours);
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  await prisma.booking.create({
+    data: {
+      type: input.meetingType === "Google Meeting" ? "GOOGLE_MEETING" : "COMPANY_MEETING",
+      status: input.status,
+      clientId: client.id,
+      date: dateOnly(input.date),
+      startTime,
+      endTime,
+      durationHours: input.durationHours,
+      serviceType: input.serviceType,
+      meetingType: input.meetingType,
+      meetingLocation: input.meetingLocation || null,
+      meetingLink: input.meetingLink || null,
+      assignedTeamMember: input.assignedTeamMember || null,
+      notes: input.notes || null,
+      internalNotes: input.internalNotes || null,
+    },
+  });
+  revalidatePath("/admin/meetings");
+  revalidatePath("/admin/bookings");
+}
+
+export async function createAdminStudioBookingAction(formData: FormData) {
+  await requireAdmin();
+  const input = adminStudioBookingSchema.parse(values(formData));
+  const durationHours = input.durationType === "HALF_DAY" ? 6 : input.durationType === "FULL_DAY" ? 12 : input.durationHours;
+  const startTime = combineDateTime(input.date, input.startTime);
+  const endTime = endAfterHours(startTime, durationHours);
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  const conflict = await prisma.booking.findFirst({
+    where: { type: "STUDIO", studioSetup: input.studioSetup, status: { in: ["PENDING", "APPROVED"] }, startTime: { lt: endTime }, endTime: { gt: startTime } },
+    select: { id: true },
+  });
+  if (conflict) throw new Error("This studio setup is already booked for the selected time.");
+  const client = await getOrCreateAdminClient(input);
+  const price = input.price ?? 0;
+  const deposit = input.deposit ?? 0;
+  await prisma.booking.create({
+    data: {
+      type: "STUDIO",
+      status: input.status,
+      clientId: client.id,
+      date: dateOnly(input.date),
+      startTime,
+      endTime,
+      durationHours,
+      studioSetup: input.studioSetup,
+      bookingSubtype: input.durationType,
+      bookingPurpose: input.bookingPurpose,
+      peopleCount: input.peopleCount,
+      price,
+      deposit,
+      remainingAmount: Math.max(price - deposit, 0),
+      paymentStatus: input.paymentStatus,
+      notes: input.notes || null,
+      internalNotes: input.internalNotes || null,
+    },
+  });
+  revalidatePath("/admin/studio");
+  revalidatePath("/admin/bookings");
+}
+
+export async function updateBookingStatusAction(formData: FormData) {
+  await requireAdmin();
+  const input = bookingStatusUpdateSchema.parse(values(formData));
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  await prisma.booking.update({ where: { id: input.bookingId }, data: { status: input.status } });
+  revalidatePath("/admin/bookings");
+  revalidatePath("/admin/meetings");
+  revalidatePath("/admin/studio");
 }
 
 export async function createMeetingBookingAction(formData: FormData) {

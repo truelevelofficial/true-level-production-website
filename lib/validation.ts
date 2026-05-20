@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { bookingStatuses, contractStatuses, contractTypeValues, expenseCategories, paymentMethods, paymentStatuses, services, studioSetups } from "./constants";
+import { adminMeetingTypes, bookingStatuses, clientTypes, contractStatuses, contractTypeValues, expenseCategories, paymentMethods, paymentStatuses, services, studioDurationTypes, studioSetups } from "./constants";
 
 const requiredText = z.string().trim().min(2).max(500);
 const optionalText = z.string().trim().max(3000).optional().or(z.literal(""));
@@ -9,6 +9,7 @@ export const clientFields = {
   fullName: requiredText,
   companyName: z.string().trim().max(200).optional().or(z.literal("")),
   phone: z.string().trim().min(7).max(40),
+  whatsapp: z.string().trim().max(40).optional().or(z.literal("")),
   email: z.string().trim().email().max(200),
 };
 
@@ -16,7 +17,50 @@ export const manualClientSchema = z.object({
   ...clientFields,
   address: z.string().trim().max(300).optional().or(z.literal("")),
   taxId: z.string().trim().max(100).optional().or(z.literal("")),
+  clientType: z.enum(clientTypes).optional().or(z.literal("")),
   notes: optionalText,
+});
+
+export const clientUpdateSchema = manualClientSchema.extend({ clientId: z.string().min(1) });
+export const clientDeleteSchema = z.object({ clientId: z.string().min(1) });
+
+export const adminMeetingSchema = z.object({
+  clientId: z.string().optional().or(z.literal("")),
+  ...clientFields,
+  meetingType: z.enum(adminMeetingTypes),
+  status: z.enum(["PENDING", "APPROVED", "COMPLETED", "CANCELLED", "REJECTED"]),
+  date: z.string().trim().min(10),
+  time: z.string().trim().min(4).max(8),
+  durationHours: z.coerce.number().int().min(1).max(12),
+  meetingLocation: z.string().trim().max(300).optional().or(z.literal("")),
+  meetingLink: z.string().trim().url().optional().or(z.literal("")),
+  serviceType: z.enum(services),
+  assignedTeamMember: z.string().trim().max(120).optional().or(z.literal("")),
+  notes: optionalText,
+  internalNotes: optionalText,
+});
+
+export const adminStudioBookingSchema = z.object({
+  clientId: z.string().optional().or(z.literal("")),
+  ...clientFields,
+  studioSetup: z.enum(studioSetups),
+  status: z.enum(["PENDING", "APPROVED", "COMPLETED", "CANCELLED"]),
+  paymentStatus: z.enum(paymentStatuses),
+  date: z.string().trim().min(10),
+  startTime: z.string().trim().min(4).max(8),
+  durationType: z.enum(studioDurationTypes),
+  durationHours: z.coerce.number().int().min(1).max(12),
+  peopleCount: z.coerce.number().int().min(1).max(100),
+  bookingPurpose: requiredText,
+  price: z.coerce.number().min(0).optional(),
+  deposit: z.coerce.number().min(0).optional(),
+  notes: optionalText,
+  internalNotes: optionalText,
+});
+
+export const bookingStatusUpdateSchema = z.object({
+  bookingId: z.string().min(1),
+  status: z.enum(bookingStatuses),
 });
 
 export const meetingBookingSchema = z.object({
