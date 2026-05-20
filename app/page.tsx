@@ -180,7 +180,7 @@ export default function Home() {
             <a className="hover:text-[#0B7CFF]" href="#work">Work</a>
             <a className="hover:text-[#0B7CFF]" href="#packages">Packages</a>
           </nav>
-          <Button href="#contact">Book</Button>
+          <Button href="/book">Book</Button>
         </div>
       </header>
 
@@ -207,8 +207,8 @@ export default function Home() {
               True Level is a creative production company and studio for brands. We create campaign ideas, shoot social-first videos, build UGC content, cover events, and run studio sessions inside our Cyclorama and ready-made setups.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button href="#contact">Start a Project <ArrowRight size={16} /></Button>
-              <Button href="#studio" variant="secondary">Enter The Studio <Play size={16} /></Button>
+              <Button href="/book/meeting">Start a Project <ArrowRight size={16} /></Button>
+              <Button href="/book/studio" variant="secondary">Enter The Studio <Play size={16} /></Button>
             </div>
             <div className="mt-10 grid max-w-xl grid-cols-3 gap-3">
               {[["01", "Concept Lab"], ["02", "Production Floor"], ["03", "Content Engine"]].map(([num, label]) => (
@@ -283,7 +283,7 @@ export default function Home() {
               A Cyclorama for clean premium frames, ready-made setups for fast social shoots, and production support for brands that need content without wasting time building every scene from zero.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button href="#contact">Book The Studio</Button>
+              <Button href="/book/studio">Book The Studio</Button>
               <Button href="#work" variant="secondary">See The Setups</Button>
             </div>
           </div>
@@ -361,7 +361,7 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-                <a className="mt-8 inline-flex w-full justify-center rounded-full border border-[#06111F]/10 bg-white px-5 py-4 text-xs font-black uppercase tracking-[0.18em] hover:bg-[#0B7CFF] hover:text-white" href="#contact">Request Package</a>
+                <a className="mt-8 inline-flex w-full justify-center rounded-full border border-[#06111F]/10 bg-white px-5 py-4 text-xs font-black uppercase tracking-[0.18em] hover:bg-[#0B7CFF] hover:text-white" href="/book/meeting">Request Package</a>
               </div>
             ))}
           </div>

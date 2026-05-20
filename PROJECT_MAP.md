@@ -2,21 +2,32 @@
 
 ## [TECH_STACK]
 - Date verified from system shell: 2026-05.
-- Package versions verified from npm registry: Next.js 16.2.6, React 19.2.6, React DOM 19.2.6, Tailwind CSS 4.3.0, @tailwindcss/postcss 4.3.0, lucide-react 1.16.0, TypeScript 6.0.3.
-- Runtime target: Vercel static frontend deployment for https://production.true-level.org.
+- Package versions verified from npm registry: Next.js 16.2.6, React 19.2.6, React DOM 19.2.6, Tailwind CSS 4.3.0, @tailwindcss/postcss 4.3.0, lucide-react 1.16.0, TypeScript 6.0.3, Prisma 7.8.0, @prisma/client 7.8.0, Zod 4.4.3, date-fns 4.2.1, react-hook-form 7.76.0, bcryptjs 3.0.3.
+- Runtime target: Vercel full-stack deployment with Supabase PostgreSQL for https://production.true-level.org.
 
 ## [SYSTEM_FLOW]
 - Visitor lands on homepage.
 - Navbar anchor links scroll to Services, Studio, Work, and Packages.
-- CTAs route to the final contact section.
-- Contact actions expose phone, email, and location only.
+- CTAs route to `/book`, `/book/meeting`, or `/book/studio`.
+- Client submits meeting or studio booking request.
+- Server validates input with Zod, upserts client, prevents studio time overlap, and stores pending booking.
+- Admin logs in at `/admin`, reviews bookings, updates status/pricing/payment notes, tracks clients, accounting, and contracts.
 
 ## [ARCHITECTURE]
 - `app/layout.tsx`: Root layout and SEO metadata.
-- `app/page.tsx`: Single static marketing page with feature-local data arrays and presentational components.
-- `app/globals.css`: Tailwind import, global background, and smooth anchor scrolling.
-- No backend, authentication, database, CMS, payments, or external integrations.
+- `app/page.tsx`: Existing marketing homepage, preserved and connected to booking routes.
+- `app/book/*`: Public booking flow and success page.
+- `app/admin/*`: Protected operations dashboard for bookings, meetings, studio, clients, accounting, contracts, settings, and CSV exports.
+- `lib/actions.ts`: Server actions for booking, admin updates, accounting, contracts, login/logout.
+- `lib/auth.ts`: Signed httpOnly cookie admin session using env credentials.
+- `lib/prisma.ts`: Prisma client helper with setup-safe runtime guard.
+- `prisma/schema.prisma`: PostgreSQL schema for admin users, clients, bookings, accounting, contracts, templates, and settings.
 
 ## [ORPHANS & PENDING]
+- Add real Supabase `DATABASE_URL` and `DIRECT_URL`, then run `npm.cmd run db:push`.
+- Add production `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and long `ADMIN_SESSION_SECRET`.
+- Email notifications are not active until Resend/SMTP credentials are provided.
+- Google Meet links are manually entered by admin in v1; full Google Calendar integration is pending credentials.
+- Contract export is browser print/PDF in v1; DOCX export is pending a dedicated package decision.
 - Replace portfolio placeholders with real media when approved.
 - Confirm final production contact email/phone/location before launch if these values change.
