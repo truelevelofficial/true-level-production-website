@@ -18,11 +18,22 @@ function values(formData: FormData) {
 async function upsertClient(data: { fullName: string; companyName?: string; phone: string; whatsapp?: string; email: string; clientType?: string }) {
   const prisma = getPrisma();
   if (!prisma) throw new Error("Database is not configured. Add DATABASE_URL before using forms.");
-  return prisma.client.upsert({
-    where: { email: data.email },
-    update: { fullName: data.fullName, companyName: data.companyName || null, phone: data.phone, whatsapp: data.whatsapp || null, clientType: data.clientType || undefined },
-    create: { fullName: data.fullName, companyName: data.companyName || null, phone: data.phone, whatsapp: data.whatsapp || null, email: data.email, clientType: data.clientType || null },
-  });
+  const existing = await prisma.client.findFirst({ where: { OR: [{ email: data.email }, { phone: data.phone }] } });
+  if (existing) {
+    const emailOwner = existing.email === data.email ? existing : await prisma.client.findUnique({ where: { email: data.email } });
+    return prisma.client.update({
+      where: { id: existing.id },
+      data: {
+        fullName: data.fullName,
+        companyName: data.companyName || null,
+        phone: data.phone,
+        whatsapp: data.whatsapp || null,
+        email: !emailOwner || emailOwner.id === existing.id ? data.email : existing.email,
+        clientType: data.clientType || existing.clientType,
+      },
+    });
+  }
+  return prisma.client.create({ data: { fullName: data.fullName, companyName: data.companyName || null, phone: data.phone, whatsapp: data.whatsapp || null, email: data.email, clientType: data.clientType || null } });
 }
 
 async function getOrCreateAdminClient(input: { clientId?: string; fullName: string; companyName?: string; phone: string; whatsapp?: string; email: string }) {
@@ -281,6 +292,7 @@ export async function createMeetingBookingAction(formData: FormData) {
   await prisma.booking.create({
     data: {
       type: input.meetingType,
+      status: "PENDING",
       meetingType: input.meetingType === "GOOGLE_MEETING" ? "Google Meeting" : "Company Meeting",
       clientId: client.id,
       date: dateOnly(input.date),
@@ -319,12 +331,14 @@ export async function createStudioBookingAction(formData: FormData) {
   await prisma.booking.create({
     data: {
       type: "STUDIO",
+      status: "PENDING",
       clientId: client.id,
       date: dateOnly(input.date),
       startTime,
       endTime,
       durationHours,
       studioSetup: input.studioSetup,
+      bookingSubtype: input.durationType,
       bookingPurpose: input.bookingPurpose,
       peopleCount: input.peopleCount,
       notes: input.notes || null,
