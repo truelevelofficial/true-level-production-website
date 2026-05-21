@@ -18,10 +18,25 @@ function logCalendarFailure(action: string, error: unknown) {
   console.error(`Google Calendar ${action} failed`, { message });
 }
 
+function getPrivateKey() {
+  const trimmed = (process.env.GOOGLE_PRIVATE_KEY || "").trim();
+  if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+    try {
+      const parsed = JSON.parse(trimmed) as { private_key?: string };
+      if (parsed.private_key) return parsed.private_key.replace(/\\n/g, "\n");
+    } catch {
+      return trimmed;
+    }
+  }
+
+  const unquoted = ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) ? trimmed.slice(1, -1) : trimmed;
+  return unquoted.replace(/\\n/g, "\n");
+}
+
 function getJwt() {
   return new auth.JWT({
     email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!,
-    key: (process.env.GOOGLE_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
+    key: getPrivateKey(),
     scopes: ["https://www.googleapis.com/auth/calendar"],
   });
 }
