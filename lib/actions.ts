@@ -8,7 +8,7 @@ import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
 import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, companySettingsSchema, contractSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, studioBookingSchema } from "./validation";
 import { generateArabicContract } from "./contracts";
-import { createCalendarEventWithMeet } from "./google-calendar";
+import { createCalendarEventWithMeet, updateCalendarEvent, cancelCalendarEvent } from "./google-calendar";
 import { notifyNewBooking, notifyBookingStatusChange } from "./notifications";
 
 function values(formData: FormData) {
@@ -206,6 +206,24 @@ export async function createAdminMeetingAction(formData: FormData) {
   const endTime = endAfterHours(startTime, input.durationHours);
   const prisma = getPrisma();
   if (!prisma) throw new Error("Database is not configured.");
+
+  let meetingLink = input.meetingLink || null;
+  let googleEventId: string | null = null;
+
+  if (input.meetingType === "Google Meeting" && !meetingLink) {
+    const result = await createCalendarEventWithMeet({
+      summary: `Meeting with ${input.fullName}`,
+      description: input.notes || "True Level Production meeting",
+      startTime,
+      endTime,
+      attendeeEmail: input.email,
+    });
+    if (result) {
+      meetingLink = result.hangoutLink;
+      googleEventId = result.eventId;
+    }
+  }
+
   await prisma.booking.create({
     data: {
       type: input.meetingType === "Google Meeting" ? "GOOGLE_MEETING" : "COMPANY_MEETING",
@@ -218,7 +236,8 @@ export async function createAdminMeetingAction(formData: FormData) {
       serviceType: input.serviceType,
       meetingType: input.meetingType,
       meetingLocation: input.meetingLocation || null,
-      meetingLink: input.meetingLink || null,
+      meetingLink,
+      googleEventId,
       assignedTeamMember: input.assignedTeamMember || null,
       notes: input.notes || null,
       internalNotes: input.internalNotes || null,
@@ -274,7 +293,17 @@ export async function updateBookingStatusAction(formData: FormData) {
   const input = bookingStatusUpdateSchema.parse(values(formData));
   const prisma = getPrisma();
   if (!prisma) throw new Error("Database is not configured.");
-  await prisma.booking.update({ where: { id: input.bookingId }, data: { status: input.status } });
+
+  const booking = await prisma.booking.findUnique({
+    where: { id: input.bookingId },
+    select: { googleEventId: true, type: true },
+  });
+
+  if (booking?.googleEventId && ["CANCELLED", "REJECTED"].includes(input.status)) {
+    await cancelCalendarEvent(booking.googleEventId);
+  }
+
+  await prisma.booking.update({ where: { id: input.bookingId }, data: { status: input.status, googleEventId: ["CANCELLED", "REJECTED"].includes(input.status) ? null : undefined } });
   revalidatePath("/admin/bookings");
   revalidatePath("/admin/meetings");
   revalidatePath("/admin/studio");
@@ -382,15 +411,35 @@ export async function updateBookingAction(formData: FormData) {
   if (!current) throw new Error("Booking not found.");
 
   let meetingLink = input.meetingLink;
+  let googleEventId = current.googleEventId;
   if (input.status === "APPROVED" && current.type === "GOOGLE_MEETING" && !meetingLink) {
-    const link = await createCalendarEventWithMeet({
-      summary: `Meeting with ${current.client.fullName}`,
-      description: current.notes || "True Level Production meeting",
-      startTime: current.startTime,
-      endTime: current.endTime,
-      attendeeEmail: current.client.email,
-    });
-    if (link) meetingLink = link;
+    if (googleEventId) {
+      await updateCalendarEvent({
+        eventId: googleEventId,
+        summary: `Meeting with ${current.client.fullName}`,
+        description: current.notes || "True Level Production meeting",
+        startTime: current.startTime,
+        endTime: current.endTime,
+        attendeeEmail: current.client.email,
+      });
+    } else {
+      const result = await createCalendarEventWithMeet({
+        summary: `Meeting with ${current.client.fullName}`,
+        description: current.notes || "True Level Production meeting",
+        startTime: current.startTime,
+        endTime: current.endTime,
+        attendeeEmail: current.client.email,
+      });
+      if (result) {
+        meetingLink = result.hangoutLink ?? undefined;
+        googleEventId = result.eventId;
+      }
+    }
+  }
+
+  if (googleEventId && ["CANCELLED", "REJECTED"].includes(input.status) && !["CANCELLED", "REJECTED"].includes(current.status)) {
+    await cancelCalendarEvent(googleEventId);
+    googleEventId = null;
   }
 
   const price = input.price ?? 0;
@@ -406,6 +455,7 @@ export async function updateBookingAction(formData: FormData) {
       remainingAmount: Math.max(price - deposit - discount, 0),
       paymentStatus: input.paymentStatus,
       meetingLink: meetingLink || null,
+      googleEventId,
       internalNotes: input.internalNotes || null,
     },
   });

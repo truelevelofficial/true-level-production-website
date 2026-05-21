@@ -145,6 +145,7 @@ model Booking {
   remainingAmount Decimal?      @db.Decimal(12, 2)
   paymentStatus   PaymentStatus @default(UNPAID)
   meetingLink     String?
+  googleEventId   String?
   notes           String?
   internalNotes   String?
   invoices        Invoice[]
