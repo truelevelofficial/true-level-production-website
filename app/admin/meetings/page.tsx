@@ -1,6 +1,7 @@
 import { AdminShell, SetupNotice } from "@/components/admin-shell";
 import { AdminMeetingForm } from "@/components/admin-meeting-form";
 import { ConfirmSubmit } from "@/components/confirm-submit";
+import { CopyLink } from "@/components/copy-link";
 import { inputClass } from "@/components/form-fields";
 import { deleteMeetingAction, updateBookingStatusAction } from "@/lib/actions";
 import { getBookings, getClients, hasDatabase } from "@/lib/admin-data";
@@ -67,7 +68,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
             <p className="text-[#06111F]/60">{displayDate(booking.startTime)} - {displayDate(booking.endTime)}</p>
             {booking.meetingLocation ? <p className="text-[#06111F]/60">Location: {booking.meetingLocation}</p> : null}
             {booking.assignedTeamMember ? <p className="text-[#06111F]/60">Team: {booking.assignedTeamMember}</p> : null}
-            {booking.meetingLink ? <p className="mt-3 text-[#0B7CFF]"><a className="font-bold underline" href={booking.meetingLink} target="_blank">Open Google Meet</a></p> : null}
+            {booking.meetingLink ? <CopyLink url={booking.meetingLink} /> : null}
             <div className="mt-4 flex flex-wrap gap-2">
               {booking.status !== "CANCELLED" ? <>
                 {booking.status !== "APPROVED" ? <form action={updateBookingStatusAction}><input name="bookingId" type="hidden" value={booking.id} /><input name="status" type="hidden" value="APPROVED" /><input name="returnTo" type="hidden" value="/admin/meetings" /><button className="rounded-full border border-[#06111F]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] hover:border-[#0B7CFF] hover:text-[#0B7CFF]">Approve</button></form> : null}
