@@ -125,7 +125,9 @@ export async function logoutAction() {
 
 export async function createClientAction(formData: FormData) {
   await requireAdmin();
-  const input = manualClientSchema.parse(values(formData));
+  const parsed = manualClientSchema.safeParse(values(formData));
+  if (!parsed.success) redirect("/admin/clients?error=invalid-client");
+  const input = parsed.data;
   const prisma = getPrisma();
   if (!prisma) throw new Error("Database is not configured.");
   await prisma.client.upsert({
@@ -165,7 +167,9 @@ export async function createClientAction(formData: FormData) {
 
 export async function updateClientAction(formData: FormData) {
   await requireAdmin();
-  const input = clientUpdateSchema.parse(values(formData));
+  const parsed = clientUpdateSchema.safeParse(values(formData));
+  if (!parsed.success) redirect("/admin/clients?error=invalid-client");
+  const input = parsed.data;
   const prisma = getPrisma();
   if (!prisma) throw new Error("Database is not configured.");
   await prisma.client.update({

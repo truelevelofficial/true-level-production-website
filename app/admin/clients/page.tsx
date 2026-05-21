@@ -8,7 +8,7 @@ import { requireAdmin } from "@/lib/auth";
 import { clientTypes, leadSources, pipelineStatuses } from "@/lib/constants";
 import { displayDate } from "@/lib/dates";
 
-export default async function ClientsPage({ searchParams }: { searchParams: Promise<{ q?: string; type?: string; leadSource?: string; pipelineStatus?: string }> }) {
+export default async function ClientsPage({ searchParams }: { searchParams: Promise<{ q?: string; type?: string; leadSource?: string; pipelineStatus?: string; error?: string }> }) {
   await requireAdmin();
   const params = await searchParams;
   const query = (params.q || "").trim().toLowerCase();
@@ -24,6 +24,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
   return (
     <AdminShell title="Clients">
       {!hasDatabase() ? <SetupNotice /> : null}
+      {params.error === "invalid-client" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not save client. Enter a valid name, phone with at least 7 characters, and email.</div> : null}
       <form action={createClientAction} className="mb-6 grid gap-4 rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm md:grid-cols-2">
         <div className="md:col-span-2">
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Manual client</p>
