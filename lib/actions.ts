@@ -334,6 +334,39 @@ export async function updateBookingStatusAction(formData: FormData) {
   if (returnTo === "/admin/meetings") redirect(`/admin/meetings?updated=${input.status.toLowerCase()}`);
 }
 
+export async function generateGoogleMeetLinkAction(formData: FormData) {
+  await requireAdmin();
+  const bookingId = String(formData.get("bookingId") || "");
+  if (!bookingId) redirect("/admin/meetings?error=google-meet");
+
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: { client: true },
+  });
+  if (!booking || booking.type !== "GOOGLE_MEETING") redirect("/admin/meetings?error=google-meet");
+  if (booking.meetingLink) redirect("/admin/meetings?generated=meet");
+
+  const result = await createCalendarEventWithMeet({
+    summary: `Meeting with ${booking.client.fullName}`,
+    description: booking.notes || "True Level Production meeting",
+    startTime: booking.startTime,
+    endTime: booking.endTime,
+    attendeeEmail: booking.client.email,
+  });
+  if (!result?.hangoutLink) redirect("/admin/meetings?error=google-meet");
+
+  await prisma.booking.update({
+    where: { id: booking.id },
+    data: { meetingLink: result.hangoutLink, googleEventId: result.eventId },
+  });
+  revalidatePath("/admin/meetings");
+  revalidatePath("/admin/bookings");
+  redirect("/admin/meetings?generated=meet");
+}
+
 export async function updateCompanySettingsAction(_prev: { error?: string; success?: string } | FormData | undefined, maybeFormData?: FormData) {
   await requireAdmin();
   const formData = maybeFormData ?? (_prev instanceof FormData ? _prev : null);
