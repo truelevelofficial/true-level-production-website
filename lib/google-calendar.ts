@@ -4,7 +4,7 @@ export function getGoogleCalendarConfigStatus() {
   const missing = [
     ["GOOGLE_SERVICE_ACCOUNT_EMAIL", process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL],
     ["GOOGLE_PRIVATE_KEY", process.env.GOOGLE_PRIVATE_KEY],
-    ["CALENDAR_ID", process.env.CALENDAR_ID],
+    ["CALENDAR_ID_OR_ADMIN_EMAIL", process.env.CALENDAR_ID || process.env.ADMIN_EMAIL],
   ].filter(([, value]) => !value).map(([key]) => key);
   return { configured: missing.length === 0, missing };
 }
@@ -31,7 +31,7 @@ function getCalendar() {
 }
 
 function getCalendarId() {
-  return process.env.CALENDAR_ID!;
+  return process.env.CALENDAR_ID || process.env.ADMIN_EMAIL!;
 }
 
 export async function createCalendarEventWithMeet(params: {

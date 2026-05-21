@@ -40,7 +40,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
       {params.warning === "google-meet" ? <div className="mb-4 rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-800">Meeting saved without Google Meet link. You can paste a manual link or try again later.</div> : null}
       {params.error === "invalid-meeting" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not save meeting. Select an existing client or enter a valid name, phone, and email.</div> : null}
       {params.error === "google-meet" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not generate Google Meet link. Check Google Calendar env settings and calendar sharing.</div> : null}
-      {params.error === "google-config" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Google Meet is not configured on Vercel. Add GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY, and CALENDAR_ID.</div> : null}
+      {params.error === "google-config" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Google Meet is not configured on Vercel. Add GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_PRIVATE_KEY. CALENDAR_ID is optional if ADMIN_EMAIL is the calendar ID.</div> : null}
       {params.error === "cancelled-meet" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Cannot generate a Google Meet link for a cancelled meeting. Approve the meeting first or create a new meeting.</div> : null}
       {params.error === "delete-meeting" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not delete meeting.</div> : null}
 
@@ -58,7 +58,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
       </div>
 
       <div className="grid gap-4" id="meetings-list">
-        {params.error === "google-config" ? <div className="rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Google Meet cannot be generated yet. Add GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY, and CALENDAR_ID in Vercel, then share the Google Calendar with the service account email.</div> : null}
+        {params.error === "google-config" ? <div className="rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Google Meet cannot be generated yet. Add GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_PRIVATE_KEY in Vercel. If CALENDAR_ID is missing, ADMIN_EMAIL will be used as the calendar ID. Share that Google Calendar with the service account email.</div> : null}
         {params.warning === "google-config" ? <div className="rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-800">Meeting was saved, but Google Meet is not configured yet. Add the Vercel env variables and share the calendar with the service account.</div> : null}
         {filtered.length === 0 ? <p className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 text-sm font-bold text-[#06111F]/55 shadow-sm">No meetings found.</p> : null}
         {filtered.map((booking) => (
