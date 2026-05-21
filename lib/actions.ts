@@ -711,3 +711,10 @@ export async function createContractAction(formData: FormData) {
   });
   revalidatePath("/admin/contracts");
 }
+
+export async function runCalendarDiagnosticAction(): Promise<{ steps: { step: string; success: boolean; detail: string }[] }> {
+  await requireAdmin();
+  const { diagnoseGoogleCalendar } = await import("./google-calendar");
+  const steps = await diagnoseGoogleCalendar();
+  return { steps };
+}

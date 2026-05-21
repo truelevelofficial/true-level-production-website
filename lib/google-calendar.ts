@@ -13,9 +13,115 @@ export function hasGoogleConfig() {
   return getGoogleCalendarConfigStatus().configured;
 }
 
+function extractErrorDetails(error: unknown) {
+  if (error && typeof error === "object") {
+    const gaxios = error as Record<string, unknown>;
+    const parts: string[] = [];
+    if (gaxios.message) parts.push(String(gaxios.message));
+    if (gaxios.code) parts.push(`code=${gaxios.code}`);
+    if (gaxios.status) parts.push(`status=${gaxios.status}`);
+    if (gaxios.errors) parts.push(`errors=${JSON.stringify(gaxios.errors)}`);
+    if (gaxios.response && typeof gaxios.response === "object") {
+      const resp = gaxios.response as Record<string, unknown>;
+      if (resp.data) parts.push(`responseData=${JSON.stringify(resp.data)}`);
+    }
+    return parts.join(" | ") || "Unknown error";
+  }
+  return String(error);
+}
+
 function logCalendarFailure(action: string, error: unknown) {
-  const message = error instanceof Error ? error.message : "Unknown error";
-  console.error(`Google Calendar ${action} failed`, { message });
+  const details = extractErrorDetails(error);
+  console.error(`Google Calendar ${action} failed`, { details });
+}
+
+export type CalendarDiagnosticStep = {
+  step: string;
+  success: boolean;
+  detail: string;
+};
+
+export async function diagnoseGoogleCalendar(): Promise<CalendarDiagnosticStep[]> {
+  const results: CalendarDiagnosticStep[] = [];
+
+  const config = getGoogleCalendarConfigStatus();
+  if (!config.configured) {
+    results.push({ step: "Environment variables", success: false, detail: `Missing: ${config.missing.join(", ")}` });
+    return results;
+  }
+  results.push({ step: "Environment variables", success: true, detail: "All variables are set" });
+
+  try {
+    const jwt = getJwt();
+    await jwt.authorize();
+    results.push({ step: "JWT Authentication", success: true, detail: "Service account key is valid" });
+  } catch (error) {
+    results.push({ step: "JWT Authentication", success: false, detail: extractErrorDetails(error) });
+    return results;
+  }
+
+  try {
+    const calendar = getCalendar();
+    const list = await calendar.calendarList.list();
+    const target = list.data.items?.find(c => c.id === getCalendarId());
+    if (target) {
+      results.push({ step: "Calendar access", success: true, detail: `Found: "${target.summary}" (${target.id})` });
+    } else {
+      results.push({ step: "Calendar access", success: false, detail: `Calendar "${getCalendarId()}" not found. Share it with ${process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL} with "Make changes to events" permission.` });
+      return results;
+    }
+  } catch (error) {
+    results.push({ step: "Calendar access", success: false, detail: extractErrorDetails(error) });
+    return results;
+  }
+
+  try {
+    const calendar = getCalendar();
+    const now = new Date();
+    const startTime = new Date(now.getTime() + 60000);
+    const endTime = new Date(startTime.getTime() + 300000);
+    const res = await calendar.events.insert({
+      calendarId: getCalendarId(),
+      requestBody: {
+        summary: "TEST EVENT - please delete (auto-diagnostic)",
+        description: "Auto-generated test for True Level diagnostics",
+        start: { dateTime: startTime.toISOString(), timeZone: "Africa/Cairo" },
+        end: { dateTime: endTime.toISOString(), timeZone: "Africa/Cairo" },
+      },
+    });
+    const eventId = res.data.id;
+    results.push({ step: "Basic event creation", success: true, detail: `Event created (${eventId})` });
+    try { await calendar.events.delete({ calendarId: getCalendarId(), eventId: eventId! }); } catch { /* cleanup */ }
+  } catch (error) {
+    results.push({ step: "Basic event creation", success: false, detail: extractErrorDetails(error) });
+    return results;
+  }
+
+  try {
+    const calendar = getCalendar();
+    const now = new Date();
+    const startTime = new Date(now.getTime() + 120000);
+    const endTime = new Date(startTime.getTime() + 300000);
+    const res = await calendar.events.insert({
+      calendarId: getCalendarId(),
+      requestBody: {
+        summary: "TEST MEET EVENT - please delete (auto-diagnostic)",
+        description: "Auto-generated test with Meet for True Level diagnostics",
+        start: { dateTime: startTime.toISOString(), timeZone: "Africa/Cairo" },
+        end: { dateTime: endTime.toISOString(), timeZone: "Africa/Cairo" },
+        conferenceData: { createRequest: { requestId: `diag-${Date.now()}` } },
+      },
+      conferenceDataVersion: 1,
+    });
+    const eventId = res.data.id;
+    const hangoutLink = res.data.hangoutLink;
+    results.push({ step: "Meet conference creation", success: true, detail: `Event created (${eventId}), hangoutLink: ${hangoutLink || "N/A"}` });
+    try { await calendar.events.delete({ calendarId: getCalendarId(), eventId: eventId! }); } catch { /* cleanup */ }
+  } catch (error) {
+    results.push({ step: "Meet conference creation", success: false, detail: extractErrorDetails(error) });
+  }
+
+  return results;
 }
 
 function getPrivateKey() {
