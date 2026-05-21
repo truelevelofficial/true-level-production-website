@@ -66,7 +66,7 @@ export async function createCalendarEventWithMeet(params: {
         description: params.description,
         start: { dateTime: params.startTime.toISOString(), timeZone: "Africa/Cairo" },
         end: { dateTime: params.endTime.toISOString(), timeZone: "Africa/Cairo" },
-        conferenceData: { createRequest: { requestId: `tl-${Date.now()}`, conferenceSolutionKey: { type: "hangoutsMeet" } } },
+        conferenceData: { createRequest: { requestId: `tl-${Date.now()}` } },
       },
       conferenceDataVersion: 1,
     });
