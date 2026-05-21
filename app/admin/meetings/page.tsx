@@ -8,13 +8,14 @@ import { requireAdmin } from "@/lib/auth";
 import { adminMeetingTypes, adminMeetingStatuses, services } from "@/lib/constants";
 import { displayDate } from "@/lib/dates";
 
-export default async function MeetingsPage({ searchParams }: { searchParams: Promise<{ status?: string; date?: string; error?: string }> }) {
+export default async function MeetingsPage({ searchParams }: { searchParams: Promise<{ status?: string; date?: string; error?: string; saved?: string }> }) {
   await requireAdmin();
   const params = await searchParams;
   const [bookings, clients] = await Promise.all([getBookings({ type: { in: ["GOOGLE_MEETING", "COMPANY_MEETING"] } }), getClients()]);
   const filtered = bookings.filter((booking) => (!params.status || booking.status === params.status) && (!params.date || booking.startTime.toISOString().startsWith(params.date)));
   const today = new Date().toISOString().slice(0, 10);
   return <AdminShell title="Meetings">{!hasDatabase() ? <SetupNotice /> : null}
+    {params.saved === "meeting" ? <div className="mb-4 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-700">Meeting saved successfully.</div> : null}
     {params.error === "invalid-meeting" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not save meeting. Select an existing client or enter a valid name, phone, and email.</div> : null}
     <AdminMeetingForm clients={clients.map((client) => ({ id: client.id, fullName: client.fullName, companyName: client.companyName, phone: client.phone, whatsapp: client.whatsapp, email: client.email }))} meetingTypes={adminMeetingTypes} meetingStatuses={adminMeetingStatuses} services={services} />
     <form className="mb-6 grid gap-3 rounded-[2rem] border border-[#06111F]/10 bg-white p-4 shadow-sm md:grid-cols-3">

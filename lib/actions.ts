@@ -266,6 +266,7 @@ export async function createAdminMeetingAction(formData: FormData) {
   });
   revalidatePath("/admin/meetings");
   revalidatePath("/admin/bookings");
+  redirect("/admin/meetings?saved=meeting");
 }
 
 export async function createAdminStudioBookingAction(formData: FormData) {
