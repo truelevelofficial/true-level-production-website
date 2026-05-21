@@ -200,12 +200,29 @@ export async function deleteClientAction(formData: FormData) {
 
 export async function createAdminMeetingAction(formData: FormData) {
   await requireAdmin();
-  const input = adminMeetingSchema.parse(values(formData));
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+
+  const raw = values(formData);
+  const selectedClientId = String(raw.clientId || "");
+  if (selectedClientId) {
+    const selectedClient = await prisma.client.findUnique({ where: { id: selectedClientId } });
+    if (selectedClient) {
+      raw.fullName ||= selectedClient.fullName;
+      raw.companyName ||= selectedClient.companyName || "";
+      raw.phone ||= selectedClient.phone;
+      raw.whatsapp ||= selectedClient.whatsapp || "";
+      raw.email ||= selectedClient.email;
+    }
+  }
+
+  const parsed = adminMeetingSchema.safeParse(raw);
+  if (!parsed.success) redirect("/admin/meetings?error=invalid-meeting");
+
+  const input = parsed.data;
   const client = await getOrCreateAdminClient(input);
   const startTime = combineDateTime(input.date, input.time);
   const endTime = endAfterHours(startTime, input.durationHours);
-  const prisma = getPrisma();
-  if (!prisma) throw new Error("Database is not configured.");
 
   let meetingLink = input.meetingLink || null;
   let googleEventId: string | null = null;

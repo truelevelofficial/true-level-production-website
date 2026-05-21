@@ -7,13 +7,14 @@ import { requireAdmin } from "@/lib/auth";
 import { adminMeetingTypes, adminMeetingStatuses, services } from "@/lib/constants";
 import { displayDate } from "@/lib/dates";
 
-export default async function MeetingsPage({ searchParams }: { searchParams: Promise<{ status?: string; date?: string }> }) {
+export default async function MeetingsPage({ searchParams }: { searchParams: Promise<{ status?: string; date?: string; error?: string }> }) {
   await requireAdmin();
   const params = await searchParams;
   const [bookings, clients] = await Promise.all([getBookings({ type: { in: ["GOOGLE_MEETING", "COMPANY_MEETING"] } }), getClients()]);
   const filtered = bookings.filter((booking) => (!params.status || booking.status === params.status) && (!params.date || booking.startTime.toISOString().startsWith(params.date)));
   const today = new Date().toISOString().slice(0, 10);
   return <AdminShell title="Meetings">{!hasDatabase() ? <SetupNotice /> : null}
+    {params.error === "invalid-meeting" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not save meeting. Select an existing client or enter a valid name, phone, and email.</div> : null}
     <form action={createAdminMeetingAction} className="mb-6 grid gap-4 rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm md:grid-cols-2">
       <div className="md:col-span-2"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">Manual meeting</p><h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.05em]">Add Meeting</h2></div>
       <Field label="Existing client"><select className={inputClass} name="clientId"><option value="">Create/link by email</option>{clients.map((client) => <option key={client.id} value={client.id}>{client.fullName} - {client.email}</option>)}</select></Field>
