@@ -8,3 +8,6 @@ build/
 
 .vercel
 .env*.local
+*service-account*.json
+google-credentials*.json
+true-level-*.json

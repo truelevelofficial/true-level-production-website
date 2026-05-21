@@ -1,7 +1,21 @@
 import { calendar_v3, auth } from "@googleapis/calendar";
 
+export function getGoogleCalendarConfigStatus() {
+  const missing = [
+    ["GOOGLE_SERVICE_ACCOUNT_EMAIL", process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL],
+    ["GOOGLE_PRIVATE_KEY", process.env.GOOGLE_PRIVATE_KEY],
+    ["CALENDAR_ID", process.env.CALENDAR_ID],
+  ].filter(([, value]) => !value).map(([key]) => key);
+  return { configured: missing.length === 0, missing };
+}
+
 export function hasGoogleConfig() {
-  return Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) && Boolean(process.env.GOOGLE_PRIVATE_KEY);
+  return getGoogleCalendarConfigStatus().configured;
+}
+
+function logCalendarFailure(action: string, error: unknown) {
+  const message = error instanceof Error ? error.message : "Unknown error";
+  console.error(`Google Calendar ${action} failed`, { message });
 }
 
 function getJwt() {
@@ -17,7 +31,7 @@ function getCalendar() {
 }
 
 function getCalendarId() {
-  return process.env.CALENDAR_ID || "primary";
+  return process.env.CALENDAR_ID!;
 }
 
 export async function createCalendarEventWithMeet(params: {
@@ -44,7 +58,7 @@ export async function createCalendarEventWithMeet(params: {
     });
     return { hangoutLink: res.data.hangoutLink || null, eventId: res.data.id || null };
   } catch (error) {
-    console.error("Google Calendar create event failed", error instanceof Error ? error.message : "Unknown error");
+    logCalendarFailure("create event", error);
     return null;
   }
 }
@@ -73,7 +87,7 @@ export async function updateCalendarEvent(params: {
     });
     return true;
   } catch (error) {
-    console.error("Google Calendar update event failed", error instanceof Error ? error.message : "Unknown error");
+    logCalendarFailure("update event", error);
     return false;
   }
 }
@@ -89,7 +103,7 @@ export async function cancelCalendarEvent(eventId: string) {
     });
     return true;
   } catch (error) {
-    console.error("Google Calendar cancel event failed", error instanceof Error ? error.message : "Unknown error");
+    logCalendarFailure("cancel event", error);
     return false;
   }
 }

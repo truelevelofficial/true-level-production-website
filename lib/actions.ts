@@ -15,6 +15,10 @@ function values(formData: FormData) {
   return Object.fromEntries(formData.entries());
 }
 
+function meetingTitle(clientName: string, companyName?: string | null) {
+  return companyName ? `Meeting with ${clientName} (${companyName})` : `Meeting with ${clientName}`;
+}
+
 async function upsertClient(data: { fullName: string; companyName?: string; phone: string; whatsapp?: string; email: string; clientType?: string }) {
   const prisma = getPrisma();
   if (!prisma) throw new Error("Database is not configured. Add DATABASE_URL before using forms.");
@@ -230,18 +234,26 @@ export async function createAdminMeetingAction(formData: FormData) {
 
   let meetingLink = input.meetingLink || null;
   let googleEventId: string | null = null;
+  let googleMeetStatus: "generated" | "not-configured" | "failed" | null = null;
 
   if (input.meetingType === "Google Meeting" && !meetingLink) {
-    const result = await createCalendarEventWithMeet({
-      summary: `Meeting with ${input.fullName}`,
-      description: input.notes || "True Level Production meeting",
-      startTime,
-      endTime,
-      attendeeEmail: input.email,
-    });
-    if (result) {
-      meetingLink = result.hangoutLink;
-      googleEventId = result.eventId;
+    if (!hasGoogleConfig()) {
+      googleMeetStatus = "not-configured";
+    } else {
+      const result = await createCalendarEventWithMeet({
+        summary: meetingTitle(input.fullName, input.companyName),
+        description: input.notes || "True Level Production meeting",
+        startTime,
+        endTime,
+        attendeeEmail: input.email,
+      });
+      if (result?.hangoutLink) {
+        meetingLink = result.hangoutLink;
+        googleEventId = result.eventId;
+        googleMeetStatus = "generated";
+      } else {
+        googleMeetStatus = "failed";
+      }
     }
   }
 
@@ -266,6 +278,9 @@ export async function createAdminMeetingAction(formData: FormData) {
   });
   revalidatePath("/admin/meetings");
   revalidatePath("/admin/bookings");
+  if (googleMeetStatus === "generated") redirect("/admin/meetings?saved=meeting&generated=meet#meetings-list");
+  if (googleMeetStatus === "not-configured") redirect("/admin/meetings?saved=meeting&warning=google-config#meetings-list");
+  if (googleMeetStatus === "failed") redirect("/admin/meetings?saved=meeting&warning=google-meet#meetings-list");
   redirect("/admin/meetings?saved=meeting");
 }
 
@@ -320,17 +335,45 @@ export async function updateBookingStatusAction(formData: FormData) {
 
   const booking = await prisma.booking.findUnique({
     where: { id: input.bookingId },
-    select: { googleEventId: true, type: true },
+    include: { client: true },
   });
 
   if (booking?.googleEventId && ["CANCELLED", "REJECTED"].includes(input.status)) {
     await cancelCalendarEvent(booking.googleEventId);
   }
 
-  await prisma.booking.update({ where: { id: input.bookingId }, data: { status: input.status, googleEventId: ["CANCELLED", "REJECTED"].includes(input.status) ? null : undefined } });
+  let meetingLink: string | null | undefined = undefined;
+  let googleEventId: string | null | undefined = ["CANCELLED", "REJECTED"].includes(input.status) ? null : undefined;
+  let googleMeetStatus: "generated" | "not-configured" | "failed" | null = null;
+
+  if (booking && input.status === "APPROVED" && booking.type === "GOOGLE_MEETING" && !booking.meetingLink) {
+    if (!hasGoogleConfig()) {
+      googleMeetStatus = "not-configured";
+    } else {
+      const result = await createCalendarEventWithMeet({
+        summary: meetingTitle(booking.client.fullName, booking.client.companyName),
+        description: booking.notes || "True Level Production meeting",
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        attendeeEmail: booking.client.email,
+      });
+      if (result?.hangoutLink) {
+        meetingLink = result.hangoutLink;
+        googleEventId = result.eventId;
+        googleMeetStatus = "generated";
+      } else {
+        googleMeetStatus = "failed";
+      }
+    }
+  }
+
+  await prisma.booking.update({ where: { id: input.bookingId }, data: { status: input.status, meetingLink, googleEventId } });
   revalidatePath("/admin/bookings");
   revalidatePath("/admin/meetings");
   revalidatePath("/admin/studio");
+  if (returnTo === "/admin/meetings" && googleMeetStatus === "generated") redirect(`/admin/meetings?updated=${input.status.toLowerCase()}&generated=meet#meetings-list`);
+  if (returnTo === "/admin/meetings" && googleMeetStatus === "not-configured") redirect(`/admin/meetings?updated=${input.status.toLowerCase()}&warning=google-config#meetings-list`);
+  if (returnTo === "/admin/meetings" && googleMeetStatus === "failed") redirect(`/admin/meetings?updated=${input.status.toLowerCase()}&warning=google-meet#meetings-list`);
   if (returnTo === "/admin/meetings") redirect(`/admin/meetings?updated=${input.status.toLowerCase()}`);
 }
 
@@ -495,15 +538,15 @@ export async function updateBookingAction(formData: FormData) {
     if (googleEventId) {
       await updateCalendarEvent({
         eventId: googleEventId,
-        summary: `Meeting with ${current.client.fullName}`,
+        summary: meetingTitle(current.client.fullName, current.client.companyName),
         description: current.notes || "True Level Production meeting",
         startTime: current.startTime,
         endTime: current.endTime,
         attendeeEmail: current.client.email,
       });
-    } else {
+    } else if (hasGoogleConfig()) {
       const result = await createCalendarEventWithMeet({
-        summary: `Meeting with ${current.client.fullName}`,
+        summary: meetingTitle(current.client.fullName, current.client.companyName),
         description: current.notes || "True Level Production meeting",
         startTime: current.startTime,
         endTime: current.endTime,
