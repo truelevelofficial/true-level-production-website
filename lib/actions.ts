@@ -312,7 +312,9 @@ export async function createAdminStudioBookingAction(formData: FormData) {
 
 export async function updateBookingStatusAction(formData: FormData) {
   await requireAdmin();
-  const input = bookingStatusUpdateSchema.parse(values(formData));
+  const raw = values(formData);
+  const input = bookingStatusUpdateSchema.parse(raw);
+  const returnTo = String(raw.returnTo || "");
   const prisma = getPrisma();
   if (!prisma) throw new Error("Database is not configured.");
 
@@ -329,6 +331,7 @@ export async function updateBookingStatusAction(formData: FormData) {
   revalidatePath("/admin/bookings");
   revalidatePath("/admin/meetings");
   revalidatePath("/admin/studio");
+  if (returnTo === "/admin/meetings") redirect(`/admin/meetings?updated=${input.status.toLowerCase()}`);
 }
 
 export async function updateCompanySettingsAction(_prev: { error?: string; success?: string } | FormData | undefined, maybeFormData?: FormData) {
