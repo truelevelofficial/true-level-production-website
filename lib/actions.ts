@@ -6,7 +6,7 @@ import { hash } from "bcryptjs";
 import { clearAdminSession, createAdminSession, ensureUserAccount, getSessionEmail, isAdminEmail, requireAdmin, validateAdminCredentials } from "./auth";
 import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
-import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, companySettingsSchema, contractSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, studioBookingSchema } from "./validation";
+import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingDeleteSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, companySettingsSchema, contractSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, studioBookingSchema } from "./validation";
 import { generateArabicContract } from "./contracts";
 import { createCalendarEventWithMeet, updateCalendarEvent, cancelCalendarEvent } from "./google-calendar";
 import { notifyNewBooking, notifyBookingStatusChange } from "./notifications";
@@ -365,6 +365,25 @@ export async function generateGoogleMeetLinkAction(formData: FormData) {
   revalidatePath("/admin/meetings");
   revalidatePath("/admin/bookings");
   redirect("/admin/meetings?generated=meet");
+}
+
+export async function deleteMeetingAction(formData: FormData) {
+  await requireAdmin();
+  const input = bookingDeleteSchema.parse(values(formData));
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+
+  const booking = await prisma.booking.findUnique({
+    where: { id: input.bookingId },
+    select: { googleEventId: true, type: true },
+  });
+  if (!booking || !["GOOGLE_MEETING", "COMPANY_MEETING"].includes(booking.type)) redirect("/admin/meetings?error=delete-meeting");
+
+  if (booking.googleEventId) await cancelCalendarEvent(booking.googleEventId);
+  await prisma.booking.delete({ where: { id: input.bookingId } });
+  revalidatePath("/admin/meetings");
+  revalidatePath("/admin/bookings");
+  redirect("/admin/meetings?deleted=meeting");
 }
 
 export async function updateCompanySettingsAction(_prev: { error?: string; success?: string } | FormData | undefined, maybeFormData?: FormData) {

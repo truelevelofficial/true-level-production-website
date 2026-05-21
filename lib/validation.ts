@@ -66,6 +66,7 @@ export const bookingStatusUpdateSchema = z.object({
   bookingId: z.string().min(1),
   status: z.enum(bookingStatuses),
 });
+export const bookingDeleteSchema = z.object({ bookingId: z.string().min(1) });
 
 export const companySettingsSchema = z.object({
   companyName: z.string().trim().max(200).optional().or(z.literal("")),

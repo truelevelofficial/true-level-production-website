@@ -3,7 +3,7 @@ import { AdminMeetingForm } from "@/components/admin-meeting-form";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { CopyButton } from "@/components/copy-button";
 import { inputClass } from "@/components/form-fields";
-import { generateGoogleMeetLinkAction, updateBookingStatusAction } from "@/lib/actions";
+import { deleteMeetingAction, generateGoogleMeetLinkAction, updateBookingStatusAction } from "@/lib/actions";
 import { getBookings, getClients, hasDatabase } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
 import { adminMeetingStatuses, adminMeetingTypes, services } from "@/lib/constants";
@@ -18,7 +18,7 @@ function MeetingTimingBadge({ startTime, endTime }: { startTime: Date; endTime: 
   return null;
 }
 
-export default async function MeetingsPage({ searchParams }: { searchParams: Promise<{ status?: string; date?: string; error?: string; generated?: string; saved?: string; updated?: string }> }) {
+export default async function MeetingsPage({ searchParams }: { searchParams: Promise<{ status?: string; date?: string; deleted?: string; error?: string; generated?: string; saved?: string; updated?: string }> }) {
   await requireAdmin();
   const params = await searchParams;
   const [bookings, clients] = await Promise.all([getBookings({ type: { in: ["GOOGLE_MEETING", "COMPANY_MEETING"] } }), getClients()]);
@@ -30,11 +30,13 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
       {!hasDatabase() ? <SetupNotice /> : null}
       {params.saved === "meeting" ? <div className="mb-4 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-700">Meeting saved successfully.</div> : null}
       {params.generated === "meet" ? <div className="mb-4 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-700">Google Meet link generated successfully. You can copy it below.</div> : null}
+      {params.deleted === "meeting" ? <div className="mb-4 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-700">Meeting deleted successfully.</div> : null}
       {params.updated === "cancelled" ? <div className="mb-4 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-700">Meeting cancelled successfully.</div> : null}
       {params.updated === "approved" ? <div className="mb-4 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-700">Meeting approved successfully.</div> : null}
       {params.updated === "completed" ? <div className="mb-4 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-700">Meeting completed successfully.</div> : null}
       {params.error === "invalid-meeting" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not save meeting. Select an existing client or enter a valid name, phone, and email.</div> : null}
       {params.error === "google-meet" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not generate Google Meet link. Check Google Calendar env settings and calendar sharing.</div> : null}
+      {params.error === "delete-meeting" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not delete meeting.</div> : null}
 
       <AdminMeetingForm clients={clients.map((client) => ({ id: client.id, fullName: client.fullName, companyName: client.companyName, phone: client.phone, whatsapp: client.whatsapp, email: client.email }))} meetingTypes={adminMeetingTypes} meetingStatuses={adminMeetingStatuses} services={services} />
 
@@ -53,8 +55,16 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
         {filtered.length === 0 ? <p className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 text-sm font-bold text-[#06111F]/55 shadow-sm">No meetings found.</p> : null}
         {filtered.map((booking) => (
           <article className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm" key={booking.id}>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">{booking.meetingType}</p>
-            <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.05em]">{booking.client.fullName}</h2>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">{booking.meetingType}</p>
+                <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.05em]">{booking.client.fullName}</h2>
+              </div>
+              <form action={deleteMeetingAction}>
+                <input name="bookingId" type="hidden" value={booking.id} />
+                <ConfirmSubmit message="Delete this meeting permanently? This will also cancel the Google Calendar event if one exists.">Delete</ConfirmSubmit>
+              </form>
+            </div>
             <p className="mt-2 text-[#06111F]/60">{booking.serviceType} / {booking.status}</p>
             <MeetingTimingBadge startTime={booking.startTime} endTime={booking.endTime} />
             <p className="text-[#06111F]/60">{displayDate(booking.startTime)} - {displayDate(booking.endTime)}</p>
