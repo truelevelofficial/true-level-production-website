@@ -8,6 +8,7 @@ import { getBookings, getClients, hasDatabase } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
 import { adminMeetingStatuses, adminMeetingTypes, services } from "@/lib/constants";
 import { displayDate } from "@/lib/dates";
+import { hasGoogleConfig } from "@/lib/google-calendar";
 
 function MeetingTimingBadge({ startTime, endTime }: { startTime: Date; endTime: Date }) {
   const now = new Date();
@@ -24,6 +25,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
   const [bookings, clients] = await Promise.all([getBookings({ type: { in: ["GOOGLE_MEETING", "COMPANY_MEETING"] } }), getClients()]);
   const filtered = bookings.filter((booking) => (!params.status || booking.status === params.status) && (!params.date || booking.startTime.toISOString().startsWith(params.date)));
   const today = new Date().toISOString().slice(0, 10);
+  const googleConfigured = hasGoogleConfig();
 
   return (
     <AdminShell title="Meetings">
@@ -54,6 +56,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
       </div>
 
       <div className="grid gap-4" id="meetings-list">
+        {params.error === "google-config" ? <div className="rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Google Meet cannot be generated yet. Add GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY, and CALENDAR_ID in Vercel, then share the Google Calendar with the service account email.</div> : null}
         {filtered.length === 0 ? <p className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 text-sm font-bold text-[#06111F]/55 shadow-sm">No meetings found.</p> : null}
         {filtered.map((booking) => (
           <article className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm" key={booking.id}>
@@ -73,7 +76,8 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
             {booking.meetingLocation ? <p className="text-[#06111F]/60">Location: {booking.meetingLocation}</p> : null}
             {booking.assignedTeamMember ? <p className="text-[#06111F]/60">Team: {booking.assignedTeamMember}</p> : null}
             {booking.meetingLink ? <div className="mt-3 flex flex-wrap items-center gap-2 rounded-[1.25rem] bg-[#0B7CFF]/5 p-3"><span className="text-xs font-black uppercase tracking-[0.14em] text-[#0B7CFF]">Google Meet</span><a className="text-sm font-bold text-[#0B7CFF] underline" href={booking.meetingLink} target="_blank">Open link</a><CopyButton text={booking.meetingLink} /></div> : null}
-            {!booking.meetingLink && booking.type === "GOOGLE_MEETING" && booking.status !== "CANCELLED" ? <form action={generateGoogleMeetLinkAction} className="mt-3"><input name="bookingId" type="hidden" value={booking.id} /><button className="rounded-full bg-[#0B7CFF] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white">Generate Google Meet link</button></form> : null}
+            {!booking.meetingLink && booking.type === "GOOGLE_MEETING" && booking.status !== "CANCELLED" && googleConfigured ? <form action={generateGoogleMeetLinkAction} className="mt-3"><input name="bookingId" type="hidden" value={booking.id} /><button className="rounded-full bg-[#0B7CFF] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white">Generate Google Meet link</button></form> : null}
+            {!booking.meetingLink && booking.type === "GOOGLE_MEETING" && booking.status !== "CANCELLED" && !googleConfigured ? <p className="mt-3 w-fit rounded-[1rem] bg-red-50 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-red-600">Google Meet not configured in Vercel</p> : null}
             {!booking.meetingLink && booking.type === "GOOGLE_MEETING" && booking.status === "CANCELLED" ? <p className="mt-3 w-fit rounded-full bg-red-50 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-red-600">No Meet link for cancelled meeting</p> : null}
             <div className="mt-4 flex flex-wrap gap-2">
               {booking.status !== "CANCELLED" ? <>
