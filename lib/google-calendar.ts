@@ -155,12 +155,11 @@ function getCalendarId() {
   return process.env.CALENDAR_ID || process.env.ADMIN_EMAIL!;
 }
 
-export async function createCalendarEventWithMeet(params: {
+export async function createCalendarEvent(params: {
   summary: string;
   description: string;
   startTime: Date;
   endTime: Date;
-  attendeeEmail?: string;
 }) {
   if (!hasGoogleConfig()) return null;
   try {
@@ -172,11 +171,9 @@ export async function createCalendarEventWithMeet(params: {
         description: params.description,
         start: { dateTime: params.startTime.toISOString(), timeZone: "Africa/Cairo" },
         end: { dateTime: params.endTime.toISOString(), timeZone: "Africa/Cairo" },
-        conferenceData: { createRequest: { requestId: `tl-${Date.now()}` } },
       },
-      conferenceDataVersion: 1,
     });
-    return { hangoutLink: res.data.hangoutLink || null, eventId: res.data.id || null };
+    return { eventId: res.data.id || null };
   } catch (error) {
     logCalendarFailure("create event", error);
     return null;

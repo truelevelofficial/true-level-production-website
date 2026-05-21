@@ -1,14 +1,12 @@
 import { AdminShell, SetupNotice } from "@/components/admin-shell";
 import { AdminMeetingForm } from "@/components/admin-meeting-form";
 import { ConfirmSubmit } from "@/components/confirm-submit";
-import { CopyButton } from "@/components/copy-button";
 import { inputClass } from "@/components/form-fields";
-import { deleteMeetingAction, generateGoogleMeetLinkAction, updateBookingStatusAction } from "@/lib/actions";
+import { deleteMeetingAction, updateBookingStatusAction } from "@/lib/actions";
 import { getBookings, getClients, hasDatabase } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
 import { adminMeetingStatuses, adminMeetingTypes, services } from "@/lib/constants";
 import { displayDate } from "@/lib/dates";
-import { hasGoogleConfig } from "@/lib/google-calendar";
 
 function MeetingTimingBadge({ startTime, endTime }: { startTime: Date; endTime: Date }) {
   const now = new Date();
@@ -19,29 +17,22 @@ function MeetingTimingBadge({ startTime, endTime }: { startTime: Date; endTime: 
   return null;
 }
 
-export default async function MeetingsPage({ searchParams }: { searchParams: Promise<{ status?: string; date?: string; deleted?: string; error?: string; generated?: string; saved?: string; updated?: string; warning?: string }> }) {
+export default async function MeetingsPage({ searchParams }: { searchParams: Promise<{ status?: string; date?: string; deleted?: string; error?: string; saved?: string; updated?: string }> }) {
   await requireAdmin();
   const params = await searchParams;
   const [bookings, clients] = await Promise.all([getBookings({ type: { in: ["GOOGLE_MEETING", "COMPANY_MEETING"] } }), getClients()]);
   const filtered = bookings.filter((booking) => (!params.status || booking.status === params.status) && (!params.date || booking.startTime.toISOString().startsWith(params.date)));
   const today = new Date().toISOString().slice(0, 10);
-  const googleConfigured = hasGoogleConfig();
 
   return (
     <AdminShell title="Meetings">
       {!hasDatabase() ? <SetupNotice /> : null}
       {params.saved === "meeting" ? <div className="mb-4 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-700">Meeting saved successfully.</div> : null}
-      {params.generated === "meet" ? <div className="mb-4 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-700">Google Meet link generated successfully. You can copy it below.</div> : null}
       {params.deleted === "meeting" ? <div className="mb-4 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-700">Meeting deleted successfully.</div> : null}
       {params.updated === "cancelled" ? <div className="mb-4 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-700">Meeting cancelled successfully.</div> : null}
       {params.updated === "approved" ? <div className="mb-4 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-700">Meeting approved successfully.</div> : null}
       {params.updated === "completed" ? <div className="mb-4 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-700">Meeting completed successfully.</div> : null}
-      {params.warning === "google-config" ? <div className="mb-4 rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-800">Meeting saved, but Google Meet link could not be generated because calendar integration is not configured.</div> : null}
-      {params.warning === "google-meet" ? <div className="mb-4 rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-800">Meeting saved without Google Meet link. You can paste a manual link or try again later.</div> : null}
       {params.error === "invalid-meeting" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not save meeting. Select an existing client or enter a valid name, phone, and email.</div> : null}
-      {params.error === "google-meet" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not generate Google Meet link. Check Google Calendar env settings and calendar sharing.</div> : null}
-      {params.error === "google-config" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Google Meet is not configured on Vercel. Add GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_PRIVATE_KEY. CALENDAR_ID is optional if ADMIN_EMAIL is the calendar ID.</div> : null}
-      {params.error === "cancelled-meet" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Cannot generate a Google Meet link for a cancelled meeting. Approve the meeting first or create a new meeting.</div> : null}
       {params.error === "delete-meeting" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not delete meeting.</div> : null}
 
       <AdminMeetingForm clients={clients.map((client) => ({ id: client.id, fullName: client.fullName, companyName: client.companyName, phone: client.phone, whatsapp: client.whatsapp, email: client.email }))} meetingTypes={adminMeetingTypes} meetingStatuses={adminMeetingStatuses} services={services} />
@@ -58,8 +49,6 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
       </div>
 
       <div className="grid gap-4" id="meetings-list">
-        {params.error === "google-config" ? <div className="rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Google Meet cannot be generated yet. Add GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_PRIVATE_KEY in Vercel. If CALENDAR_ID is missing, ADMIN_EMAIL will be used as the calendar ID. Share that Google Calendar with the service account email.</div> : null}
-        {params.warning === "google-config" ? <div className="rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-800">Meeting was saved, but Google Meet is not configured yet. Add the Vercel env variables and share the calendar with the service account.</div> : null}
         {filtered.length === 0 ? <p className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 text-sm font-bold text-[#06111F]/55 shadow-sm">No meetings found.</p> : null}
         {filtered.map((booking) => (
           <article className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm" key={booking.id}>
@@ -78,11 +67,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
             <p className="text-[#06111F]/60">{displayDate(booking.startTime)} - {displayDate(booking.endTime)}</p>
             {booking.meetingLocation ? <p className="text-[#06111F]/60">Location: {booking.meetingLocation}</p> : null}
             {booking.assignedTeamMember ? <p className="text-[#06111F]/60">Team: {booking.assignedTeamMember}</p> : null}
-            {booking.meetingLink ? <div className="mt-3 flex flex-wrap items-center gap-2 rounded-[1.25rem] bg-[#0B7CFF]/5 p-3"><span className="text-xs font-black uppercase tracking-[0.14em] text-[#0B7CFF]">Google Meet</span><a className="text-sm font-bold text-[#0B7CFF] underline" href={booking.meetingLink} target="_blank">Open link</a><CopyButton text={booking.meetingLink} /></div> : null}
-            {booking.type === "GOOGLE_MEETING" && booking.meetingLink ? <p className="mt-2 w-fit rounded-full bg-green-50 px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-green-700">Meet link generated</p> : null}
-            {!booking.meetingLink && booking.type === "GOOGLE_MEETING" && booking.status !== "CANCELLED" && googleConfigured ? <form action={generateGoogleMeetLinkAction} className="mt-3"><input name="bookingId" type="hidden" value={booking.id} /><button className="rounded-full bg-[#0B7CFF] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white">Generate Google Meet link</button></form> : null}
-            {!booking.meetingLink && booking.type === "GOOGLE_MEETING" && booking.status !== "CANCELLED" && !googleConfigured ? <p className="mt-3 w-fit rounded-[1rem] bg-red-50 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-red-600">Google Meet not configured in Vercel</p> : null}
-            {!booking.meetingLink && booking.type === "GOOGLE_MEETING" && booking.status === "CANCELLED" ? <p className="mt-3 w-fit rounded-full bg-red-50 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-red-600">No Meet link for cancelled meeting</p> : null}
+            {booking.meetingLink ? <p className="mt-3 text-[#0B7CFF]"><a className="font-bold underline" href={booking.meetingLink} target="_blank">Open Google Meet</a></p> : null}
             <div className="mt-4 flex flex-wrap gap-2">
               {booking.status !== "CANCELLED" ? <>
                 {booking.status !== "APPROVED" ? <form action={updateBookingStatusAction}><input name="bookingId" type="hidden" value={booking.id} /><input name="status" type="hidden" value="APPROVED" /><input name="returnTo" type="hidden" value="/admin/meetings" /><button className="rounded-full border border-[#06111F]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] hover:border-[#0B7CFF] hover:text-[#0B7CFF]">Approve</button></form> : null}

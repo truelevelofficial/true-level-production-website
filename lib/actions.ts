@@ -8,7 +8,7 @@ import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
 import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingDeleteSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, companySettingsSchema, contractSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, studioBookingSchema } from "./validation";
 import { generateArabicContract } from "./contracts";
-import { createCalendarEventWithMeet, updateCalendarEvent, cancelCalendarEvent, hasGoogleConfig } from "./google-calendar";
+import { createCalendarEvent, updateCalendarEvent, cancelCalendarEvent } from "./google-calendar";
 import { notifyNewBooking, notifyBookingStatusChange } from "./notifications";
 
 function values(formData: FormData) {
@@ -234,27 +234,15 @@ export async function createAdminMeetingAction(formData: FormData) {
 
   let meetingLink = input.meetingLink || null;
   let googleEventId: string | null = null;
-  let googleMeetStatus: "generated" | "not-configured" | "failed" | null = null;
 
   if (input.meetingType === "Google Meeting" && !meetingLink) {
-    if (!hasGoogleConfig()) {
-      googleMeetStatus = "not-configured";
-    } else {
-      const result = await createCalendarEventWithMeet({
-        summary: meetingTitle(input.fullName, input.companyName),
-        description: input.notes || "True Level Production meeting",
-        startTime,
-        endTime,
-        attendeeEmail: input.email,
-      });
-      if (result?.hangoutLink) {
-        meetingLink = result.hangoutLink;
-        googleEventId = result.eventId;
-        googleMeetStatus = "generated";
-      } else {
-        googleMeetStatus = "failed";
-      }
-    }
+    const result = await createCalendarEvent({
+      summary: meetingTitle(input.fullName, input.companyName),
+      description: input.notes || "True Level Production meeting",
+      startTime,
+      endTime,
+    });
+    if (result?.eventId) googleEventId = result.eventId;
   }
 
   await prisma.booking.create({
@@ -278,9 +266,6 @@ export async function createAdminMeetingAction(formData: FormData) {
   });
   revalidatePath("/admin/meetings");
   revalidatePath("/admin/bookings");
-  if (googleMeetStatus === "generated") redirect("/admin/meetings?saved=meeting&generated=meet#meetings-list");
-  if (googleMeetStatus === "not-configured") redirect("/admin/meetings?saved=meeting&warning=google-config#meetings-list");
-  if (googleMeetStatus === "failed") redirect("/admin/meetings?saved=meeting&warning=google-meet#meetings-list");
   redirect("/admin/meetings?saved=meeting");
 }
 
@@ -344,72 +329,22 @@ export async function updateBookingStatusAction(formData: FormData) {
 
   let meetingLink: string | null | undefined = undefined;
   let googleEventId: string | null | undefined = ["CANCELLED", "REJECTED"].includes(input.status) ? null : undefined;
-  let googleMeetStatus: "generated" | "not-configured" | "failed" | null = null;
 
-  if (booking && input.status === "APPROVED" && booking.type === "GOOGLE_MEETING" && !booking.meetingLink) {
-    if (!hasGoogleConfig()) {
-      googleMeetStatus = "not-configured";
-    } else {
-      const result = await createCalendarEventWithMeet({
-        summary: meetingTitle(booking.client.fullName, booking.client.companyName),
-        description: booking.notes || "True Level Production meeting",
-        startTime: booking.startTime,
-        endTime: booking.endTime,
-        attendeeEmail: booking.client.email,
-      });
-      if (result?.hangoutLink) {
-        meetingLink = result.hangoutLink;
-        googleEventId = result.eventId;
-        googleMeetStatus = "generated";
-      } else {
-        googleMeetStatus = "failed";
-      }
-    }
+  if (booking && input.status === "APPROVED" && booking.type === "GOOGLE_MEETING" && !booking.meetingLink && !booking.googleEventId) {
+    const result = await createCalendarEvent({
+      summary: meetingTitle(booking.client.fullName, booking.client.companyName),
+      description: booking.notes || "True Level Production meeting",
+      startTime: booking.startTime,
+      endTime: booking.endTime,
+    });
+    if (result?.eventId) googleEventId = result.eventId;
   }
 
   await prisma.booking.update({ where: { id: input.bookingId }, data: { status: input.status, meetingLink, googleEventId } });
   revalidatePath("/admin/bookings");
   revalidatePath("/admin/meetings");
   revalidatePath("/admin/studio");
-  if (returnTo === "/admin/meetings" && googleMeetStatus === "generated") redirect(`/admin/meetings?updated=${input.status.toLowerCase()}&generated=meet#meetings-list`);
-  if (returnTo === "/admin/meetings" && googleMeetStatus === "not-configured") redirect(`/admin/meetings?updated=${input.status.toLowerCase()}&warning=google-config#meetings-list`);
-  if (returnTo === "/admin/meetings" && googleMeetStatus === "failed") redirect(`/admin/meetings?updated=${input.status.toLowerCase()}&warning=google-meet#meetings-list`);
   if (returnTo === "/admin/meetings") redirect(`/admin/meetings?updated=${input.status.toLowerCase()}`);
-}
-
-export async function generateGoogleMeetLinkAction(formData: FormData) {
-  await requireAdmin();
-  const bookingId = String(formData.get("bookingId") || "");
-  if (!bookingId) redirect("/admin/meetings?error=google-meet#meetings-list");
-  if (!hasGoogleConfig()) redirect("/admin/meetings?error=google-config#meetings-list");
-
-  const prisma = getPrisma();
-  if (!prisma) throw new Error("Database is not configured.");
-
-  const booking = await prisma.booking.findUnique({
-    where: { id: bookingId },
-    include: { client: true },
-  });
-  if (!booking || booking.type !== "GOOGLE_MEETING") redirect("/admin/meetings?error=google-meet#meetings-list");
-  if (booking.status === "CANCELLED") redirect("/admin/meetings?error=cancelled-meet#meetings-list");
-  if (booking.meetingLink) redirect("/admin/meetings?generated=meet#meetings-list");
-
-  const result = await createCalendarEventWithMeet({
-    summary: `Meeting with ${booking.client.fullName}`,
-    description: booking.notes || "True Level Production meeting",
-    startTime: booking.startTime,
-    endTime: booking.endTime,
-    attendeeEmail: booking.client.email,
-  });
-  if (!result?.hangoutLink) redirect("/admin/meetings?error=google-meet#meetings-list");
-
-  await prisma.booking.update({
-    where: { id: booking.id },
-    data: { meetingLink: result.hangoutLink, googleEventId: result.eventId },
-  });
-  revalidatePath("/admin/meetings");
-  revalidatePath("/admin/bookings");
-  redirect("/admin/meetings?generated=meet#meetings-list");
 }
 
 export async function deleteMeetingAction(formData: FormData) {
@@ -542,20 +477,15 @@ export async function updateBookingAction(formData: FormData) {
         description: current.notes || "True Level Production meeting",
         startTime: current.startTime,
         endTime: current.endTime,
-        attendeeEmail: current.client.email,
       });
-    } else if (hasGoogleConfig()) {
-      const result = await createCalendarEventWithMeet({
+    } else {
+      const result = await createCalendarEvent({
         summary: meetingTitle(current.client.fullName, current.client.companyName),
         description: current.notes || "True Level Production meeting",
         startTime: current.startTime,
         endTime: current.endTime,
-        attendeeEmail: current.client.email,
       });
-      if (result) {
-        meetingLink = result.hangoutLink ?? undefined;
-        googleEventId = result.eventId;
-      }
+      if (result?.eventId) googleEventId = result.eventId;
     }
   }
 
