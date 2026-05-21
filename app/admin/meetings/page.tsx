@@ -36,6 +36,8 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
       {params.updated === "completed" ? <div className="mb-4 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-700">Meeting completed successfully.</div> : null}
       {params.error === "invalid-meeting" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not save meeting. Select an existing client or enter a valid name, phone, and email.</div> : null}
       {params.error === "google-meet" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not generate Google Meet link. Check Google Calendar env settings and calendar sharing.</div> : null}
+      {params.error === "google-config" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Google Meet is not configured on Vercel. Add GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY, and CALENDAR_ID.</div> : null}
+      {params.error === "cancelled-meet" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Cannot generate a Google Meet link for a cancelled meeting. Approve the meeting first or create a new meeting.</div> : null}
       {params.error === "delete-meeting" ? <div className="mb-4 rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">Could not delete meeting.</div> : null}
 
       <AdminMeetingForm clients={clients.map((client) => ({ id: client.id, fullName: client.fullName, companyName: client.companyName, phone: client.phone, whatsapp: client.whatsapp, email: client.email }))} meetingTypes={adminMeetingTypes} meetingStatuses={adminMeetingStatuses} services={services} />
@@ -51,7 +53,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
         <p className="mt-2 text-3xl font-black">{bookings.filter((booking) => booking.startTime.toISOString().startsWith(today)).length}</p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-4" id="meetings-list">
         {filtered.length === 0 ? <p className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 text-sm font-bold text-[#06111F]/55 shadow-sm">No meetings found.</p> : null}
         {filtered.map((booking) => (
           <article className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm" key={booking.id}>
@@ -71,7 +73,8 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
             {booking.meetingLocation ? <p className="text-[#06111F]/60">Location: {booking.meetingLocation}</p> : null}
             {booking.assignedTeamMember ? <p className="text-[#06111F]/60">Team: {booking.assignedTeamMember}</p> : null}
             {booking.meetingLink ? <div className="mt-3 flex flex-wrap items-center gap-2 rounded-[1.25rem] bg-[#0B7CFF]/5 p-3"><span className="text-xs font-black uppercase tracking-[0.14em] text-[#0B7CFF]">Google Meet</span><a className="text-sm font-bold text-[#0B7CFF] underline" href={booking.meetingLink} target="_blank">Open link</a><CopyButton text={booking.meetingLink} /></div> : null}
-            {!booking.meetingLink && booking.type === "GOOGLE_MEETING" ? <form action={generateGoogleMeetLinkAction} className="mt-3"><input name="bookingId" type="hidden" value={booking.id} /><button className="rounded-full bg-[#0B7CFF] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white">Generate Google Meet link</button></form> : null}
+            {!booking.meetingLink && booking.type === "GOOGLE_MEETING" && booking.status !== "CANCELLED" ? <form action={generateGoogleMeetLinkAction} className="mt-3"><input name="bookingId" type="hidden" value={booking.id} /><button className="rounded-full bg-[#0B7CFF] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white">Generate Google Meet link</button></form> : null}
+            {!booking.meetingLink && booking.type === "GOOGLE_MEETING" && booking.status === "CANCELLED" ? <p className="mt-3 w-fit rounded-full bg-red-50 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-red-600">No Meet link for cancelled meeting</p> : null}
             <div className="mt-4 flex flex-wrap gap-2">
               {booking.status !== "CANCELLED" ? <>
                 {booking.status !== "APPROVED" ? <form action={updateBookingStatusAction}><input name="bookingId" type="hidden" value={booking.id} /><input name="status" type="hidden" value="APPROVED" /><input name="returnTo" type="hidden" value="/admin/meetings" /><button className="rounded-full border border-[#06111F]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] hover:border-[#0B7CFF] hover:text-[#0B7CFF]">Approve</button></form> : null}

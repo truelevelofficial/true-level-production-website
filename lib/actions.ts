@@ -8,7 +8,7 @@ import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
 import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingDeleteSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, companySettingsSchema, contractSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, studioBookingSchema } from "./validation";
 import { generateArabicContract } from "./contracts";
-import { createCalendarEventWithMeet, updateCalendarEvent, cancelCalendarEvent } from "./google-calendar";
+import { createCalendarEventWithMeet, updateCalendarEvent, cancelCalendarEvent, hasGoogleConfig } from "./google-calendar";
 import { notifyNewBooking, notifyBookingStatusChange } from "./notifications";
 
 function values(formData: FormData) {
@@ -337,7 +337,8 @@ export async function updateBookingStatusAction(formData: FormData) {
 export async function generateGoogleMeetLinkAction(formData: FormData) {
   await requireAdmin();
   const bookingId = String(formData.get("bookingId") || "");
-  if (!bookingId) redirect("/admin/meetings?error=google-meet");
+  if (!bookingId) redirect("/admin/meetings?error=google-meet#meetings-list");
+  if (!hasGoogleConfig()) redirect("/admin/meetings?error=google-config#meetings-list");
 
   const prisma = getPrisma();
   if (!prisma) throw new Error("Database is not configured.");
@@ -346,8 +347,9 @@ export async function generateGoogleMeetLinkAction(formData: FormData) {
     where: { id: bookingId },
     include: { client: true },
   });
-  if (!booking || booking.type !== "GOOGLE_MEETING") redirect("/admin/meetings?error=google-meet");
-  if (booking.meetingLink) redirect("/admin/meetings?generated=meet");
+  if (!booking || booking.type !== "GOOGLE_MEETING") redirect("/admin/meetings?error=google-meet#meetings-list");
+  if (booking.status === "CANCELLED") redirect("/admin/meetings?error=cancelled-meet#meetings-list");
+  if (booking.meetingLink) redirect("/admin/meetings?generated=meet#meetings-list");
 
   const result = await createCalendarEventWithMeet({
     summary: `Meeting with ${booking.client.fullName}`,
@@ -356,7 +358,7 @@ export async function generateGoogleMeetLinkAction(formData: FormData) {
     endTime: booking.endTime,
     attendeeEmail: booking.client.email,
   });
-  if (!result?.hangoutLink) redirect("/admin/meetings?error=google-meet");
+  if (!result?.hangoutLink) redirect("/admin/meetings?error=google-meet#meetings-list");
 
   await prisma.booking.update({
     where: { id: booking.id },
@@ -364,7 +366,7 @@ export async function generateGoogleMeetLinkAction(formData: FormData) {
   });
   revalidatePath("/admin/meetings");
   revalidatePath("/admin/bookings");
-  redirect("/admin/meetings?generated=meet");
+  redirect("/admin/meetings?generated=meet#meetings-list");
 }
 
 export async function deleteMeetingAction(formData: FormData) {
