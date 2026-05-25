@@ -8,7 +8,7 @@ export async function generateContractDocx(title: string, body: string) {
     return new Paragraph({
       children: [new TextRun({ text: trimmed, bold: isHead, size: 22, font: "Calibri" })],
       alignment: AlignmentType.RIGHT,
-      spacing: { after: 200 },
+      spacing: { after: 200, line: 360 },
     });
   });
   const doc = new Document({
