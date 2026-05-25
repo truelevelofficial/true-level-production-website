@@ -47,6 +47,6 @@ export function SetupNotice() {
   );
 }
 
-export function Card({ title, value, text }: { title: string; value: string; text?: string }) {
-  return <div className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#06111F]/40">{title}</p><p className="mt-4 text-4xl font-black tracking-[-0.06em] text-[#0B7CFF]">{value}</p>{text ? <p className="mt-2 text-sm text-[#06111F]/55">{text}</p> : null}</div>;
+export function Card({ title, value, text, children }: { title: string; value: string; text?: string; children?: React.ReactNode }) {
+  return <div className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#06111F]/40">{title}</p><div className="mt-4 flex items-baseline gap-2"><p className="text-4xl font-black tracking-[-0.06em] text-[#0B7CFF]">{value}</p>{children}</div>{text ? <p className="mt-2 text-sm text-[#06111F]/55">{text}</p> : null}</div>;
 }
