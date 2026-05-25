@@ -5,6 +5,7 @@ import { getUnreadNotificationCount } from "@/lib/admin-data";
 
 const links = [
   ["/admin/bookings", "Management"],
+  ["/admin/analytics", "Analytics"],
   ["/admin/meetings", "Meetings"],
   ["/admin/studio", "Studio"],
   ["/admin/clients", "Clients"],
