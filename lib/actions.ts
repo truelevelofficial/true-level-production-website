@@ -6,7 +6,7 @@ import { hash } from "bcryptjs";
 import { clearAdminSession, createAdminSession, ensureUserAccount, getSessionEmail, isAdminEmail, requireAdmin, validateAdminCredentials } from "./auth";
 import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
-import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingDeleteSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, companySettingsSchema, contractSchema, contractUpdateSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, studioBookingSchema } from "./validation";
+import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingDeleteSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, companySettingsSchema, contractDeleteSchema, contractSchema, contractUpdateSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, studioBookingSchema } from "./validation";
 import { generateArabicContract } from "./contracts";
 import { createCalendarEvent, updateCalendarEvent, cancelCalendarEvent } from "./google-calendar";
 import { notifyNewBooking, notifyBookingStatusChange } from "./notifications";
@@ -656,6 +656,16 @@ export async function updateContractAction(formData: FormData) {
   if (input.body) data.body = input.body;
   await prisma.contract.update({ where: { id: input.contractId }, data });
   revalidatePath("/admin/contracts");
+}
+
+export async function deleteContractAction(formData: FormData) {
+  await requireAdmin();
+  const input = contractDeleteSchema.parse(values(formData));
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  await prisma.contract.delete({ where: { id: input.contractId } });
+  revalidatePath("/admin/contracts");
+  redirect("/admin/contracts");
 }
 
 export async function runCalendarDiagnosticAction(): Promise<{ steps: { step: string; success: boolean; detail: string }[] }> {

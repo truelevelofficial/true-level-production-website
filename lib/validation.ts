@@ -144,6 +144,8 @@ export const expenseSchema = z.object({
 export const expenseUpdateSchema = expenseSchema.extend({ expenseId: z.string().min(1) });
 export const expenseDeleteSchema = z.object({ expenseId: z.string().min(1) });
 
+export const contractDeleteSchema = z.object({ contractId: z.string().min(1) });
+
 export const contractUpdateSchema = z.object({
   contractId: z.string().min(1),
   status: z.enum(contractStatuses).optional(),

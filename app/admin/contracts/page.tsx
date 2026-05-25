@@ -1,6 +1,7 @@
 import { AdminShell, SetupNotice } from "@/components/admin-shell";
 import { Field, inputClass } from "@/components/form-fields";
-import { createContractAction, updateContractAction } from "@/lib/actions";
+import { createContractAction, deleteContractAction, updateContractAction } from "@/lib/actions";
+import { ConfirmSubmit } from "@/components/confirm-submit";
 import { contractStatusArabic, contractStatuses, contractTypes, services } from "@/lib/constants";
 import { getBookings, getClients, getCompanySettings, getContracts, hasDatabase } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
@@ -116,11 +117,16 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
                   </details>
                   <a className="rounded-full bg-[#06111F] px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white" href={`/admin/export/contract/${contract.id}`}>تصدير Word</a>
                   <PrintButton />
+                  <form action={deleteContractAction}>
+                    <input name="contractId" type="hidden" value={contract.id} />
+                    <ConfirmSubmit message="Are you sure you want to delete this contract? This action cannot be undone.">حذف</ConfirmSubmit>
+                  </form>
                 </div>
 
                 <ContractPreview
                   body={contract.body}
                   clientName={contract.client?.fullName || ""}
+                  clientCompanyName={contract.client?.companyName}
                   status={contract.status}
                   title={contract.title}
                   totalPrice={contract.totalPrice ? Number(contract.totalPrice).toLocaleString("ar-EG") : null}

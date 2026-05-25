@@ -29,7 +29,7 @@ export function generateArabicContract(input: Record<string, unknown>) {
 
 الطرف الأول: شركة True Level Production - كيان مسجل في جمهورية مصر العربية، ويمثلها في هذا العقد السيد/ ${data.representativeName}، ويشار إليها لاحقا باسم "الشركة".
 
-الطرف الثاني: ${data.clientName}${data.clientCompanyName ? `، بصفته ممثلا عن شركة/مؤسسة ${data.clientCompanyName}` : ""}${data.clientTaxId ? `، الرقم القومي/البطاقة الضريبية: ${data.clientTaxId}` : ""}${data.clientAddress ? `، العنوان: ${data.clientAddress}` : ""}، الهاتف: ${data.clientPhone}، البريد الإلكتروني: ${data.clientEmail}، ويشار إليه لاحقا باسم "العميل".
+الطرف الثاني: ${data.clientName}${data.clientCompanyName ? `، بصفته ممثلا عن شركة/مؤسسة ${data.clientCompanyName}` : ""}${data.clientTaxId ? `، الرقم القومي/البطاقة الضريبية: ${data.clientTaxId}` : ""}${data.clientAddress ? `، العنوان: ${data.clientAddress}` : ""}، الهاتف: ${data.clientPhone}، ويشار إليه لاحقا باسم "العميل".
 
 (يشار إلى الطرف الأول والطرف الثاني مجتمعين بأنهما "الطرفان" ولكل منهما "طرف").
 
