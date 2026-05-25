@@ -93,11 +93,15 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
                   </form>
                 </div>
 
+                {contract.status === "DRAFT" ? (
+                  <p className="no-print mb-4 rounded-2xl bg-amber-50 p-3 text-center text-xs font-bold text-amber-800">
+                    مسودة عقد غير ملزمة قانونيا. يُرجى مراجعة العقد مع محام متخصص قبل التوقيع.
+                  </p>
+                ) : null}
                 <ContractPreview
                   body={contract.body}
                   clientName={contract.client?.fullName || ""}
                   clientCompanyName={contract.client?.companyName}
-                  status={contract.status}
                   title={contract.title}
                   totalPrice={contract.totalPrice ? Number(contract.totalPrice).toLocaleString("ar-EG") : null}
                   contractNumber={contract.id.slice(0, 8).toUpperCase()}

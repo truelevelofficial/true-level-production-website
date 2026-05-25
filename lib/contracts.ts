@@ -23,7 +23,6 @@ function contractMetaSection(data: ContractInput) {
 
 نوع العقد: ${typeLabel}
 تاريخ العقد: ${data.projectStartDate}
-حالة العقد: مسودة - غير ملزمة
 رقم العقد: يُمنح تلقائيا بعد التثبيت`;
 }
 
@@ -276,12 +275,6 @@ function additionalNotes(data: ContractInput) {
   return `${SEP}
 ملاحظات إضافية:
 ${data.additionalNotes || "لا توجد."}`;
-}
-
-/* ===== SIGNATURES ===== */
-/* ===== DISCLAIMER ===== */
-function disclaimer() {
-  return "تنبيه قانوني مهم: هذه المسودة نموذج مبدئي قابل للتعديل ولا تعتبر بديلا عن مراجعة محام متخصص. يجب مراجعة هذا العقد قانونيا من قبل محام مرخص في جمهورية مصر العربية قبل التوقيع أو الاستخدام الرسمي. لا تتحمل شركة True Level Production أي مسؤولية قانونية ناتجة عن استخدام هذه المسودة دون مراجعة قانونية متخصصة.";
 }
 
 /* ========================================================================
@@ -633,10 +626,7 @@ export function generateArabicContract(data: ContractInput) {
 
   return {
     title: `${title} - ${data.clientName}`,
-    body: `مسودة عقد ${title}
-${disclaimer()}
-${commonSections}
-`.trim(),
+    body: `${commonSections}`.trim(),
   };
 }
 

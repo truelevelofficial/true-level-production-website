@@ -1,7 +1,6 @@
 export function ContractPreview({
   title,
   body,
-  status,
   clientName,
   clientCompanyName,
   representativeName,
@@ -11,7 +10,6 @@ export function ContractPreview({
 }: {
   title: string;
   body: string;
-  status: string;
   clientName: string;
   clientCompanyName?: string | null;
   representativeName?: string | null;
@@ -19,7 +17,6 @@ export function ContractPreview({
   contractNumber?: string;
   createdAt?: string;
 }) {
-  const isDraft = status === "DRAFT";
   const sections = body.split(/\n\s*=+\s*\n/).filter(Boolean);
 
   return (
@@ -37,20 +34,9 @@ export function ContractPreview({
             </div>
           </div>
 
-          <div className={`contract-status-badge ${isDraft ? "draft" : status.toLowerCase()}`}>
-            {status === "DRAFT" ? "مسودة - غير ملزمة" : status === "SENT" ? "مرسل للعميل" : status === "SIGNED" ? "موقع" : "ملغي"}
-          </div>
-
           <div className="contract-title-area">
             <h1 className="contract-title">{title}</h1>
           </div>
-
-          {isDraft ? (
-            <div className="contract-disclaimer">
-              <svg className="disclaimer-icon" fill="none" height="16" stroke="#92400e" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="16"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
-              <span><strong>تنبيه قانوني:</strong> هذا المستند مسودة نموذج مبدئي قابلة للتعديل، ولا تعتبر بديلا عن مراجعة محام متخصص. يجب مراجعة هذا العقد قانونيا من قبل محام مرخص في جمهورية مصر العربية قبل التوقيع أو الاستخدام الرسمي.</span>
-            </div>
-          ) : null}
 
           <div className="contract-body">
             {sections.map((section, i) => {
@@ -154,7 +140,6 @@ const printStyles = `
   * { font-family: var(--font-cairo), 'Traditional Arabic', 'Noto Naskh Arabic', Tahoma, sans-serif; }
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
   .contract-document { box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; max-width: none !important; }
-  .contract-status-badge { display: none; }
   .no-print { display: none !important; }
   .contract-section { page-break-inside: avoid; }
   .contract-signatures { page-break-inside: avoid; break-inside: avoid; }
@@ -191,40 +176,8 @@ const printStyles = `
 .contract-meta { text-align: left; direction: ltr; }
 .meta-line { margin: 0 0 4px 0; font-size: 11px; color: #555; line-height: 1.5; }
 
-.contract-status-badge {
-  display: inline-block;
-  padding: 5px 16px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-.contract-status-badge.draft { background: #fef3c7; color: #92400e; }
-.contract-status-badge.sent { background: #dbeafe; color: #1e40af; }
-.contract-status-badge.signed { background: #d1fae5; color: #065f46; }
-.contract-status-badge.cancelled { background: #fee2e2; color: #991b1b; }
-
 .contract-title-area { margin-bottom: 24px; text-align: center; }
 .contract-title { font-size: 20px; font-weight: 800; color: #0d0d0d; margin: 0; letter-spacing: -0.02em; }
-
-.contract-disclaimer {
-  background: #fef3c7;
-  border: 1px solid #fcd34d;
-  border-radius: 8px;
-  padding: 14px 18px;
-  margin-bottom: 28px;
-  font-size: 12px;
-  line-height: 1.8;
-  color: #92400e;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-.disclaimer-icon { flex-shrink: 0; }
 
 .contract-body { font-size: 14px; line-height: 1.9; text-align: right; }
 .contract-section { margin-bottom: 22px; }
