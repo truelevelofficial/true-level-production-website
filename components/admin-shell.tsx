@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { logoutAction } from "@/lib/actions";
 import { getUnreadNotificationCount } from "@/lib/admin-data";
 
@@ -16,21 +17,28 @@ const links = [
 
 export async function AdminShell({ title, children }: { title: string; children: ReactNode }) {
   const notificationCount = await getUnreadNotificationCount();
+  const h = await headers();
+  const currentPath = h.get("x-invoke-path") || h.get("next-url") || "";
   return (
-    <main className="min-h-screen bg-[#F7F8FB] px-5 py-6 text-[#06111F]">
-      <div className="mx-auto max-w-7xl">
-        <header className="mb-8 flex flex-col gap-4 rounded-[2rem] border border-[#06111F]/10 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-4">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#0B7CFF]">True Level Operations</p>
-              <Link className="mt-1 block text-3xl font-black uppercase tracking-[-0.05em] transition hover:text-[#0B7CFF]" href="/">{title}</Link>
+    <main className="min-h-screen bg-[#F7F8FB] px-6 py-8 text-[#06111F]">
+      <div className="mx-auto max-w-[1440px]">
+        <header className="mb-10 rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-4">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.22em] text-[#0B7CFF]">True Level Operations</p>
+                <Link className="mt-1 block text-4xl font-black uppercase tracking-[-0.05em] transition hover:text-[#0B7CFF]" href="/">{title} / الإدارة</Link>
+              </div>
+              {notificationCount > 0 ? <div className="rounded-full bg-red-600 px-3 py-1 text-xs font-black text-white">{notificationCount}</div> : null}
             </div>
-            {notificationCount > 0 ? <div className="rounded-full bg-red-600 px-3 py-1 text-xs font-black text-white">{notificationCount}</div> : null}
+            <nav className="flex flex-wrap items-center gap-2">
+              {links.map(([href, label]) => {
+                const isActive = currentPath === href || currentPath.startsWith(href);
+                return <a className={`rounded-full px-5 py-3 text-sm font-black uppercase tracking-[0.12em] transition-colors ${isActive ? "bg-[#0B7CFF] text-white shadow-lg shadow-blue-500/25" : "border border-[#06111F]/10 text-[#06111F] hover:border-[#0B7CFF] hover:text-[#0B7CFF]"}`} href={href} key={href}>{label}</a>;
+              })}
+              <form action={logoutAction}><button className="ml-2 rounded-full bg-[#06111F] px-5 py-3 text-sm font-black uppercase tracking-[0.12em] text-white/60 transition hover:text-white">Logout</button></form>
+            </nav>
           </div>
-          <nav className="flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.12em]">
-            {links.map(([href, label]) => <a className="rounded-full border border-[#06111F]/10 px-4 py-2 hover:border-[#0B7CFF] hover:text-[#0B7CFF]" href={href} key={href}>{label}</a>)}
-            <form action={logoutAction}><button className="rounded-full bg-[#06111F] px-4 py-2 text-white">Logout</button></form>
-          </nav>
         </header>
         {children}
       </div>
@@ -48,5 +56,5 @@ export function SetupNotice() {
 }
 
 export function Card({ title, value, text, children }: { title: string; value: string; text?: string; children?: React.ReactNode }) {
-  return <div className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#06111F]/40">{title}</p><div className="mt-4 flex items-baseline gap-2"><p className="text-4xl font-black tracking-[-0.06em] text-[#0B7CFF]">{value}</p>{children}</div>{text ? <p className="mt-2 text-sm text-[#06111F]/55">{text}</p> : null}</div>;
+  return <div className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#06111F]/40">{title}</p><div className="mt-4 flex items-baseline gap-2"><p className="text-4xl font-black tracking-[-0.06em] text-[#0B7CFF]">{value}</p>{children}</div>{text ? <p className="mt-2 text-sm leading-6 text-[#06111F]/55">{text}</p> : null}</div>;
 }
