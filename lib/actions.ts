@@ -617,29 +617,40 @@ export async function deleteExpenseAction(formData: FormData) {
 export async function createContractAction(formData: FormData) {
   await requireAdmin();
   const raw = values(formData);
-  const input = contractSchema.parse(raw);
-  const generated = generateArabicContract(raw);
+  const parsed = contractSchema.safeParse(raw);
+  if (!parsed.success) {
+    const msgs = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
+    return { error: msgs || "بيانات غير صالحة. تأكد من ملء جميع الحقول المطلوبة." };
+  }
+  const input = parsed.data;
   const prisma = getPrisma();
-  if (!prisma) throw new Error("Database is not configured.");
-  const client = await upsertClient({
-    fullName: input.clientName,
-    companyName: input.clientCompanyName,
-    phone: input.clientPhone,
-    email: input.clientEmail,
-  });
-  await prisma.contract.create({
-    data: {
-      type: input.type,
-      status: input.status,
-      title: generated.title,
-      body: input.bodyOverride || generated.body,
-      clientId: client.id,
-      totalPrice: input.totalPrice,
-      deposit: input.depositAmount,
-      remaining: input.remainingAmount,
-    },
-  });
-  revalidatePath("/admin/contracts");
+  if (!prisma) return { error: "Database is not configured." };
+  try {
+    const generated = generateArabicContract(input);
+    const client = await upsertClient({
+      fullName: input.clientName,
+      companyName: input.clientCompanyName,
+      phone: input.clientPhone,
+      email: input.clientEmail,
+    });
+    await prisma.contract.create({
+      data: {
+        type: input.type,
+        status: input.status,
+        title: generated.title,
+        body: input.bodyOverride || generated.body,
+        clientId: client.id,
+        totalPrice: input.totalPrice,
+        deposit: input.depositAmount,
+        remaining: input.remainingAmount,
+      },
+    });
+    revalidatePath("/admin/contracts");
+    return { success: "تم حفظ العقد بنجاح" };
+  } catch (e) {
+    console.error("createContractAction", e);
+    return { error: "حدث خطأ أثناء حفظ العقد. يرجى المحاولة مرة أخرى." };
+  }
 }
 
 export async function updateContractAction(formData: FormData) {

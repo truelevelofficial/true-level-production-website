@@ -1,9 +1,9 @@
 import { AdminShell, SetupNotice } from "@/components/admin-shell";
-import { Field, inputClass } from "@/components/form-fields";
-import { createContractAction, deleteContractAction, updateContractAction } from "@/lib/actions";
+import { inputClass } from "@/components/form-fields";
+import { deleteContractAction, updateContractAction } from "@/lib/actions";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { ContractFormFields } from "@/components/contract-form-fields";
-import { contractStatusArabic, contractStatuses, contractTypes, services } from "@/lib/constants";
+import { contractStatusArabic, contractStatuses, services } from "@/lib/constants";
 import { getBookings, getClients, getCompanySettings, getContracts, hasDatabase } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
 import { ContractPreview } from "@/components/contract-preview";
@@ -29,18 +29,12 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
       <details className="no-print mb-6 rounded-[2rem] border border-[#06111F]/10 bg-white shadow-sm">
         <summary className="cursor-pointer p-6 text-sm font-black uppercase tracking-[0.14em] text-[#0B7CFF]">إنشاء عقد جديد</summary>
         <div className="px-6 pb-6">
-          <form action={createContractAction}>
-            <div className="md:col-span-2 mb-4">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">إنشاء مسودات العقود</p>
-              <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.05em]">إنشاء العقد</h2>
-            </div>
-            <ContractFormFields
-              defaultCancellationPolicy={settings.defaultCancellationPolicy || ""}
-              defaultPaymentTerms={settings.defaultPaymentTerms || ""}
-              defaultRep={settings.defaultContractRepresentative || ""}
-              services={services}
-            />
-          </form>
+          <ContractFormFields
+            defaultCancellationPolicy={settings.defaultCancellationPolicy || ""}
+            defaultPaymentTerms={settings.defaultPaymentTerms || ""}
+            defaultRep={settings.defaultContractRepresentative || ""}
+            services={services}
+          />
         </div>
       </details>
 
