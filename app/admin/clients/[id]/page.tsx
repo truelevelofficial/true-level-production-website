@@ -68,29 +68,29 @@ export default async function ClientProfilePage({ params }: { params: Promise<{ 
         </section>
       </div>
 
-       <div className="mb-6 grid gap-6 lg:grid-cols-2">
-         <History title="Meetings" rows={meetings.map((booking) => `${booking.meetingType || booking.type} / ${booking.status} / ${displayDate(booking.startTime)}`)} />
-         <History title="Bookings" rows={studioBookings.map((booking) => `${booking.studioSetup || booking.type} / ${booking.status} / ${displayDate(booking.startTime)}`)} />
-         <History title="Payments" rows={client.payments.map((payment) => `${displayDate(payment.date)} / ${String(payment.amount)} EGP / ${payment.method} / ${payment.status}`)} />
-         <History title="Contracts" rows={client.contracts.map((contract) => `${contract.title} / ${contract.status} / ${displayDate(contract.createdAt)}`)} />
-         <Placeholder title="Projects" />
-         <Placeholder title="Quotations" />
-         <Placeholder title="Files" />
-         <Placeholder title="Activity Log" />
-       </div>
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <History title="Meetings" rows={meetings.map((booking) => `${booking.meetingType || booking.type} / ${booking.status} / ${displayDate(booking.startTime)}`)} />
+        <History title="Bookings" rows={studioBookings.map((booking) => `${booking.studioSetup || booking.type} / ${booking.status} / ${displayDate(booking.startTime)}`)} />
+        <History title="Payments" rows={client.payments.map((payment) => `${displayDate(payment.date)} / ${String(payment.amount)} EGP / ${payment.method} / ${payment.status}`)} />
+        <History title="Contracts" rows={client.contracts.map((contract) => `${contract.title} / ${contract.status} / ${displayDate(contract.createdAt)}`)} />
+        <Placeholder title="Projects" />
+        <Placeholder title="Quotations" />
+        <Placeholder title="Files" />
+        <Placeholder title="Activity Log" />
+      </div>
 
-       <section className="mb-6 rounded-[2rem] border border-[#06111F]/10 bg-white p-6">
-         <h2 className="text-2xl font-black uppercase tracking-[-0.05em]">إضافة مصروف للعميل</h2>
-         <form action={createExpenseAction} className="grid gap-4">
-           <Field label="المبلغ"><input className={inputClass} name="amount" required type="number" /></Field>
-           <Field label="التصنيف"><select className={inputClass} name="category">{expenseCategories.map((item) => <option key={item} value={item}>{expenseCategoryArabic[item]}</option>)}</select></Field>
-           <Field label="طريقة الدفع"><select className={inputClass} name="method">{paymentMethods.map((item) => <option key={item} value={item}>{paymentMethodArabic[item]}</option>)}</select></Field>
-           <Field label="الوصف"><textarea className={inputClass} name="description" required /></Field>
-           <input name="clientId" type="hidden" value={id} />
-           <input name="date" type="hidden" defaultValue={new Date().toISOString().slice(0, 10)} />
-           <button className="rounded-full bg-[#06111F] px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white">حفظ المصروف</button>
-         </form>
-       </section>
+      <section className="mb-6 rounded-[2rem] border border-[#06111F]/10 bg-white p-6">
+        <h2 className="text-2xl font-black uppercase tracking-[-0.05em]">إضافة مصروف للعميل</h2>
+        <form action={createExpenseAction} className="grid gap-4">
+          <Field label="المبلغ"><input className={inputClass} name="amount" required type="number" /></Field>
+          <Field label="التصنيف"><select className={inputClass} name="category">{expenseCategories.map((item) => <option key={item} value={item}>{expenseCategoryArabic[item]}</option>)}</select></Field>
+          <Field label="طريقة الدفع"><select className={inputClass} name="method">{paymentMethods.map((item) => <option key={item} value={item}>{paymentMethodArabic[item]}</option>)}</select></Field>
+          <Field label="الوصف"><textarea className={inputClass} name="description" required /></Field>
+          <input name="clientId" type="hidden" value={id} />
+          <input name="date" type="hidden" defaultValue={new Date().toISOString().slice(0, 10)} />
+          <button className="rounded-full bg-[#06111F] px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white">حفظ المصروف</button>
+        </form>
+      </section>
     </AdminShell>
   );
 }
