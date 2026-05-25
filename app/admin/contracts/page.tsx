@@ -2,6 +2,7 @@ import { AdminShell, SetupNotice } from "@/components/admin-shell";
 import { Field, inputClass } from "@/components/form-fields";
 import { createContractAction, deleteContractAction, updateContractAction } from "@/lib/actions";
 import { ConfirmSubmit } from "@/components/confirm-submit";
+import { ContractFormFields } from "@/components/contract-form-fields";
 import { contractStatusArabic, contractStatuses, contractTypes, services } from "@/lib/constants";
 import { getBookings, getClients, getCompanySettings, getContracts, hasDatabase } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
@@ -28,42 +29,17 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
       <details className="no-print mb-6 rounded-[2rem] border border-[#06111F]/10 bg-white shadow-sm">
         <summary className="cursor-pointer p-6 text-sm font-black uppercase tracking-[0.14em] text-[#0B7CFF]">إنشاء عقد جديد</summary>
         <div className="px-6 pb-6">
-          <form action={createContractAction} className="grid gap-4 md:grid-cols-2" dir="rtl">
-            <div className="md:col-span-2">
+          <form action={createContractAction}>
+            <div className="md:col-span-2 mb-4">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">إنشاء مسودات العقود</p>
               <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.05em]">إنشاء العقد</h2>
             </div>
-            <Field label="نوع العقد"><select className={inputClass} name="type">{contractTypes.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field>
-            <Field label="الحالة"><select className={inputClass} name="status">{contractStatuses.map((status) => <option key={status} value={status}>{contractStatusArabic[status]}</option>)}</select></Field>
-            <Field label="إنشاء من عميل"><select className={inputClass} name="clientPicker"><option value="">اختياري</option>{clients.map((client) => <option key={client.id} value={client.id}>{client.fullName} - {client.email}</option>)}</select></Field>
-            <Field label="إنشاء من حجز"><select className={inputClass} name="bookingPicker"><option value="">اختياري</option>{bookings.map((booking) => <option key={booking.id} value={booking.id}>{booking.client.fullName} - {booking.type}</option>)}</select></Field>
-            <Field label="اسم العميل"><input className={inputClass} name="clientName" required /></Field>
-            <Field label="اسم الشركة"><input className={inputClass} name="clientCompanyName" /></Field>
-            <Field label="الرقم القومي أو البطاقة الضريبية"><input className={inputClass} name="clientTaxId" /></Field>
-            <Field label="عنوان العميل"><input className={inputClass} name="clientAddress" /></Field>
-            <Field label="رقم الهاتف"><input className={inputClass} name="clientPhone" required /></Field>
-            <Field label="البريد الإلكتروني"><input className={inputClass} name="clientEmail" required type="email" /></Field>
-            <Field label="ممثل True Level"><input className={inputClass} defaultValue={settings.defaultContractRepresentative || ""} name="representativeName" required /></Field>
-            <Field label="نوع الخدمة"><select className={inputClass} name="serviceType">{services.map((service) => <option key={service}>{service}</option>)}</select></Field>
-            <Field label="تاريخ بداية المشروع"><input className={inputClass} name="projectStartDate" required type="date" /></Field>
-            <Field label="تاريخ نهاية المشروع"><input className={inputClass} name="projectEndDate" required type="date" /></Field>
-            <Field label="تاريخ التصوير"><input className={inputClass} name="shootingDate" required type="date" /></Field>
-            <Field label="مكان التنفيذ"><input className={inputClass} name="location" required /></Field>
-            <Field label="إجمالي السعر"><input className={inputClass} name="totalPrice" required type="number" /></Field>
-            <Field label="الدفعة المقدمة"><input className={inputClass} name="depositAmount" required type="number" /></Field>
-            <Field label="المبلغ المتبقي"><input className={inputClass} name="remainingAmount" required type="number" /></Field>
-            <Field label="عدد التعديلات"><input className={inputClass} defaultValue="2" name="revisionRounds" required type="number" /></Field>
-            <Field label="وصف المشروع"><textarea className={inputClass} name="projectDescription" required /></Field>
-            <Field label="البنود والتسليمات"><textarea className={inputClass} name="deliverables" required /></Field>
-            <Field label="شروط الدفع"><textarea className={inputClass} defaultValue={settings.defaultPaymentTerms || ""} name="paymentTerms" required /></Field>
-            <Field label="سياسة الإلغاء"><textarea className={inputClass} defaultValue={settings.defaultCancellationPolicy || ""} name="cancellationPolicy" required /></Field>
-            <Field label="مدة التسليم"><textarea className={inputClass} name="deliveryTimeline" required /></Field>
-            <Field label="حقوق الاستخدام"><textarea className={inputClass} name="usageRights" required /></Field>
-            <Field label="السرية"><textarea className={inputClass} name="confidentialityClause" required /></Field>
-            <Field label="التأخير في الدفع"><textarea className={inputClass} name="latePaymentClause" required /></Field>
-            <Field label="ملاحظات إضافية"><textarea className={inputClass} name="additionalNotes" /></Field>
-            <Field label="تعديل نص العقد قبل الحفظ"><textarea className={inputClass} name="bodyOverride" rows={8} placeholder="اختياري: اتركه فارغا ليتم توليد المسودة تلقائيا من القالب." /></Field>
-            <div className="md:col-span-2"><button className="rounded-full bg-[#0B7CFF] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-blue-500/20">حفظ مسودة</button></div>
+            <ContractFormFields
+              defaultCancellationPolicy={settings.defaultCancellationPolicy || ""}
+              defaultPaymentTerms={settings.defaultPaymentTerms || ""}
+              defaultRep={settings.defaultContractRepresentative || ""}
+              services={services}
+            />
           </form>
         </div>
       </details>
