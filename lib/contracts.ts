@@ -279,27 +279,6 @@ ${data.additionalNotes || "لا توجد."}`;
 }
 
 /* ===== SIGNATURES ===== */
-function signaturesSection(data: ContractInput) {
-  return `${SEP}
-التوقيعات:
-
-الطرف الأول:
-True Level Production
-الاسم: ${data.representativeName}
-الصفة: ممثل الشركة
-التوقيع: _______________
-التاريخ: ___/___/20___
-
-الطرف الثاني:
-${data.clientName}${data.clientCompanyName ? `\nممثل: ${data.clientCompanyName}` : ""}
-الاسم: ${data.clientName}
-الصفة: ${data.clientCompanyName ? `ممثل ${data.clientCompanyName}` : "عميل"}
-التوقيع: _______________
-التاريخ: ___/___/20___
-
-حرر هذا العقد من نسختين، تسلم كل طرف نسخة واحدة للعمل بموجبه.`;
-}
-
 /* ===== DISCLAIMER ===== */
 function disclaimer() {
   return "تنبيه قانوني مهم: هذه المسودة نموذج مبدئي قابل للتعديل ولا تعتبر بديلا عن مراجعة محام متخصص. يجب مراجعة هذا العقد قانونيا من قبل محام مرخص في جمهورية مصر العربية قبل التوقيع أو الاستخدام الرسمي. لا تتحمل شركة True Level Production أي مسؤولية قانونية ناتجة عن استخدام هذه المسودة دون مراجعة قانونية متخصصة.";
@@ -650,7 +629,6 @@ export function generateArabicContract(data: ContractInput) {
     governingLawSection(),
     generalProvisionsSection(),
     additionalNotes(data),
-    signaturesSection(data),
   ].join("\n");
 
   return {
