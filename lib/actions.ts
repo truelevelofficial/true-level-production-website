@@ -6,7 +6,7 @@ import { hash } from "bcryptjs";
 import { clearAdminSession, createAdminSession, ensureUserAccount, getSessionEmail, isAdminEmail, requireAdmin, validateAdminCredentials } from "./auth";
 import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
-import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingDeleteSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, companySettingsSchema, contractSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, studioBookingSchema } from "./validation";
+import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingDeleteSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, companySettingsSchema, contractSchema, contractUpdateSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, studioBookingSchema } from "./validation";
 import { generateArabicContract } from "./contracts";
 import { createCalendarEvent, updateCalendarEvent, cancelCalendarEvent } from "./google-calendar";
 import { notifyNewBooking, notifyBookingStatusChange } from "./notifications";
@@ -639,6 +639,22 @@ export async function createContractAction(formData: FormData) {
       remaining: input.remainingAmount,
     },
   });
+  revalidatePath("/admin/contracts");
+}
+
+export async function updateContractAction(formData: FormData) {
+  await requireAdmin();
+  const raw = values(formData);
+  const input = contractUpdateSchema.parse(raw);
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  const data: Record<string, unknown> = {};
+  if (input.status) {
+    data.status = input.status;
+    if (input.status === "SIGNED") data.signedAt = new Date();
+  }
+  if (input.body) data.body = input.body;
+  await prisma.contract.update({ where: { id: input.contractId }, data });
   revalidatePath("/admin/contracts");
 }
 
