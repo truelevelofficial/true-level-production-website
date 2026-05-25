@@ -5,7 +5,7 @@ import { contractStatusArabic, contractStatuses, contractTypes, services } from 
 import { getBookings, getClients, getCompanySettings, getContracts, hasDatabase } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
 import { ContractPreview } from "@/components/contract-preview";
-import { ConfirmSubmit } from "@/components/confirm-submit";
+import { PrintButton } from "@/components/print-button";
 
 export default async function ContractsPage({ searchParams }: { searchParams: Promise<{ status?: string; clientId?: string }> }) {
   await requireAdmin();
@@ -17,7 +17,14 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
     <AdminShell title="العقود">
       {!hasDatabase() ? <SetupNotice /> : null}
 
-      <details className="mb-6 rounded-[2rem] border border-[#06111F]/10 bg-white shadow-sm">
+      <style>{`
+@media print {
+  .no-print { display: none !important; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+`}</style>
+
+      <details className="no-print mb-6 rounded-[2rem] border border-[#06111F]/10 bg-white shadow-sm">
         <summary className="cursor-pointer p-6 text-sm font-black uppercase tracking-[0.14em] text-[#0B7CFF]">إنشاء عقد جديد</summary>
         <div className="px-6 pb-6">
           <form action={createContractAction} className="grid gap-4 md:grid-cols-2" dir="rtl">
@@ -60,7 +67,7 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
         </div>
       </details>
 
-      <form className="mb-6 rounded-[2rem] border border-[#06111F]/10 bg-white p-4 shadow-sm">
+      <form className="no-print mb-6 rounded-[2rem] border border-[#06111F]/10 bg-white p-4 shadow-sm">
         <div className="flex flex-wrap gap-3">
           <select className={`${inputClass} flex-1`} defaultValue={params.status || ""} name="status"><option value="">كل الحالات</option>{contractStatuses.map((status) => <option key={status} value={status}>{contractStatusArabic[status]}</option>)}</select>
           <select className={`${inputClass} flex-1`} defaultValue={params.clientId || ""} name="clientId"><option value="">كل العملاء</option>{clients.map((client) => <option key={client.id} value={client.id}>{client.fullName}</option>)}</select>
@@ -79,14 +86,14 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
         <div className="grid gap-6">
           {filtered.map((contract) => (
             <details className="rounded-[2rem] border border-[#06111F]/10 bg-white shadow-sm" key={contract.id}>
-              <summary className="flex cursor-pointer flex-wrap items-center gap-4 p-6 transition hover:bg-[#F7F8FB]">
+              <summary className="no-print flex cursor-pointer flex-wrap items-center gap-4 p-6 transition hover:bg-[#F7F8FB]">
                 <span className={`rounded-full px-3 py-1 text-xs font-black uppercase ${contract.status === "SIGNED" ? "bg-green-100 text-green-700" : contract.status === "SENT" ? "bg-blue-100 text-blue-700" : contract.status === "CANCELLED" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{contractStatusArabic[contract.status]}</span>
                 <h2 className="text-xl font-black">{contract.title}</h2>
                 <p className="text-sm text-[#06111F]/55">{contract.client?.fullName || "بدون عميل"}</p>
                 <p className="mr-auto text-xs text-[#06111F]/40">{new Date(contract.createdAt).toLocaleDateString("ar-EG")}</p>
               </summary>
               <div className="px-6 pb-6">
-                <div className="no-print mb-6 flex flex-wrap gap-3">
+                <div className="no-print mb-6 flex flex-wrap items-center gap-3">
                   <span className="rounded-full border border-[#06111F]/10 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]/45">
                     {contract.totalPrice ? `قيمة العقد: ${Number(contract.totalPrice).toLocaleString("ar-EG")} EGP` : ""}
                   </span>
@@ -97,7 +104,18 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
                     <button className="rounded-full bg-green-600 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white" name="status" value="SIGNED">تحديد كموقع</button>
                     <button className="rounded-full bg-red-600 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white" name="status" value="CANCELLED">إلغاء</button>
                   </form>
+                  <details className="relative inline-block">
+                    <summary className="cursor-pointer rounded-full border border-[#06111F]/10 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]/60">تعديل النص</summary>
+                    <div className="absolute left-0 top-full z-10 mt-2 w-[600px] max-w-[90vw] rounded-2xl border border-[#06111F]/10 bg-white p-4 shadow-xl">
+                      <form action={updateContractAction} className="grid gap-3">
+                        <input name="contractId" type="hidden" value={contract.id} />
+                        <textarea className={inputClass} defaultValue={contract.body} name="body" rows={12} style={{ direction: "rtl", fontSize: 13, lineHeight: 1.7 }} />
+                        <button className="rounded-full bg-[#0B7CFF] px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white" type="submit">حفظ التعديلات</button>
+                      </form>
+                    </div>
+                  </details>
                   <a className="rounded-full bg-[#06111F] px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white" href={`/admin/export/contract/${contract.id}`}>تصدير Word</a>
+                  <PrintButton />
                 </div>
 
                 <ContractPreview
