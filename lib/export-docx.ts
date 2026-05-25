@@ -12,31 +12,40 @@ export async function generateContractDocx(title: string, body: string) {
     });
   });
 
+  children.push(
+    new Paragraph({ spacing: { before: 600 } }),
+    new Paragraph({
+      children: [new TextRun({ text: "حرر هذا العقد من نسختين أصليتين، تسلم كل طرف نسخة للعمل بموجبها.", bold: true, size: 22, font: "Calibri" })],
+      alignment: AlignmentType.RIGHT,
+      spacing: { after: 200, line: 360 },
+    }),
+  );
+
   const sigPar = (text: string, bold = false) =>
     new Paragraph({
       children: [new TextRun({ text, bold, size: 22, font: "Calibri" })],
       alignment: AlignmentType.RIGHT,
-      spacing: { after: 160, line: 360 },
+      spacing: { after: 140, line: 360 },
     });
 
   children.push(
-    new Paragraph({ spacing: { before: 600 } }),
+    new Paragraph({ spacing: { before: 400 } }),
     sigPar("التوقيعات", true),
-    new Paragraph({ spacing: { before: 300 } }),
+    new Paragraph({ spacing: { before: 200 } }),
     sigPar("الطرف الأول:"),
     sigPar("True Level Production"),
-    sigPar("الاسم: _______________"),
+    sigPar("الاسم: ______________________"),
     sigPar("الصفة: ممثل الشركة"),
-    sigPar("التوقيع: _______________"),
-    sigPar("التاريخ: ___/___/20___"),
+    sigPar("التوقيع: ______________________"),
+    sigPar("التاريخ: ____ / ____ / 20__"),
+    sigPar("الختم: ______________________"),
     new Paragraph({ spacing: { before: 300 } }),
     sigPar("الطرف الثاني:"),
-    sigPar("الاسم: _______________"),
-    sigPar("الصفة: _______________"),
-    sigPar("التوقيع: _______________"),
-    sigPar("التاريخ: ___/___/20___"),
-    new Paragraph({ spacing: { before: 300 } }),
-    sigPar("حرر هذا العقد من نسختين، تسلم كل طرف نسخة واحدة للعمل بموجبه.")
+    sigPar("الاسم: ______________________"),
+    sigPar("الصفة: ______________________"),
+    sigPar("التوقيع: ______________________"),
+    sigPar("التاريخ: ____ / ____ / 20__"),
+    sigPar("الختم: ______________________"),
   );
 
   const doc = new Document({

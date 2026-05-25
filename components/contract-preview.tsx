@@ -73,6 +73,10 @@ export function ContractPreview({
             })}
           </div>
 
+          <div className="contract-ending-sentence">
+            حرر هذا العقد من نسختين أصليتين، تسلم كل طرف نسخة للعمل بموجبها.
+          </div>
+
           <div className="contract-signatures">
             <h2 className="sig-heading">التوقيعات</h2>
             <table className="signature-table">
@@ -84,7 +88,7 @@ export function ContractPreview({
                       <p className="sig-company">True Level Production</p>
                       <div className="sig-field">
                         <span className="sig-label">الاسم:</span>
-                        <span className="sig-value">{representativeName || "______________"}</span>
+                        <span className="sig-value">{representativeName || "______________________"}</span>
                       </div>
                       <div className="sig-field">
                         <span className="sig-label">الصفة:</span>
@@ -96,7 +100,11 @@ export function ContractPreview({
                       </div>
                       <div className="sig-field">
                         <span className="sig-label">التاريخ:</span>
-                        <span className="sig-value">___/___/20___</span>
+                        <span className="sig-value">____ / ____ / 20__</span>
+                      </div>
+                      <div className="sig-field">
+                        <span className="sig-label">الختم:</span>
+                        <span className="sig-stamp" />
                       </div>
                     </div>
                   </td>
@@ -119,14 +127,17 @@ export function ContractPreview({
                       </div>
                       <div className="sig-field">
                         <span className="sig-label">التاريخ:</span>
-                        <span className="sig-value">___/___/20___</span>
+                        <span className="sig-value">____ / ____ / 20__</span>
+                      </div>
+                      <div className="sig-field">
+                        <span className="sig-label">الختم:</span>
+                        <span className="sig-stamp" />
                       </div>
                     </div>
                   </td>
                 </tr>
               </tbody>
             </table>
-            <p className="sig-footer-note">حرر هذا العقد من نسختين، تسلم كل طرف نسخة واحدة للعمل بموجبه.</p>
           </div>
         </div>
       </div>
@@ -146,7 +157,7 @@ const printStyles = `
   .contract-status-badge { display: none; }
   .no-print { display: none !important; }
   .contract-section { page-break-inside: avoid; }
-  .contract-signatures { page-break-inside: avoid; }
+  .contract-signatures { page-break-inside: avoid; break-inside: avoid; }
   .contract-header { page-break-after: avoid; }
   .contract-title-area { page-break-after: avoid; }
 }
@@ -228,23 +239,42 @@ const printStyles = `
 .section-paragraph { margin: 6px 0; text-align: justify; }
 .section-paragraph.clause { margin: 4px 0 4px 12px; }
 
-.contract-signatures { margin-top: 40px; padding-top: 24px; border-top: 1.5px solid #0d0d0d; }
-.sig-heading { font-size: 17px; font-weight: 800; color: #0d0d0d; margin: 0 0 20px 0; text-align: center; }
+.contract-ending-sentence {
+  margin-top: 48px;
+  margin-bottom: 8px;
+  padding: 14px 20px;
+  border-top: 1.5px solid #0d0d0d;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0d0d0d;
+  line-height: 1.8;
+}
+
+.contract-signatures { margin-top: 28px; page-break-inside: avoid; break-inside: avoid; }
+.sig-heading { font-size: 18px; font-weight: 800; color: #0d0d0d; margin: 0 0 24px 0; text-align: center; letter-spacing: 0.02em; }
 .signature-table { width: 100%; border-collapse: collapse; }
 .signature-cell { width: 48%; vertical-align: top; padding: 0; }
 .signature-divider { width: 4%; border-left: 1px dashed #bbb; }
-.signature-side { padding: 4px 0; }
-.sig-party { font-size: 16px; font-weight: 800; color: #0d0d0d; margin: 0 0 2px 0; }
-.sig-company { font-size: 14px; font-weight: 600; color: #333; margin: 0 0 18px 0; }
-.sig-field { margin: 8px 0; font-size: 13px; color: #333; display: flex; align-items: baseline; gap: 6px; }
-.sig-label { font-weight: 700; min-width: 52px; flex-shrink: 0; }
+.signature-side { padding: 6px 0; }
+.sig-party { font-size: 16px; font-weight: 800; color: #0d0d0d; margin: 0 0 4px 0; }
+.sig-company { font-size: 14px; font-weight: 600; color: #0d0d0d; margin: 0 0 20px 0; }
+.sig-field { margin: 10px 0; font-size: 14px; color: #0d0d0d; display: flex; align-items: baseline; gap: 8px; }
+.sig-label { font-weight: 700; min-width: 58px; flex-shrink: 0; }
 .sig-value { font-weight: 400; }
 .sig-line-draw {
   display: inline-block;
-  width: 180px;
+  width: 200px;
   height: 0;
-  border-bottom: 1px solid #666;
+  border-bottom: 1.5px solid #0d0d0d;
   margin-right: 4px;
 }
-.sig-footer-note { margin-top: 24px; text-align: center; font-size: 12px; color: #555; }
+.sig-stamp {
+  display: inline-block;
+  width: 180px;
+  height: 56px;
+  border: 1.5px dashed #888;
+  border-radius: 4px;
+  margin-right: 4px;
+}
 `;
