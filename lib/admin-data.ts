@@ -131,4 +131,58 @@ export async function getCompanySettings() {
   }
 }
 
+export async function getInvoices() {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.invoice.findMany({
+      include: { client: true, items: true, payments: true },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    });
+  } catch {
+    return [];
+  }
+}
+
+export async function getQuotations() {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.quotation.findMany({
+      include: { client: true, items: true },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    });
+  } catch {
+    return [];
+  }
+}
+
+export async function getQuotationById(id: string) {
+  const prisma = getPrisma();
+  if (!prisma) return null;
+  try {
+    return await prisma.quotation.findUnique({
+      where: { id },
+      include: { client: true, items: { orderBy: { createdAt: "asc" } }, booking: true, project: true },
+    });
+  } catch {
+    return null;
+  }
+}
+
+export async function getInvoiceById(id: string) {
+  const prisma = getPrisma();
+  if (!prisma) return null;
+  try {
+    return await prisma.invoice.findUnique({
+      where: { id },
+      include: { client: true, items: { orderBy: { createdAt: "asc" } }, payments: { orderBy: { date: "desc" } }, booking: true, project: true, contract: true },
+    });
+  } catch {
+    return null;
+  }
+}
+
 export { hasDatabase };

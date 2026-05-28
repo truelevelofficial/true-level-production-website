@@ -100,3 +100,29 @@ export const contractTypes = [
 ] as const;
 
 export const contractTypeValues = ["STUDIO_RENTAL", "VIDEO_PRODUCTION", "UGC_CREATOR_CAMPAIGN", "EVENT_COVERAGE", "MONTHLY_CONTENT_MANAGEMENT", "GENERAL_SERVICE"] as const;
+
+export const invoiceStatuses = ["DRAFT", "SENT", "CANCELLED"] as const;
+export const invoicePaymentStatuses = ["UNPAID", "PARTIALLY_PAID", "PAID", "OVERDUE", "REFUNDED"] as const;
+
+export const quotationStatuses = ["DRAFT", "SENT", "ACCEPTED", "REJECTED", "EXPIRED"] as const;
+export const quotationStatusArabic: Record<string, string> = {
+  DRAFT: "مسودة",
+  SENT: "مرسلة",
+  ACCEPTED: "تم القبول",
+  REJECTED: "تم الرفض",
+  EXPIRED: "منتهية",
+};
+
+export const invoiceStatusArabic: Record<string, string> = {
+  DRAFT: "مسودة",
+  SENT: "مرسلة",
+  CANCELLED: "ملغية",
+};
+
+export const invoicePaymentStatusArabic: Record<string, string> = {
+  UNPAID: "غير مدفوعة",
+  PARTIALLY_PAID: "مدفوعة جزئيا",
+  PAID: "مدفوعة",
+  OVERDUE: "متأخرة",
+  REFUNDED: "مستردة",
+};

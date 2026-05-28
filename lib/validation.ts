@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { adminMeetingTypes, bookingStatuses, clientTypes, contractStatuses, contractTypeValues, expenseCategories, leadSources, paymentMethods, paymentStatuses, pipelineStatuses, services, studioDurationTypes, studioSetups } from "./constants";
+import { adminMeetingTypes, bookingStatuses, clientTypes, contractStatuses, contractTypeValues, expenseCategories, invoiceStatuses, leadSources, paymentMethods, paymentStatuses, pipelineStatuses, quotationStatuses, services, studioDurationTypes, studioSetups } from "./constants";
 
 const requiredText = z.string().trim().min(2).max(500);
 const optionalText = z.string().trim().max(3000).optional().or(z.literal(""));
@@ -151,6 +151,79 @@ export const contractUpdateSchema = z.object({
   status: z.enum(contractStatuses).optional(),
   body: z.string().trim().max(30000).optional(),
 });
+
+export const invoiceItemSchema = z.object({
+  description: requiredText,
+  quantity: z.coerce.number().min(0.01).max(999999),
+  unitPrice: z.coerce.number().min(0).max(100000000),
+  discount: z.coerce.number().min(0).max(100000000).default(0),
+  total: z.coerce.number().min(0).max(100000000),
+});
+
+export const invoiceSchema = z.object({
+  clientId: z.string().min(1),
+  bookingId: z.string().optional().or(z.literal("")),
+  projectId: z.string().optional().or(z.literal("")),
+  contractId: z.string().optional().or(z.literal("")),
+  status: z.enum(invoiceStatuses).default("DRAFT"),
+  invoiceDate: z.string().trim().min(10),
+  dueDate: z.string().trim().min(10).optional().or(z.literal("")),
+  currency: z.string().trim().max(10).default("EGP"),
+  subtotal: z.coerce.number().min(0).max(100000000),
+  discount: z.coerce.number().min(0).max(100000000).default(0),
+  taxRate: z.coerce.number().min(0).max(100).default(0),
+  taxAmount: z.coerce.number().min(0).max(100000000).default(0),
+  total: z.coerce.number().min(0).max(100000000),
+  paidAmount: z.coerce.number().min(0).max(100000000).default(0),
+  remainingAmount: z.coerce.number().min(0).max(100000000),
+  notes: optionalText,
+  terms: optionalText,
+  items: z.array(invoiceItemSchema).min(1, "يجب إضافة بند واحد على الأقل"),
+});
+
+export const invoicePaymentSchema = z.object({
+  invoiceId: z.string().min(1),
+  amount: z.coerce.number().positive().max(100000000),
+  paymentDate: z.string().trim().min(10),
+  method: z.enum(paymentMethods),
+  description: optionalText,
+});
+
+export const invoiceDeleteSchema = z.object({ invoiceId: z.string().min(1) });
+
+export const quotationItemSchema = z.object({
+  description: requiredText,
+  quantity: z.coerce.number().min(0.01).max(999999),
+  unitPrice: z.coerce.number().min(0).max(100000000),
+  discount: z.coerce.number().min(0).max(100000000).default(0),
+  total: z.coerce.number().min(0).max(100000000),
+});
+
+export const quotationSchema = z.object({
+  clientId: z.string().min(1, "يجب اختيار عميل"),
+  bookingId: z.string().optional().or(z.literal("")),
+  projectId: z.string().optional().or(z.literal("")),
+  status: z.enum(quotationStatuses).default("DRAFT"),
+  serviceType: optionalText,
+  currency: z.string().default("EGP"),
+  subtotal: z.coerce.number().min(0).max(100000000),
+  discount: z.coerce.number().min(0).max(100000000).default(0),
+  taxRate: z.coerce.number().min(0).max(100).default(0),
+  taxAmount: z.coerce.number().min(0).max(100000000).default(0),
+  grandTotal: z.coerce.number().min(0).max(100000000),
+  notes: optionalText,
+  terms: optionalText,
+  validUntil: z.string().trim().min(10).optional().or(z.literal("")),
+  items: z.array(quotationItemSchema).min(1, "يجب إضافة بند واحد على الأقل"),
+});
+
+export const quotationUpdateSchema = z.object({
+  quotationId: z.string().min(1),
+  status: z.enum(quotationStatuses).optional(),
+  rejectedReason: optionalText,
+});
+
+export const quotationDeleteSchema = z.object({ quotationId: z.string().min(1) });
 
 export const contractSchema = z.object({
   type: z.enum(contractTypeValues),

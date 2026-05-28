@@ -6,7 +6,7 @@ import { hash } from "bcryptjs";
 import { clearAdminSession, createAdminSession, ensureUserAccount, getSessionEmail, isAdminEmail, requireAdmin, validateAdminCredentials } from "./auth";
 import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
-import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingDeleteSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, companySettingsSchema, contractDeleteSchema, contractSchema, contractUpdateSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, studioBookingSchema } from "./validation";
+import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingDeleteSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, companySettingsSchema, contractDeleteSchema, contractSchema, contractUpdateSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, invoiceDeleteSchema, invoicePaymentSchema, invoiceSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, quotationDeleteSchema, quotationSchema, quotationUpdateSchema, studioBookingSchema } from "./validation";
 import { generateArabicContract } from "./contracts";
 import { createCalendarEvent, updateCalendarEvent, cancelCalendarEvent } from "./google-calendar";
 import { notifyNewBooking, notifyBookingStatusChange } from "./notifications";
@@ -677,6 +677,209 @@ export async function deleteContractAction(formData: FormData) {
   await prisma.contract.delete({ where: { id: input.contractId } });
   revalidatePath("/admin/contracts");
   redirect("/admin/contracts");
+}
+
+export async function createInvoiceAction(formData: FormData): Promise<{ success?: string; error?: string; invoiceId?: string }> {
+  await requireAdmin();
+  const raw = values(formData);
+  const rawItems = (() => { try { return JSON.parse(String(raw.items || "[]")); } catch { return []; } })();
+  const parsed = invoiceSchema.safeParse({ ...raw, items: rawItems });
+  if (!parsed.success) {
+    const msgs = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
+    return { error: msgs || "بيانات غير صالحة. تأكد من ملء جميع الحقول المطلوبة." };
+  }
+  const input = parsed.data;
+  const prisma = getPrisma();
+  if (!prisma) return { error: "Database is not configured." };
+  try {
+    const count = await prisma.invoice.count();
+    const invoiceNo = `INV-${String(count + 1).padStart(4, "0")}`;
+    const invoice = await prisma.invoice.create({
+      data: {
+        invoiceNo,
+        clientId: input.clientId,
+        bookingId: input.bookingId || null,
+        projectId: input.projectId || null,
+        contractId: input.contractId || null,
+        status: input.status,
+        paymentStatus: input.paidAmount >= input.total ? "PAID" : input.paidAmount > 0 ? "PARTIALLY_PAID" : "UNPAID",
+        invoiceDate: new Date(`${input.invoiceDate}T00:00:00`),
+        dueDate: input.dueDate ? new Date(`${input.dueDate}T00:00:00`) : null,
+        currency: input.currency,
+        subtotal: input.subtotal,
+        discount: input.discount,
+        taxRate: input.taxRate,
+        taxAmount: input.taxAmount,
+        total: input.total,
+        paidAmount: input.paidAmount,
+        remainingAmount: input.remainingAmount,
+        notes: input.notes || null,
+        terms: input.terms || null,
+        items: { create: input.items.map((item) => ({ description: item.description, quantity: item.quantity, unitPrice: item.unitPrice, discount: item.discount, total: item.total })) },
+      },
+      include: { items: true },
+    });
+    revalidatePath("/admin/accounting");
+    return { success: "تم حفظ الفاتورة بنجاح", invoiceId: invoice.id };
+  } catch (e) {
+    console.error("createInvoiceAction", e);
+    return { error: "تعذر حفظ الفاتورة. برجاء مراجعة البيانات والمحاولة مرة أخرى." };
+  }
+}
+
+export async function updateInvoiceStatusAction(formData: FormData): Promise<{ success?: string; error?: string }> {
+  await requireAdmin();
+  const invoiceId = String(formData.get("invoiceId") || "");
+  const status = String(formData.get("status") || "");
+  if (!invoiceId || !status) return { error: "بيانات غير صالحة." };
+  const prisma = getPrisma();
+  if (!prisma) return { error: "Database is not configured." };
+  try {
+    const data: Record<string, unknown> = { status };
+    if (status === "SENT") data.sentAt = new Date();
+    await prisma.invoice.update({ where: { id: invoiceId }, data });
+    revalidatePath("/admin/accounting");
+    return { success: "تم تحديث حالة الفاتورة بنجاح" };
+  } catch (e) {
+    console.error("updateInvoiceStatusAction", e);
+    return { error: "تعذر تحديث حالة الفاتورة." };
+  }
+}
+
+export async function addInvoicePaymentAction(formData: FormData): Promise<{ success?: string; error?: string }> {
+  await requireAdmin();
+  const raw = values(formData);
+  const parsed = invoicePaymentSchema.safeParse(raw);
+  if (!parsed.success) return { error: "بيانات الدفع غير صالحة." };
+  const input = parsed.data;
+  const prisma = getPrisma();
+  if (!prisma) return { error: "Database is not configured." };
+  try {
+    const invoice = await prisma.invoice.findUnique({ where: { id: input.invoiceId } });
+    if (!invoice) return { error: "الفاتورة غير موجودة." };
+    const newPaid = Number(invoice.paidAmount) + input.amount;
+    const total = Number(invoice.total);
+    const paymentStatus = newPaid >= total ? "PAID" : newPaid > 0 ? "PARTIALLY_PAID" : "UNPAID";
+    await prisma.invoice.update({
+      where: { id: input.invoiceId },
+      data: { paidAmount: newPaid, remainingAmount: Math.max(0, total - newPaid), paymentStatus },
+    });
+    await prisma.payment.create({
+      data: {
+        amount: input.amount,
+        method: input.method,
+        status: "PAID" as const,
+        description: input.description || `دفع فاتورة ${invoice.invoiceNo}`,
+        clientId: invoice.clientId,
+        invoiceId: invoice.id,
+        date: new Date(`${input.paymentDate}T00:00:00`),
+      },
+    });
+    revalidatePath("/admin/accounting");
+    return { success: "تم تسجيل الدفع بنجاح" };
+  } catch (e) {
+    console.error("addInvoicePaymentAction", e);
+    return { error: "تعذر تسجيل الدفع." };
+  }
+}
+
+export async function deleteInvoiceAction(formData: FormData): Promise<{ success?: string; error?: string }> {
+  await requireAdmin();
+  const input = invoiceDeleteSchema.parse(values(formData));
+  const prisma = getPrisma();
+  if (!prisma) throw new Error("Database is not configured.");
+  try {
+    await prisma.invoice.delete({ where: { id: input.invoiceId } });
+    revalidatePath("/admin/accounting");
+    return { success: "تم حذف الفاتورة بنجاح" };
+  } catch (e) {
+    console.error("deleteInvoiceAction", e);
+    return { error: "تعذر حذف الفاتورة." };
+  }
+}
+
+export async function createQuotationAction(formData: FormData): Promise<{ success?: string; error?: string; quotationId?: string }> {
+  await requireAdmin();
+  const raw = values(formData);
+  const rawItems = (() => { try { return JSON.parse(String(raw.items || "[]")); } catch { return []; } })();
+  const parsed = quotationSchema.safeParse({ ...raw, items: rawItems });
+  if (!parsed.success) {
+    const msgs = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
+    return { error: msgs || "بيانات غير صالحة. تأكد من ملء جميع الحقول المطلوبة." };
+  }
+  const input = parsed.data;
+  const prisma = getPrisma();
+  if (!prisma) return { error: "Database is not configured." };
+  try {
+    const count = await prisma.quotation.count();
+    const quotationNo = `QTN-${String(count + 1).padStart(4, "0")}`;
+    const quotation = await prisma.quotation.create({
+      data: {
+        quotationNo,
+        clientId: input.clientId,
+        bookingId: input.bookingId || null,
+        projectId: input.projectId || null,
+        status: input.status,
+        serviceType: input.serviceType || null,
+        currency: input.currency,
+        totalAmount: input.subtotal,
+        discount: input.discount,
+        taxRate: input.taxRate,
+        taxAmount: input.taxAmount,
+        grandTotal: input.grandTotal,
+        notes: input.notes || null,
+        terms: input.terms || null,
+        validUntil: input.validUntil ? new Date(`${input.validUntil}T00:00:00`) : null,
+        items: { create: input.items.map((item) => ({ description: item.description, quantity: item.quantity, unitPrice: item.unitPrice, discount: item.discount, total: item.total })) },
+      },
+      include: { items: true },
+    });
+    revalidatePath("/admin/quotations");
+    return { success: "تم حفظ عرض السعر بنجاح", quotationId: quotation.id };
+  } catch (e) {
+    console.error("createQuotationAction", e);
+    return { error: "تعذر حفظ عرض السعر. برجاء مراجعة البيانات والمحاولة مرة أخرى." };
+  }
+}
+
+export async function updateQuotationStatusAction(formData: FormData): Promise<{ success?: string; error?: string }> {
+  await requireAdmin();
+  const raw = values(formData);
+  const parsed = quotationUpdateSchema.safeParse(raw);
+  if (!parsed.success) return { error: "بيانات غير صالحة." };
+  const input = parsed.data;
+  const prisma = getPrisma();
+  if (!prisma) return { error: "Database is not configured." };
+  try {
+    const data: Record<string, unknown> = {};
+    if (input.status) {
+      data.status = input.status;
+      if (input.status === "SENT") data.sentAt = new Date();
+      else if (input.status === "ACCEPTED") data.acceptedAt = new Date();
+      else if (input.status === "REJECTED") { data.rejectedAt = new Date(); data.rejectedReason = input.rejectedReason || null; }
+    }
+    await prisma.quotation.update({ where: { id: input.quotationId }, data });
+    revalidatePath("/admin/quotations");
+    return { success: "تم تحديث حالة عرض السعر بنجاح" };
+  } catch (e) {
+    console.error("updateQuotationStatusAction", e);
+    return { error: "تعذر تحديث حالة عرض السعر." };
+  }
+}
+
+export async function deleteQuotationAction(formData: FormData): Promise<{ success?: string; error?: string }> {
+  await requireAdmin();
+  const input = quotationDeleteSchema.parse(values(formData));
+  const prisma = getPrisma();
+  if (!prisma) return { error: "Database is not configured." };
+  try {
+    await prisma.quotation.delete({ where: { id: input.quotationId } });
+    revalidatePath("/admin/quotations");
+    return { success: "تم حذف عرض السعر بنجاح" };
+  } catch (e) {
+    console.error("deleteQuotationAction", e);
+    return { error: "تعذر حذف عرض السعر." };
+  }
 }
 
 export async function runCalendarDiagnosticAction(): Promise<{ steps: { step: string; success: boolean; detail: string }[] }> {

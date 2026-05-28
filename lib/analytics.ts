@@ -270,7 +270,7 @@ export async function getSmartInsights(month?: string) {
       prisma.client.findMany({ select: { leadSource: true, pipelineStatus: true, lastContactDate: true, createdAt: true } }),
       prisma.payment.aggregate({ _sum: { amount: true }, where: Object.keys(dr).length ? { date: dr } : {} }),
       prisma.expense.aggregate({ _sum: { amount: true }, where: Object.keys(dr).length ? { date: dr } : {} }),
-      prisma.invoice.findMany({ where: { status: { not: "PAID" }, dueDate: { lt: now } }, select: { id: true } }),
+      prisma.invoice.findMany({ where: { paymentStatus: { not: "PAID" }, dueDate: { lt: now } }, select: { id: true } }),
       prisma.booking.findMany({ where: { type: "STUDIO", ...(Object.keys(dr).length ? { startTime: dr } : {}) }, select: { studioSetup: true, durationHours: true, status: true, startTime: true } }),
       prisma.booking.aggregate({ where: { type: "STUDIO", ...(Object.keys(dr).length ? { startTime: dr } : {}) }, _sum: { durationHours: true } }),
       prisma.contract.findMany({ where: { status: "SENT" }, select: { id: true } }),
