@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { getSessionEmail, isAdminAuthenticated } from "@/lib/auth";
 import { UserMenu } from "@/components/user-menu";
+import { HeroSlider } from "@/components/hero-slider";
+import { SafeImage } from "@/components/safe-image";
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -29,6 +31,7 @@ type Service = {
   title: string;
   number: string;
   text: string;
+  image: string;
 };
 
 const services: Service[] = [
@@ -37,36 +40,42 @@ const services: Service[] = [
     title: "Brand Films",
     number: "01",
     text: "Launch films, campaign videos, product stories, interviews, reels, and social-first edits.",
+    image: "/images/service-video-production.jpg",
   },
   {
     icon: Lightbulb,
     title: "Creative Direction",
     number: "02",
     text: "Concepts, scripts, shot lists, moodboards, campaign angles, and full production direction.",
+    image: "",
   },
   {
     icon: Users,
     title: "UGC Content",
     number: "03",
     text: "Creator-led videos that feel native, build trust, and give brands ad-ready content.",
+    image: "/images/service-ugc.jpg",
   },
   {
     icon: Camera,
     title: "Studio Shoots",
     number: "04",
     text: "Cyclorama, ready-made setups, product shooting, creator sessions, and lighting support.",
+    image: "",
   },
   {
     icon: Radio,
     title: "Event Coverage",
     number: "05",
     text: "Live coverage, interviews, instant reels, recap videos, and on-ground production teams.",
+    image: "/images/service-event-coverage.jpg",
   },
   {
     icon: Megaphone,
     title: "Campaign Assets",
     number: "06",
     text: "Social designs, ad creatives, campaign visuals, thumbnails, banners, and digital assets.",
+    image: "",
   },
 ];
 
@@ -77,16 +86,16 @@ const process = [
   ["04", "Cut For Impact", "We edit, color, sound, package, and prepare content for publishing and ads."],
 ] as const;
 
-const studio = [
-  ["01", "Cyclorama"],
-  ["02", "Creator Corners"],
-  ["03", "Product Zone"],
-  ["04", "Podcast Look"],
-  ["05", "Lifestyle Setups"],
-  ["06", "Lighting Ready"],
+const studioSetups = [
+  ["01", "Cyclorama", "/images/studio-cyclorama-01.jpg"],
+  ["02", "Creator Corners", "/images/studio-creator-corner-01.jpg"],
+  ["03", "Product Zone", "/images/studio-product-zone-01.jpg"],
+  ["04", "Podcast Look", "/images/studio-podcast-01.jpg"],
+  ["05", "Lifestyle Setups", "/images/studio-lifestyle-01.jpg"],
+  ["06", "Lighting Ready", ""],
 ] as const;
 
-const work = [
+const workItems = [
   ["Brand Films", "Campaign films, launch videos, and product storytelling."],
   ["UGC Ads", "Creator content, testimonials, hooks, and native ads."],
   ["Events", "Live coverage, interviews, instant reels, and recap edits."],
@@ -229,19 +238,7 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="relative min-h-[650px] max-lg:hidden">
-            <div className="absolute left-2 top-8 z-10 -rotate-6 rounded-full bg-[#0B7CFF] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-white shadow-xl shadow-blue-500/20">Cyclorama</div>
-            <div className="absolute right-0 top-28 z-10 rotate-6 rounded-full border border-[#06111F]/10 bg-white/90 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-[#06111F] backdrop-blur">Set Locations</div>
-            <div className="absolute bottom-16 left-10 z-10 rotate-3 rounded-full bg-[#06111F] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-white">UGC Ready</div>
-            <VisualCard title="Shoot" label="Frame 01" className="absolute left-0 top-20 w-[44%] -rotate-6" />
-            <VisualCard title="Studio" label="Frame 02" className="absolute right-0 top-0 w-[52%] rotate-3" />
-            <VisualCard title="Cut" label="Frame 03" className="absolute bottom-8 left-[18%] w-[58%] rotate-2" />
-            <div className="absolute left-[42%] top-[44%] z-20 grid h-28 w-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-[#06111F]/10 bg-white/80 shadow-2xl shadow-blue-950/10 backdrop-blur-xl">
-              <div className="grid h-20 w-20 place-items-center rounded-full bg-[#0B7CFF] text-white">
-                <Camera size={34} />
-              </div>
-            </div>
-          </div>
+          <HeroSlider />
         </div>
       </section>
 
@@ -266,16 +263,20 @@ export default async function Home() {
           {services.map((service) => {
             const Icon = service.icon;
             return (
-              <div key={service.title} className="group relative min-h-[330px] overflow-hidden rounded-[2.2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-950/10">
-                <div className="absolute -bottom-16 -right-10 text-[10rem] font-black leading-none text-[#06111F]/[0.035] transition group-hover:text-[#0B7CFF]/10">{service.number}</div>
-                <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#0B7CFF]/0 blur-3xl transition group-hover:bg-[#0B7CFF]/15" />
-                <div className="relative flex items-start justify-between">
-                  <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[#0B7CFF] text-white"><Icon size={24} /></div>
-                  <span className="text-xs font-black uppercase tracking-[0.22em] text-[#06111F]/35">{service.number}</span>
-                </div>
-                <div className="relative mt-20">
-                  <h3 className="text-3xl font-black uppercase leading-none tracking-[-0.05em]">{service.title}</h3>
-                  <p className="mt-5 leading-7 text-[#06111F]/55">{service.text}</p>
+              <div key={service.title} className="group relative min-h-[420px] overflow-hidden rounded-[2.2rem] border border-[#06111F]/10 bg-white shadow-sm transition hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-950/10">
+                {service.image ? (
+                  <SafeImage alt={service.title} className="absolute inset-0 h-full w-full transition duration-500 group-hover:scale-105" fallback="blue" src={service.image} />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#0B7CFF]/10 to-[#06111F]/5" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#06111F]/80 via-[#06111F]/10 to-transparent" />
+                <div className="relative flex h-full min-h-[420px] flex-col justify-end p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white/20 text-white backdrop-blur"><Icon size={22} /></div>
+                    <span className="text-xs font-black uppercase tracking-[0.22em] text-white/50">{service.number}</span>
+                  </div>
+                  <h3 className="mt-4 text-3xl font-black uppercase leading-none tracking-[-0.05em] text-white">{service.title}</h3>
+                  <p className="mt-3 leading-7 text-white/72">{service.text}</p>
                 </div>
               </div>
             );
@@ -298,10 +299,18 @@ export default async function Home() {
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-6">
-            {studio.map(([num, item], index) => (
-              <div key={item} className={`${index === 0 || index === 3 ? "sm:col-span-4" : index === 1 || index === 2 ? "sm:col-span-2" : "sm:col-span-3"} min-h-[155px] rounded-[2rem] border border-[#06111F]/10 bg-[#F7F8FB] p-6 transition hover:-rotate-1 hover:bg-[#0B7CFF] hover:text-white`}>
-                <p className="text-4xl font-black">{num}</p>
-                <p className="mt-8 text-2xl font-black uppercase leading-none tracking-[-0.05em]">{item}</p>
+            {studioSetups.map(([num, item, image], index) => (
+              <div key={item} className={`${index === 0 || index === 3 ? "sm:col-span-4" : index === 1 || index === 2 ? "sm:col-span-2" : "sm:col-span-3"} relative min-h-[200px] overflow-hidden rounded-[2rem] transition hover:-rotate-1`}>
+                {image ? (
+                  <SafeImage alt={item} className="absolute inset-0 h-full w-full" fallback="dark" src={image} />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#0B7CFF]/15 to-[#06111F]/10" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#06111F]/70 to-transparent" />
+                <div className="relative flex h-full min-h-[200px] flex-col justify-end p-6">
+                  <p className="text-4xl font-black text-white/40">{num}</p>
+                  <p className="mt-6 text-2xl font-black uppercase leading-none tracking-[-0.05em] text-white">{item}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -334,13 +343,13 @@ export default async function Home() {
           <h2 className="max-w-5xl text-5xl font-black uppercase leading-[0.78] tracking-[-0.075em] md:text-8xl">Not a portfolio. A wall of proof.</h2>
         </div>
         <div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-6">
-          {work.map(([title, desc], index) => (
-            <div key={title} className={`group relative min-h-[330px] overflow-hidden rounded-[2.2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm ${index === 0 ? "md:col-span-4" : index === 1 ? "md:col-span-2" : index === 2 ? "md:col-span-2" : index === 3 ? "md:col-span-4" : "md:col-span-3"}`}>
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_25%,rgba(11,124,255,0.16),transparent_28%),linear-gradient(145deg,rgba(11,124,255,0.06),transparent)]" />
-              <div className="relative flex h-full min-h-[280px] flex-col justify-between">
+          {workItems.map(([title, desc], index) => (
+            <div key={title} className={`group relative min-h-[380px] overflow-hidden rounded-[2.2rem] border border-[#06111F]/10 bg-white shadow-sm ${index === 0 ? "md:col-span-4" : index === 1 ? "md:col-span-2" : index === 2 ? "md:col-span-2" : index === 3 ? "md:col-span-4" : "md:col-span-3"}`}>
+              <div className="absolute inset-0 bg-gradient-to-br from-[#0B7CFF]/20 via-white/10 to-[#06111F]/10 transition duration-500 group-hover:scale-110" />
+              <div className={`absolute inset-0 bg-[radial-gradient(circle_at_35%_25%,rgba(11,124,255,0.2),transparent_28%),linear-gradient(145deg,rgba(11,124,255,0.08),transparent)] transition duration-500 group-hover:scale-110`} />
+              <div className="relative flex h-full min-h-[350px] flex-col justify-between p-6">
                 <div className="flex items-center justify-between">
                   <span className="w-fit rounded-full bg-[#0B7CFF] px-4 py-2 text-xs font-black text-white">0{index + 1}</span>
-                  <span className="rounded-full border border-[#06111F]/15 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#06111F]/45">Add real media</span>
                 </div>
                 <div>
                   <h3 className="max-w-xl text-4xl font-black uppercase leading-none tracking-[-0.06em]">{title}</h3>
