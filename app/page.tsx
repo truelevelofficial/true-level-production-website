@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { getSessionEmail, isAdminAuthenticated } from "@/lib/auth";
 import { UserMenu } from "@/components/user-menu";
-import { HeroSlider } from "@/components/hero-slider";
 import { SafeImage } from "@/components/safe-image";
 
 type ButtonProps = {
@@ -162,16 +161,19 @@ function LogoMark() {
   );
 }
 
-function VisualCard({ title, label, className = "" }: { title: string; label: string; className?: string }) {
+function VisualCard({ title, label, className = "", imageSrc }: { title: string; label: string; className?: string; imageSrc?: string }) {
   return (
     <div className={`relative overflow-hidden rounded-[2rem] bg-white p-4 shadow-2xl shadow-blue-950/10 ring-1 ring-[#06111F]/10 ${className}`}>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_15%,rgba(11,124,255,0.18),transparent_34%),linear-gradient(135deg,rgba(11,124,255,0.08),transparent)]" />
-      <div className="relative flex h-full min-h-[260px] flex-col justify-between rounded-[1.4rem] border border-[#06111F]/10 bg-[#F7F8FB] p-5">
-        <div className="flex items-center justify-between">
+      <div className="relative flex h-full min-h-[260px] flex-col justify-between overflow-hidden rounded-[1.4rem] border border-[#06111F]/10 bg-[#F7F8FB] p-5">
+        {imageSrc ? (
+          <SafeImage alt={title} className="absolute inset-0 h-full w-full" contain src={imageSrc} />
+        ) : null}
+        <div className="relative z-10 flex items-center justify-between">
           <span className="rounded-full bg-[#0B7CFF] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white">{label}</span>
           <span className="h-2.5 w-2.5 rounded-full bg-[#0B7CFF]" />
         </div>
-        <h3 className="max-w-[220px] text-4xl font-black uppercase leading-[0.85] tracking-[-0.06em] text-[#06111F]">{title}</h3>
+        <h3 className="relative z-10 max-w-[220px] text-4xl font-black uppercase leading-[0.85] tracking-[-0.06em] text-[#06111F]">{title}</h3>
       </div>
     </div>
   );
@@ -238,7 +240,19 @@ export default async function Home() {
             </div>
           </div>
 
-          <HeroSlider />
+          <div className="relative min-h-[650px] max-lg:hidden">
+            <div className="absolute left-2 top-8 z-10 -rotate-6 rounded-full bg-[#0B7CFF] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-white shadow-xl shadow-blue-500/20">Cyclorama</div>
+            <div className="absolute right-0 top-28 z-10 rotate-6 rounded-full border border-[#06111F]/10 bg-white/90 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-[#06111F] backdrop-blur">Set Locations</div>
+            <div className="absolute bottom-16 left-10 z-10 rotate-3 rounded-full bg-[#06111F] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-white">UGC Ready</div>
+            <VisualCard imageSrc="/images/hero-cyclorama.png" title="Shoot" label="Frame 01" className="absolute left-0 top-20 w-[44%] -rotate-6" />
+            <VisualCard imageSrc="/images/hero-studio.png" title="Studio" label="Frame 02" className="absolute right-0 top-0 w-[52%] rotate-3" />
+            <VisualCard imageSrc="/images/hero-production.png" title="Cut" label="Frame 03" className="absolute bottom-8 left-[18%] w-[58%] rotate-2" />
+            <div className="absolute left-[42%] top-[44%] z-20 grid h-28 w-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-[#06111F]/10 bg-white/80 shadow-2xl shadow-blue-950/10 backdrop-blur-xl">
+              <div className="grid h-20 w-20 place-items-center rounded-full bg-[#0B7CFF] text-white">
+                <Camera size={34} />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
