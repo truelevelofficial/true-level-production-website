@@ -195,7 +195,7 @@ export default async function Home() {
           <LogoMark />
           <nav className="hidden items-center gap-7 text-xs font-black uppercase tracking-[0.16em] text-[#06111F]/55 md:flex">
             <a className="hover:text-[#0B7CFF]" href="#services">Services</a>
-            <a className="hover:text-[#0B7CFF]" href="#studio">Studio</a>
+            <a className="hover:text-[#0B7CFF]" href="#studio-3d">Studio</a>
             <a className="hover:text-[#0B7CFF]" href="#work">Work</a>
             <a className="hover:text-[#0B7CFF]" href="#packages">Packages</a>
             {isAdmin ? <a className="text-[#0B7CFF] hover:text-[#06111F]" href="/admin/bookings">Management</a> : null}
@@ -233,7 +233,7 @@ export default async function Home() {
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button href="/book/meeting">Start a Project <ArrowRight size={16} /></Button>
-              <Button href="/book/studio" variant="secondary">Enter The Studio <Play size={16} /></Button>
+              <Button href="#studio-3d" variant="secondary">Enter The Studio <Play size={16} /></Button>
             </div>
             <div className="mt-10 grid max-w-xl grid-cols-3 gap-3">
               {[["01", "Concept Lab"], ["02", "Production Floor"], ["03", "Content Engine"]].map(([num, label]) => (
@@ -303,7 +303,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section id="studio" className="relative scroll-mt-28 border-y border-[#06111F]/10 bg-white">
+      <section id="studio-3d" className="relative scroll-mt-28 border-y border-[#06111F]/10 bg-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_40%,rgba(11,124,255,0.12),transparent_35%),radial-gradient(circle_at_85%_70%,rgba(6,17,31,0.04),transparent_30%)]" />
         <div className="relative mx-auto grid max-w-7xl gap-12 px-5 py-24 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
