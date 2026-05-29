@@ -167,13 +167,16 @@ function VisualCard({ title, label, className = "", imageSrc }: { title: string;
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_15%,rgba(11,124,255,0.18),transparent_34%),linear-gradient(135deg,rgba(11,124,255,0.08),transparent)]" />
       <div className="relative flex h-full min-h-[260px] flex-col justify-between overflow-hidden rounded-[1.4rem] border border-[#06111F]/10 bg-[#F7F8FB] p-5">
         {imageSrc ? (
-          <SafeImage alt={title} className="absolute inset-0 h-full w-full" contain src={imageSrc} />
+          <>
+            <SafeImage alt={title} className="absolute inset-0 h-full w-full" src={imageSrc} />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          </>
         ) : null}
         <div className="relative z-10 flex items-center justify-between">
-          <span className="rounded-full bg-[#0B7CFF] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white">{label}</span>
-          <span className="h-2.5 w-2.5 rounded-full bg-[#0B7CFF]" />
+          <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${imageSrc ? "bg-white/20 text-white" : "bg-[#0B7CFF] text-white"}`}>{label}</span>
+          <span className={`h-2.5 w-2.5 rounded-full ${imageSrc ? "bg-white/60" : "bg-[#0B7CFF]"}`} />
         </div>
-        <h3 className="relative z-10 max-w-[220px] text-4xl font-black uppercase leading-[0.85] tracking-[-0.06em] text-[#06111F]">{title}</h3>
+        <h3 className={`relative z-10 max-w-[220px] text-4xl font-black uppercase leading-[0.85] tracking-[-0.06em] ${imageSrc ? "text-white" : "text-[#06111F]"}`}>{title}</h3>
       </div>
     </div>
   );

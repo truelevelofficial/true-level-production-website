@@ -15,17 +15,14 @@ export function SafeImage({
   className = "",
   fallback = "blue",
   icon,
-  contain,
 }: {
   src: string;
   alt: string;
   className?: string;
   fallback?: keyof typeof gradients;
   icon?: React.ReactNode;
-  contain?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
-  const [loaded, setLoaded] = useState(false);
 
   if (failed) {
     return (
@@ -37,14 +34,11 @@ export function SafeImage({
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      {!loaded && (
-        <div className={`absolute inset-0 ${gradients[fallback] || gradients.blue} animate-pulse`} />
-      )}
+      <div className={`absolute inset-0 ${gradients[fallback] || gradients.blue}`} />
       <img
         alt={alt}
-        className={`h-full w-full object-cover transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"} ${contain ? "object-contain p-4" : ""}`}
+        className="relative h-full w-full object-cover"
         onError={() => setFailed(true)}
-        onLoad={() => setLoaded(true)}
         src={src}
       />
     </div>
