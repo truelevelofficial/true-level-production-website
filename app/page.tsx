@@ -249,9 +249,9 @@ export default async function Home() {
             <div className="absolute left-2 top-8 z-10 -rotate-6 rounded-full bg-[#0B7CFF] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-white shadow-xl shadow-blue-500/20">Cyclorama</div>
             <div className="absolute right-0 top-28 z-10 rotate-6 rounded-full border border-[#06111F]/10 bg-white/90 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-[#06111F] backdrop-blur">Set Locations</div>
             <div className="absolute bottom-16 left-10 z-10 rotate-3 rounded-full bg-[#06111F] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-white">UGC Ready</div>
-            <VisualCard imageSrc="/images/hero-cyclorama.png" title="Shoot" label="Frame 01" className="absolute left-0 top-20 w-[44%] -rotate-6" />
-            <VisualCard imageSrc="/images/hero-studio.png" title="Studio" label="Frame 02" className="absolute right-0 top-0 w-[52%] rotate-3" />
-            <VisualCard imageSrc="/images/hero-production.png" title="Cut" label="Frame 03" className="absolute bottom-8 left-[18%] w-[58%] rotate-2" />
+            <VisualCard imageSrc="/images/hero-cyclorama.png" title="Shoot" label="CYCLORAMA" className="absolute left-0 top-20 w-[44%] -rotate-6" />
+            <VisualCard imageSrc="/images/hero-studio.png" title="Studio" label="STUDIO" className="absolute right-0 top-0 w-[52%] rotate-3" />
+            <VisualCard imageSrc="/images/hero-production.png" title="PODCAST" label="SETUP" className="absolute bottom-8 left-[18%] w-[58%] rotate-2" />
             <div className="absolute left-[42%] top-[44%] z-20 grid h-28 w-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-[#06111F]/10 bg-white/80 shadow-2xl shadow-blue-950/10 backdrop-blur-xl">
               <div className="grid h-20 w-20 place-items-center rounded-full bg-[#0B7CFF] text-white">
                 <Camera size={34} />
