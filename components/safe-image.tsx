@@ -27,7 +27,7 @@ export function SafeImage({
   if (failed) {
     return (
       <div className={`flex items-center justify-center ${gradients[fallback] || gradients.blue} ${className}`}>
-        {icon || <span className="text-4xl font-black uppercase tracking-[-0.05em] text-[#06111F]/20">{alt.slice(0, 2)}</span>}
+        {icon || null}
       </div>
     );
   }

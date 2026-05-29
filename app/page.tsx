@@ -86,12 +86,12 @@ const process = [
 ] as const;
 
 const studioSetups = [
-  ["01", "Cyclorama", "/images/studio-cyclorama-01.jpg"],
-  ["02", "Creator Corners", "/images/studio-creator-corner-01.jpg"],
-  ["03", "Product Zone", "/images/studio-product-zone-01.jpg"],
-  ["04", "Podcast Look", "/images/studio-podcast-01.jpg"],
-  ["05", "Lifestyle Setups", "/images/studio-lifestyle-01.jpg"],
-  ["06", "Lighting Ready", ""],
+  ["01", "Cyclorama", "/images/studio-cyclorama.jpg", "Clean curved wall studio for reels, product shoots, and campaigns."],
+  ["02", "Creator Corners", "/images/studio-creator-corner.jpg", "Ready-made creator setups for talking-head reels and social content."],
+  ["03", "Product Zone", "/images/studio-product-zone.jpg", "Product shooting setup for beauty, food, fashion, and e-commerce brands."],
+  ["04", "Podcast Look", "/images/studio-podcast.jpg", "Cozy podcast-style setup with seating, mic, and warm background."],
+  ["05", "Lifestyle Setups", "/images/studio-lifestyle.jpg", "Designed spaces for brand scenes, UGC, and lifestyle content."],
+  ["06", "Lighting Ready", "/images/studio-lighting.jpg", "Flexible lighting setups for fast content production."],
 ] as const;
 
 const workItems = [
@@ -318,17 +318,14 @@ export default async function Home() {
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-6">
-            {studioSetups.map(([num, item, image], index) => (
-              <div key={item} className={`${index === 0 || index === 3 ? "sm:col-span-4" : index === 1 || index === 2 ? "sm:col-span-2" : "sm:col-span-3"} relative min-h-[200px] overflow-hidden rounded-[2rem] transition hover:-rotate-1`}>
-                {image ? (
-                  <SafeImage alt={item} className="absolute inset-0 h-full w-full" fallback="dark" src={image} />
-                ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#0B7CFF]/15 to-[#06111F]/10" />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#06111F]/70 to-transparent" />
-                <div className="relative flex h-full min-h-[200px] flex-col justify-end p-6">
+            {studioSetups.map(([num, item, image, subtitle], index) => (
+              <div key={item} className={`${index === 0 || index === 3 ? "sm:col-span-4" : index === 1 || index === 2 ? "sm:col-span-2" : "sm:col-span-3"} relative min-h-[280px] overflow-hidden rounded-[2rem] transition hover:-rotate-1`}>
+                <SafeImage alt={item} className="absolute inset-0 h-full w-full" fallback="dark" src={image} />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#06111F]/70 via-[#06111F]/10 to-transparent" />
+                <div className="relative flex h-full min-h-[280px] flex-col justify-end p-6">
                   <p className="text-4xl font-black text-white/40">{num}</p>
-                  <p className="mt-6 text-2xl font-black uppercase leading-none tracking-[-0.05em] text-white">{item}</p>
+                  <p className="mt-3 text-2xl font-black uppercase leading-none tracking-[-0.05em] text-white">{item}</p>
+                  <p className="mt-2 max-w-[220px] text-sm leading-snug text-white/65">{subtitle}</p>
                 </div>
               </div>
             ))}
