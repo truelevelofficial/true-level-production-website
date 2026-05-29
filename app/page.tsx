@@ -206,7 +206,9 @@ export default async function Home() {
 
       <section className="relative min-h-screen pt-28">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(11,124,255,0.18),transparent_26%),radial-gradient(circle_at_85%_18%,rgba(11,124,255,0.10),transparent_24%)]" />
-        <div className="absolute right-[-110px] top-[155px] hidden h-[420px] w-[420px] rotate-12 rounded-[4rem] border border-[#06111F]/10 bg-white/40 lg:block" />
+        <div className="absolute right-[-110px] top-[155px] hidden h-[420px] w-[420px] rotate-12 overflow-hidden rounded-[4rem] border border-[#06111F]/10 bg-white/40 lg:block">
+          <SafeImage alt="Set Location" className="h-full w-full" fallback="light" src="/images/hero-set-location.png" />
+        </div>
         <div className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 text-[10px] font-black uppercase tracking-[0.7em] text-[#06111F]/25 md:block">
           Concept Shoot Cut Publish Scale
         </div>
