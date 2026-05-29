@@ -26,3 +26,10 @@ a {
 .animate-marquee {
   animation: marquee 30s linear infinite;
 }
+
+.admin-blur-mode .blur-sensitive {
+  filter: blur(6px);
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.65;
+}

@@ -65,16 +65,16 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
             const lastBooking = client.bookings[0];
             return (
               <div className="grid min-w-[1100px] grid-cols-[1.2fr_1fr_0.8fr_0.8fr_1.1fr_0.8fr_0.9fr_1fr_0.7fr_0.8fr_0.9fr_1fr] gap-3 border-b border-[#06111F]/10 p-4 text-sm font-bold text-[#06111F]/65" key={client.id}>
-                <Link className="font-black text-[#06111F] hover:text-[#0B7CFF]" href={`/admin/clients/${client.id}`}>{client.fullName}</Link>
-                <span>{client.companyName || "-"}</span>
-                <span>{client.phone}</span>
-                <span>{client.whatsapp || "-"}</span>
-                <span>{client.email}</span>
+                <Link className="blur-sensitive font-black text-[#06111F] hover:text-[#0B7CFF]" href={`/admin/clients/${client.id}`}>{client.fullName}</Link>
+                <span className="blur-sensitive">{client.companyName || "-"}</span>
+                <span className="blur-sensitive">{client.phone}</span>
+                <span className="blur-sensitive">{client.whatsapp || "-"}</span>
+                <span className="blur-sensitive">{client.email}</span>
                 <span>{client.clientType || "-"}</span>
                 <span>{client.leadSource || "-"}</span>
                 <span className="w-fit rounded-full bg-[#0B7CFF]/10 px-3 py-1 text-xs text-[#0B7CFF]">{client.pipelineStatus || "New Lead"}</span>
                 <span>{client.bookings.length}</span>
-                <span>{revenue} EGP</span>
+                <span className="blur-sensitive">{revenue} EGP</span>
                 <span>{lastBooking ? displayDate(lastBooking.startTime) : displayDate(client.updatedAt)}</span>
                 <span className="flex flex-wrap gap-2">
                   <Link className="rounded-full border border-[#06111F]/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] hover:border-[#0B7CFF] hover:text-[#0B7CFF]" href={`/admin/clients/${client.id}`}>View</Link>
@@ -83,11 +83,11 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
                     <div className="fixed inset-0 z-50 overflow-y-auto bg-[#06111F]/20 p-5">
                       <form action={updateClientAction} className="mx-auto grid max-w-2xl gap-3 rounded-[2rem] bg-white p-6 shadow-2xl">
                         <input name="clientId" type="hidden" value={client.id} />
-                        <input className={inputClass} defaultValue={client.fullName} name="fullName" required />
-                        <input className={inputClass} defaultValue={client.companyName || ""} name="companyName" placeholder="Company" />
-                        <input className={inputClass} defaultValue={client.phone} name="phone" required />
-                        <input className={inputClass} defaultValue={client.whatsapp || ""} name="whatsapp" placeholder="WhatsApp" />
-                        <input className={inputClass} defaultValue={client.email} name="email" required type="email" />
+                        <input className={`${inputClass} blur-sensitive`} defaultValue={client.fullName} name="fullName" required />
+                        <input className={`${inputClass} blur-sensitive`} defaultValue={client.companyName || ""} name="companyName" placeholder="Company" />
+                        <input className={`${inputClass} blur-sensitive`} defaultValue={client.phone} name="phone" required />
+                        <input className={`${inputClass} blur-sensitive`} defaultValue={client.whatsapp || ""} name="whatsapp" placeholder="WhatsApp" />
+                        <input className={`${inputClass} blur-sensitive`} defaultValue={client.email} name="email" required type="email" />
                         <select className={inputClass} defaultValue={client.clientType || ""} name="clientType"><option value="">Select type</option>{clientTypes.map((type) => <option key={type}>{type}</option>)}</select>
                         <select className={inputClass} defaultValue={client.leadSource || ""} name="leadSource"><option value="">Select source</option>{leadSources.map((source) => <option key={source}>{source}</option>)}</select>
                         <select className={inputClass} defaultValue={client.pipelineStatus || "New Lead"} name="pipelineStatus">{pipelineStatuses.map((status) => <option key={status}>{status}</option>)}</select>

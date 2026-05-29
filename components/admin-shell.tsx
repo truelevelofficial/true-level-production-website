@@ -3,6 +3,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { logoutAction } from "@/lib/actions";
 import { getUnreadNotificationCount } from "@/lib/admin-data";
+import { AdminBlurToggle } from "./admin-blur-toggle";
 
 const links = [
   ["/admin/bookings", "Management"],
@@ -37,6 +38,7 @@ export async function AdminShell({ title, children }: { title: string; children:
                 const isActive = currentPath === href || currentPath.startsWith(href);
                 return <a className={`rounded-full px-5 py-3 text-sm font-black uppercase tracking-[0.12em] transition-colors ${isActive ? "bg-[#0B7CFF] text-white shadow-lg shadow-blue-500/25" : "border border-[#06111F]/10 text-[#06111F] hover:border-[#0B7CFF] hover:text-[#0B7CFF]"}`} href={href} key={href}>{label}</a>;
               })}
+              <AdminBlurToggle />
               <form action={logoutAction}><button className="ml-2 rounded-full bg-[#06111F] px-5 py-3 text-sm font-black uppercase tracking-[0.12em] text-white/60 transition hover:text-white">Logout</button></form>
             </nav>
           </div>
@@ -57,5 +59,5 @@ export function SetupNotice() {
 }
 
 export function Card({ title, value, text, children }: { title: string; value: string; text?: string; children?: React.ReactNode }) {
-  return <div className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#06111F]/40">{title}</p><div className="mt-4 flex items-baseline gap-2"><p className="text-4xl font-black tracking-[-0.06em] text-[#0B7CFF]">{value}</p>{children}</div>{text ? <p className="mt-2 text-sm leading-6 text-[#06111F]/55">{text}</p> : null}</div>;
+  return <div className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#06111F]/40">{title}</p><div className="mt-4 flex items-baseline gap-2"><p className="blur-sensitive text-4xl font-black tracking-[-0.06em] text-[#0B7CFF]">{value}</p>{children}</div>{text ? <p className="mt-2 text-sm leading-6 text-[#06111F]/55">{text}</p> : null}</div>;
 }

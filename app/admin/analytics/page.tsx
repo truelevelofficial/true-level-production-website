@@ -102,8 +102,8 @@ function ExecutiveTab({ data, label }: { data: NonNullable<Awaited<ReturnType<ty
         <Card title="Profit margin" value={current.revenue > 0 ? `${Math.round((current.profit / current.revenue) * 100)}%` : "0%"} />
       </div>
       <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl bg-[#F7F8FB] p-4"><p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]/40">Revenue vs Expenses</p><MiniBar value={current.revenue} max={maxRevenue} color="bg-[#0B7CFF]" /><div className="mt-2 flex justify-between text-xs font-bold text-[#06111F]/45"><span>Revenue: {current.revenue.toLocaleString()} EGP</span><span>Expenses: {current.expenses.toLocaleString()} EGP</span></div></div>
-        <div className="rounded-2xl bg-[#F7F8FB] p-4"><p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]/40">Net Profit</p><MiniBar value={Math.max(0, current.profit)} max={maxRevenue} color={current.profit >= 0 ? "bg-green-500" : "bg-red-500"} /><div className="mt-2 flex justify-between text-xs font-bold text-[#06111F]/45"><span>Profit: {current.profit.toLocaleString()} EGP</span><span>Margin: {current.revenue > 0 ? `${Math.round((current.profit / current.revenue) * 100)}%` : "0%"}</span></div></div>
+        <div className="rounded-2xl bg-[#F7F8FB] p-4"><p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]/40">Revenue vs Expenses</p><MiniBar value={current.revenue} max={maxRevenue} color="bg-[#0B7CFF]" /><div className="mt-2 flex justify-between text-xs font-bold text-[#06111F]/45"><span className="blur-sensitive">Revenue: {current.revenue.toLocaleString()} EGP</span><span className="blur-sensitive">Expenses: {current.expenses.toLocaleString()} EGP</span></div></div>
+        <div className="rounded-2xl bg-[#F7F8FB] p-4"><p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]/40">Net Profit</p><MiniBar value={Math.max(0, current.profit)} max={maxRevenue} color={current.profit >= 0 ? "bg-green-500" : "bg-red-500"} /><div className="mt-2 flex justify-between text-xs font-bold text-[#06111F]/45"><span className="blur-sensitive">Profit: {current.profit.toLocaleString()} EGP</span><span>Margin: {current.revenue > 0 ? `${Math.round((current.profit / current.revenue) * 100)}%` : "0%"}</span></div></div>
       </div>
     </Section>
 
@@ -153,10 +153,10 @@ function ComparisonCard({ label, current, previous, change }: { label: string; c
   return <div className="rounded-2xl border border-[#06111F]/10 bg-white p-4 shadow-sm">
     <p className="text-xs font-black uppercase tracking-[0.18em] text-[#06111F]/40">{label}</p>
     <div className="mt-3 flex items-baseline justify-between">
-      <p className="text-2xl font-black tracking-[-0.04em] text-[#0B7CFF]">{current}</p>
+      <p className="blur-sensitive text-2xl font-black tracking-[-0.04em] text-[#0B7CFF]">{current}</p>
       <ChangeBadge change={change} />
     </div>
-    <p className="mt-1 text-xs text-[#06111F]/45">Previous: {previous}</p>
+    <p className="blur-sensitive mt-1 text-xs text-[#06111F]/45">Previous: {previous}</p>
   </div>;
 }
 
@@ -187,7 +187,7 @@ function ClientsTab({ data, label }: { data: NonNullable<Awaited<ReturnType<type
 
     <Section title="Top 10 clients by revenue">
       <table className="w-full text-left text-sm"><thead><tr className="border-b border-[#06111F]/10 text-xs font-black uppercase tracking-[0.14em] text-[#0B7CFF]"><th className="p-3">Client</th><th className="p-3">Revenue</th></tr></thead><tbody>
-        {data.topRevenue.length === 0 ? <tr><td className="p-3 text-sm text-[#06111F]/45" colSpan={2}>No data</td></tr> : data.topRevenue.map((c) => <tr className="border-b border-[#06111F]/5 text-sm font-bold text-[#06111F]/65" key={c.name}><td className="p-3">{c.name}</td><td className="p-3">{c.revenue.toLocaleString()} EGP</td></tr>)}
+        {data.topRevenue.length === 0 ? <tr><td className="p-3 text-sm text-[#06111F]/45" colSpan={2}>No data</td></tr> : data.topRevenue.map((c) => <tr className="border-b border-[#06111F]/5 text-sm font-bold text-[#06111F]/65" key={c.name}><td className="blur-sensitive p-3">{c.name}</td><td className="blur-sensitive p-3">{c.revenue.toLocaleString()} EGP</td></tr>)}
       </tbody></table>
     </Section>
   </>);
@@ -204,7 +204,7 @@ function PipelineTab({ data, label }: { data: NonNullable<Awaited<ReturnType<typ
     </Section>
     <Section title="Pipeline stages">
       <table className="w-full text-left text-sm"><thead><tr className="border-b border-[#06111F]/10 text-xs font-black uppercase tracking-[0.14em] text-[#0B7CFF]"><th className="p-3">Stage</th><th className="p-3">Count</th><th className="p-3">%</th><th className="p-3">Revenue</th></tr></thead><tbody>
-        {data.map((d) => <tr className="border-b border-[#06111F]/5 text-sm font-bold text-[#06111F]/65" key={d.stage}><td className="p-3">{d.stage}</td><td className="p-3">{d.count}</td><td className="p-3">{total > 0 ? `${Math.round((d.count / total) * 100)}%` : "0%"}</td><td className="p-3">{d.revenue > 0 ? `${d.revenue.toLocaleString()} EGP` : "-"}</td></tr>)}
+        {data.map((d) => <tr className="border-b border-[#06111F]/5 text-sm font-bold text-[#06111F]/65" key={d.stage}><td className="p-3">{d.stage}</td><td className="p-3">{d.count}</td><td className="p-3">{total > 0 ? `${Math.round((d.count / total) * 100)}%` : "0%"}</td><td className="blur-sensitive p-3">{d.revenue > 0 ? `${d.revenue.toLocaleString()} EGP` : "-"}</td></tr>)}
       </tbody></table>
     </Section>
   </>);
@@ -280,19 +280,19 @@ function AccountingTab({ data, label }: { data: NonNullable<Awaited<ReturnType<t
     {prevExists ? <Section title="مقارنة بالشهر السابق">
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-2xl border border-[#06111F]/10 bg-white p-5 shadow-sm">
-          <p className="mb-2 text-sm font-black uppercase tracking-[0.18em] text-[#06111F]/40">الإيرادات</p>
-          <p className="text-3xl font-black tracking-[-0.05em] text-[#0B7CFF]">{data.revenue.toLocaleString()} EGP</p>
-          <p className="mt-2 text-sm leading-6 text-[#06111F]/55">الشهر السابق: {data.prevRevenue.toLocaleString()} EGP{data.prevRevenue > 0 ? <span className={`mr-2 ${data.revenue > data.prevRevenue ? "text-green-600" : data.revenue < data.prevRevenue ? "text-red-600" : "text-gray-500"}`}>{data.revenue > data.prevRevenue ? "▲ أعلى" : data.revenue < data.prevRevenue ? "▼ أقل" : "● بدون تغيير"}</span> : null}</p>
+          <p className="blur-sensitive mb-2 text-sm font-black uppercase tracking-[0.18em] text-[#06111F]/40">الإيرادات</p>
+          <p className="blur-sensitive text-3xl font-black tracking-[-0.05em] text-[#0B7CFF]">{data.revenue.toLocaleString()} EGP</p>
+          <p className="blur-sensitive mt-2 text-sm leading-6 text-[#06111F]/55">الشهر السابق: {data.prevRevenue.toLocaleString()} EGP{data.prevRevenue > 0 ? <span className={`mr-2 ${data.revenue > data.prevRevenue ? "text-green-600" : data.revenue < data.prevRevenue ? "text-red-600" : "text-gray-500"}`}>{data.revenue > data.prevRevenue ? "▲ أعلى" : data.revenue < data.prevRevenue ? "▼ أقل" : "● بدون تغيير"}</span> : null}</p>
         </div>
         <div className="rounded-2xl border border-[#06111F]/10 bg-white p-5 shadow-sm">
-          <p className="mb-2 text-sm font-black uppercase tracking-[0.18em] text-[#06111F]/40">المصروفات</p>
-          <p className="text-3xl font-black tracking-[-0.05em] text-[#0B7CFF]">{data.expenses.toLocaleString()} EGP</p>
-          <p className="mt-2 text-sm leading-6 text-[#06111F]/55">الشهر السابق: {data.prevCost.toLocaleString()} EGP{data.prevCost > 0 ? <span className={`mr-2 ${data.expenses > data.prevCost ? "text-red-600" : data.expenses < data.prevCost ? "text-green-600" : "text-gray-500"}`}>{data.expenses > data.prevCost ? "▲ أعلى" : data.expenses < data.prevCost ? "▼ أقل" : "● بدون تغيير"}</span> : null}</p>
+          <p className="blur-sensitive mb-2 text-sm font-black uppercase tracking-[0.18em] text-[#06111F]/40">المصروفات</p>
+          <p className="blur-sensitive text-3xl font-black tracking-[-0.05em] text-[#0B7CFF]">{data.expenses.toLocaleString()} EGP</p>
+          <p className="blur-sensitive mt-2 text-sm leading-6 text-[#06111F]/55">الشهر السابق: {data.prevCost.toLocaleString()} EGP{data.prevCost > 0 ? <span className={`mr-2 ${data.expenses > data.prevCost ? "text-red-600" : data.expenses < data.prevCost ? "text-green-600" : "text-gray-500"}`}>{data.expenses > data.prevCost ? "▲ أعلى" : data.expenses < data.prevCost ? "▼ أقل" : "● بدون تغيير"}</span> : null}</p>
         </div>
         <div className="rounded-2xl border border-[#06111F]/10 bg-white p-5 shadow-sm">
-          <p className="mb-2 text-sm font-black uppercase tracking-[0.18em] text-[#06111F]/40">صافي الربح</p>
-          <p className="text-3xl font-black tracking-[-0.05em] text-[#0B7CFF]">{data.profit.toLocaleString()} EGP</p>
-          <p className="mt-2 text-sm leading-6 text-[#06111F]/55">الشهر السابق: {data.prevProfit.toLocaleString()} EGP{data.prevProfit !== 0 ? <span className={`mr-2 ${data.profit > data.prevProfit ? "text-green-600" : data.profit < data.prevProfit ? "text-red-600" : "text-gray-500"}`}>{data.profit > data.prevProfit ? "▲ أعلى" : data.profit < data.prevProfit ? "▼ أقل" : "● بدون تغيير"}</span> : null}</p>
+          <p className="blur-sensitive mb-2 text-sm font-black uppercase tracking-[0.18em] text-[#06111F]/40">صافي الربح</p>
+          <p className="blur-sensitive text-3xl font-black tracking-[-0.05em] text-[#0B7CFF]">{data.profit.toLocaleString()} EGP</p>
+          <p className="blur-sensitive mt-2 text-sm leading-6 text-[#06111F]/55">الشهر السابق: {data.prevProfit.toLocaleString()} EGP{data.prevProfit !== 0 ? <span className={`mr-2 ${data.profit > data.prevProfit ? "text-green-600" : data.profit < data.prevProfit ? "text-red-600" : "text-gray-500"}`}>{data.profit > data.prevProfit ? "▲ أعلى" : data.profit < data.prevProfit ? "▼ أقل" : "● بدون تغيير"}</span> : null}</p>
         </div>
       </div>
     </Section> : null}
@@ -310,7 +310,7 @@ function AccountingTab({ data, label }: { data: NonNullable<Awaited<ReturnType<t
 
     <Section title="أفضل العملاء">
       <table className="w-full text-right text-sm"><thead><tr className="border-b border-[#06111F]/10 text-xs font-black uppercase tracking-[0.14em] text-[#0B7CFF]"><th className="p-3">العميل</th><th className="p-3">الإيرادات</th></tr></thead><tbody>
-        {data.byClient.length === 0 ? <tr><td className="p-3 text-sm text-[#06111F]/45" colSpan={2}>لا توجد بيانات</td></tr> : data.byClient.map(([name, amount]) => <tr className="border-b border-[#06111F]/5 text-sm font-bold text-[#06111F]/65" key={name}><td className="p-3">{name}</td><td className="p-3">{amount.toLocaleString()} EGP</td></tr>)}
+        {data.byClient.length === 0 ? <tr><td className="p-3 text-sm text-[#06111F]/45" colSpan={2}>لا توجد بيانات</td></tr> : data.byClient.map(([name, amount]) => <tr className="border-b border-[#06111F]/5 text-sm font-bold text-[#06111F]/65" key={name}><td className="blur-sensitive p-3">{name}</td><td className="blur-sensitive p-3">{amount.toLocaleString()} EGP</td></tr>)}
       </tbody></table>
     </Section>
 
@@ -364,7 +364,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function Row({ label, value }: { label: string; value: string }) {
-  return <div className="flex items-center justify-between border-b border-[#06111F]/5 py-3 text-sm font-bold"><span className="text-[#06111F]/65">{label}</span><span className="text-[#06111F]">{value}</span></div>;
+  return <div className="flex items-center justify-between border-b border-[#06111F]/5 py-3 text-sm font-bold"><span className="text-[#06111F]/65">{label}</span><span className="blur-sensitive text-[#06111F]">{value}</span></div>;
 }
 
 function EmptyState({ message }: { message: string }) {

@@ -26,8 +26,8 @@ export default async function ClientProfilePage({ params }: { params: Promise<{ 
       <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.22em] text-[#0B7CFF]">Client profile</p>
-          <h1 className="mt-1 text-4xl font-black uppercase tracking-[-0.06em]">{client.fullName}</h1>
-          <p className="mt-2 text-sm font-bold text-[#06111F]/55">{client.companyName || "No company"}</p>
+          <h1 className="blur-sensitive mt-1 text-4xl font-black uppercase tracking-[-0.06em]">{client.fullName}</h1>
+          <p className="blur-sensitive mt-2 text-sm font-bold text-[#06111F]/55">{client.companyName || "No company"}</p>
         </div>
         <Link className="rounded-full border border-[#06111F]/10 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]" href="/admin/clients">Back to clients</Link>
       </div>
@@ -43,18 +43,18 @@ export default async function ClientProfilePage({ params }: { params: Promise<{ 
         <section className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm">
           <h2 className="text-2xl font-black uppercase tracking-[-0.05em]">Client Information</h2>
           <div className="mt-5 grid gap-3 text-sm font-bold text-[#06111F]/65">
-            <p>Email: {client.email}</p>
-            <p>Phone: {client.phone}</p>
-            <p>WhatsApp: {client.whatsapp || "-"}</p>
-            <p>Address: {client.address || "-"}</p>
-            <p>Tax number: {client.taxId || "-"}</p>
-            <p>Commercial registration: {client.commercialRegistrationNumber || "-"}</p>
+            <p className="blur-sensitive">Email: {client.email}</p>
+            <p className="blur-sensitive">Phone: {client.phone}</p>
+            <p className="blur-sensitive">WhatsApp: {client.whatsapp || "-"}</p>
+            <p className="blur-sensitive">Address: {client.address || "-"}</p>
+            <p className="blur-sensitive">Tax number: {client.taxId || "-"}</p>
+            <p className="blur-sensitive">Commercial registration: {client.commercialRegistrationNumber || "-"}</p>
             <p>Client type: {client.clientType || "-"}</p>
             <p>Lead source: {client.leadSource || "-"}</p>
             <p>Assigned team member: {client.assignedTeamMember || "-"}</p>
             <p>Created: {displayDate(client.createdAt)}</p>
           </div>
-          {client.notes ? <div className="mt-5 rounded-2xl bg-[#F7F8FB] p-4 text-sm leading-7 text-[#06111F]/65"><p className="font-black text-[#06111F]">Notes</p>{client.notes}</div> : null}
+          {client.notes ? <div className="blur-sensitive mt-5 rounded-2xl bg-[#F7F8FB] p-4 text-sm leading-7 text-[#06111F]/65"><p className="font-black text-[#06111F]">Notes</p>{client.notes}</div> : null}
         </section>
 
         <section className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm">

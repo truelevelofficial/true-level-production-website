@@ -50,10 +50,10 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
                 <tr className="border-b border-[#06111F]/5 transition hover:bg-[#F7F8FB]" key={inv.id}>
                   <td className="p-3 font-black text-[#06111F]">{inv.invoiceNo}</td>
                   <td className="p-3 text-[#06111F]/65">{new Date(inv.invoiceDate).toLocaleDateString("ar-EG")}</td>
-                  <td className="p-3 text-[#06111F]/65">{inv.client?.fullName || "بدون"}</td>
-                  <td className="p-3 font-black text-[#06111F]">{Number(inv.total).toLocaleString()} EGP</td>
-                  <td className="p-3 text-[#06111F]/65">{Number(inv.paidAmount).toLocaleString()} EGP</td>
-                  <td className="p-3 font-bold">{Number(inv.remainingAmount) > 0 ? <span className="text-red-600">{Number(inv.remainingAmount).toLocaleString()} EGP</span> : <span className="text-green-600">0</span>}</td>
+                  <td className="blur-sensitive p-3 text-[#06111F]/65">{inv.client?.fullName || "بدون"}</td>
+                  <td className="blur-sensitive p-3 font-black text-[#06111F]">{Number(inv.total).toLocaleString()} EGP</td>
+                  <td className="blur-sensitive p-3 text-[#06111F]/65">{Number(inv.paidAmount).toLocaleString()} EGP</td>
+                  <td className="blur-sensitive p-3 font-bold">{Number(inv.remainingAmount) > 0 ? <span className="text-red-600">{Number(inv.remainingAmount).toLocaleString()} EGP</span> : <span className="text-green-600">0</span>}</td>
                   <td className="p-3"><span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${inv.status === "SENT" ? "bg-blue-100 text-blue-700" : inv.status === "CANCELLED" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{invoiceStatusArabic[inv.status]}</span></td>
                   <td className="p-3"><span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${inv.paymentStatus === "PAID" ? "bg-green-100 text-green-700" : inv.paymentStatus === "OVERDUE" ? "bg-red-100 text-red-700" : inv.paymentStatus === "PARTIALLY_PAID" ? "bg-blue-100 text-blue-700" : inv.paymentStatus === "REFUNDED" ? "bg-purple-100 text-purple-700" : "bg-amber-100 text-amber-700"}`}>{invoicePaymentStatusArabic[inv.paymentStatus]}</span></td>
                   <td className="p-3 text-[#06111F]/65">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("ar-EG") : "-"}</td>

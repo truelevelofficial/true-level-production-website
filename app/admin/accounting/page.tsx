@@ -15,7 +15,7 @@ function InvoiceSummary({ label, value, color }: { label: string; value: string;
   return (
     <div className="rounded-xl border border-[#06111F]/10 bg-white p-4 shadow-sm">
       <p className="text-xs font-black uppercase tracking-[0.18em] text-[#06111F]/40">{label}</p>
-      <p className={`mt-2 text-2xl font-black tracking-[-0.04em] ${color}`}>{value}</p>
+      <p className={`blur-sensitive mt-2 text-2xl font-black tracking-[-0.04em] ${color}`}>{value}</p>
     </div>
   );
 }
@@ -164,12 +164,12 @@ async function IncomeTab({ params }: { params: { from?: string; to?: string; cli
                   <tr className="border-b border-[#06111F]/5 transition hover:bg-[#F7F8FB]" key={`${row.kind}-${row.item.id}`}>
                     <td className="p-3 text-sm font-bold text-[#06111F]/65">{dateInput(row.item.date)}</td>
                     <td className="p-3"><span className={`inline-block rounded-full px-3 py-1 text-xs font-black uppercase ${row.kind === "إيراد" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{row.kind}</span></td>
-                    <td className="p-3 text-sm font-bold text-[#06111F]/65">{row.item.client?.fullName || "بدون عميل"}</td>
-                    <td className="p-3 text-sm font-bold text-[#06111F]/65">{row.item.description || "-"}</td>
+                    <td className="blur-sensitive p-3 text-sm font-bold text-[#06111F]/65">{row.item.client?.fullName || "بدون عميل"}</td>
+                    <td className="blur-sensitive p-3 text-sm font-bold text-[#06111F]/65">{row.item.description || "-"}</td>
                     <td className="p-3 text-sm font-bold text-[#06111F]/65">{"category" in row.item ? expenseCategoryArabic[row.item.category] : "إيراد"}</td>
                     <td className="p-3 text-sm font-bold text-[#06111F]/65">{paymentMethodArabic[row.item.method]}</td>
                     <td className="p-3">{"status" in row.item ? <span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${row.item.status === "PAID" ? "bg-green-100 text-green-700" : row.item.status === "UNPAID" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{paymentStatusArabic[row.item.status]}</span> : <span className="text-sm text-[#06111F]/45">-</span>}</td>
-                    <td className="p-3 text-sm font-black text-[#06111F]">{Number(row.item.amount).toLocaleString()} EGP</td>
+                    <td className="blur-sensitive p-3 text-sm font-black text-[#06111F]">{Number(row.item.amount).toLocaleString()} EGP</td>
                     <td className="p-3">
                       <details className="relative">
                         <summary className="cursor-pointer rounded-full bg-[#0B7CFF]/10 px-3 py-1 text-xs font-black uppercase tracking-[0.1em] text-[#0B7CFF]">إجراءات</summary>
@@ -395,9 +395,9 @@ async function ReportsTab() {
                 return (
                   <tr className="border-b border-[#06111F]/5" key={month}>
                     <td className="p-3 font-bold">{month}</td>
-                    <td className="p-3 text-green-600">{rev.toLocaleString()} EGP</td>
-                    <td className="p-3 text-red-600">{exp.toLocaleString()} EGP</td>
-                    <td className={`p-3 font-bold ${rev - exp >= 0 ? "text-green-700" : "text-red-700"}`}>{(rev - exp).toLocaleString()} EGP</td>
+                    <td className="blur-sensitive p-3 text-green-600">{rev.toLocaleString()} EGP</td>
+                    <td className="blur-sensitive p-3 text-red-600">{exp.toLocaleString()} EGP</td>
+                    <td className={`blur-sensitive p-3 font-bold ${rev - exp >= 0 ? "text-green-700" : "text-red-700"}`}>{(rev - exp).toLocaleString()} EGP</td>
                   </tr>
                 );
               })}
@@ -419,8 +419,8 @@ async function ReportsTab() {
               <tbody>
                 {Object.entries(revenueByClient).length === 0 ? <tr><td className="p-3 text-center text-[#06111F]/55" colSpan={2}>لا توجد بيانات</td></tr> : Object.entries(revenueByClient).sort((a, b) => b[1] - a[1]).map(([name, amount]) => (
                   <tr className="border-b border-[#06111F]/5" key={name}>
-                    <td className="p-3 font-bold">{name}</td>
-                    <td className="p-3">{amount.toLocaleString()} EGP</td>
+                    <td className="blur-sensitive p-3 font-bold">{name}</td>
+                    <td className="blur-sensitive p-3">{amount.toLocaleString()} EGP</td>
                   </tr>
                 ))}
               </tbody>
@@ -440,8 +440,8 @@ async function ReportsTab() {
               <tbody>
                 {Object.entries(revenueByMethod).length === 0 ? <tr><td className="p-3 text-center text-[#06111F]/55" colSpan={2}>لا توجد بيانات</td></tr> : Object.entries(revenueByMethod).sort((a, b) => b[1] - a[1]).map(([method, amount]) => (
                   <tr className="border-b border-[#06111F]/5" key={method}>
-                    <td className="p-3 font-bold">{paymentMethodArabic[method] || method}</td>
-                    <td className="p-3">{amount.toLocaleString()} EGP</td>
+                    <td className="blur-sensitive p-3 font-bold">{paymentMethodArabic[method] || method}</td>
+                    <td className="blur-sensitive p-3">{amount.toLocaleString()} EGP</td>
                   </tr>
                 ))}
               </tbody>
@@ -461,8 +461,8 @@ async function ReportsTab() {
               <tbody>
                 {Object.entries(expenseByCategory).length === 0 ? <tr><td className="p-3 text-center text-[#06111F]/55" colSpan={2}>لا توجد بيانات</td></tr> : Object.entries(expenseByCategory).sort((a, b) => b[1] - a[1]).map(([cat, amount]) => (
                   <tr className="border-b border-[#06111F]/5" key={cat}>
-                    <td className="p-3 font-bold">{expenseCategoryArabic[cat] || cat}</td>
-                    <td className="p-3">{amount.toLocaleString()} EGP</td>
+                    <td className="blur-sensitive p-3 font-bold">{expenseCategoryArabic[cat] || cat}</td>
+                    <td className="blur-sensitive p-3">{amount.toLocaleString()} EGP</td>
                   </tr>
                 ))}
               </tbody>
@@ -485,16 +485,16 @@ async function ReportsTab() {
                   if (filtered.length === 0) return null;
                   return (
                     <tr className="border-b border-[#06111F]/5" key={st}>
-                      <td className="p-3 font-bold">{invoiceStatusArabic[st]}</td>
+                      <td className="blur-sensitive p-3 font-bold">{invoiceStatusArabic[st]}</td>
                       <td className="p-3">{filtered.length}</td>
-                      <td className="p-3">{filtered.reduce((s, i) => s + Number(i.total), 0).toLocaleString()} EGP</td>
+                      <td className="blur-sensitive p-3">{filtered.reduce((s, i) => s + Number(i.total), 0).toLocaleString()} EGP</td>
                     </tr>
                   );
                 })}
                 <tr className="border-t-2 border-[#06111F] font-bold">
                   <td className="p-3">الإجمالي</td>
-                  <td className="p-3">{invoices.length}</td>
-                  <td className="p-3">{totalInvoiceValue.toLocaleString()} EGP</td>
+                  <td className="blur-sensitive p-3">{invoices.length}</td>
+                  <td className="blur-sensitive p-3">{totalInvoiceValue.toLocaleString()} EGP</td>
                 </tr>
               </tbody>
             </table>
@@ -515,10 +515,10 @@ async function ReportsTab() {
               <tbody>
                 {overdueInvoices.slice(0, 10).map((inv) => (
                   <tr className="border-b border-red-100" key={inv.id}>
-                    <td className="p-3 font-bold">{inv.invoiceNo}</td>
-                    <td className="p-3">{inv.client?.fullName || "بدون"}</td>
-                    <td className="p-3">{Number(inv.total).toLocaleString()} EGP</td>
-                    <td className="p-3 font-bold text-red-700">{Number(inv.remainingAmount).toLocaleString()} EGP</td>
+                    <td className="blur-sensitive p-3 font-bold">{inv.invoiceNo}</td>
+                    <td className="blur-sensitive p-3">{inv.client?.fullName || "بدون"}</td>
+                    <td className="blur-sensitive p-3">{Number(inv.total).toLocaleString()} EGP</td>
+                    <td className="blur-sensitive p-3 font-bold text-red-700">{Number(inv.remainingAmount).toLocaleString()} EGP</td>
                     <td className="p-3">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("ar-EG") : "-"}</td>
                   </tr>
                 ))}

@@ -56,7 +56,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">{booking.meetingType}</p>
-                <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.05em]">{booking.client.fullName}</h2>
+                <h2 className="blur-sensitive mt-2 text-3xl font-black uppercase tracking-[-0.05em]">{booking.client.fullName}</h2>
               </div>
               <form action={deleteMeetingAction}>
                 <input name="bookingId" type="hidden" value={booking.id} />

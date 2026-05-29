@@ -126,16 +126,16 @@ export default async function AdminBookingsPage({ searchParams }: { searchParams
                 <span className={`rounded-full px-3 py-1 text-xs font-black uppercase ${booking.status === "COMPLETED" ? "bg-green-100 text-green-700" : booking.status === "CANCELLED" ? "bg-red-100 text-red-700" : booking.status === "APPROVED" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>{booking.status}</span>
                 <span className={`rounded-full px-3 py-1 text-xs font-bold ${booking.paymentStatus === "PAID" ? "bg-green-100 text-green-700" : booking.paymentStatus === "UNPAID" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{booking.paymentStatus?.replace("_", " ") || "N/A"}</span>
               </div>
-              <h2 className="mt-3 text-2xl font-black">{booking.client.fullName}</h2>
-              <p className="mt-1 text-sm text-[#06111F]/55">{booking.client.companyName} {booking.client.phone}</p>
+              <h2 className="blur-sensitive mt-3 text-2xl font-black">{booking.client.fullName}</h2>
+              <p className="blur-sensitive mt-1 text-sm text-[#06111F]/55">{booking.client.companyName} {booking.client.phone}</p>
               <p className="text-sm text-[#06111F]/55">{displayDate(booking.startTime)} - {displayDate(booking.endTime)}</p>
               {booking.meetingLink ? <a className="mt-1 inline-block text-xs text-[#0B7CFF] underline" href={booking.meetingLink} target="_blank">Meeting link</a> : null}
             </div>
             <select className={inputClass} name="status" defaultValue={booking.status}>{bookingStatuses.map((status) => <option key={status}>{status}</option>)}</select>
             <select className={inputClass} name="paymentStatus" defaultValue={booking.paymentStatus}>{paymentStatuses.map((status) => <option key={status}>{status}</option>)}</select>
-            <input className={inputClass} name="price" placeholder="Price" defaultValue={String(booking.price ?? "")} />
-            <input className={inputClass} name="deposit" placeholder="Deposit" defaultValue={String(booking.deposit ?? "")} />
-            <input className={inputClass} name="discount" placeholder="Discount" defaultValue={String(booking.discount ?? "")} />
+            <input className={`${inputClass} blur-sensitive`} name="price" placeholder="Price" defaultValue={String(booking.price ?? "")} />
+            <input className={`${inputClass} blur-sensitive`} name="deposit" placeholder="Deposit" defaultValue={String(booking.deposit ?? "")} />
+            <input className={`${inputClass} blur-sensitive`} name="discount" placeholder="Discount" defaultValue={String(booking.discount ?? "")} />
             <input className={`${inputClass} lg:col-span-2`} name="meetingLink" placeholder="Meeting link" defaultValue={booking.meetingLink ?? ""} />
             <textarea className={`${inputClass} lg:col-span-2`} name="internalNotes" placeholder="Internal notes" defaultValue={booking.internalNotes ?? ""} />
             {!booking.meetingLink && booking.type === "GOOGLE_MEETING" && booking.status === "APPROVED" && hasGoogleConfig() ? <p className="text-xs text-[#0B7CFF] lg:col-span-2">Meet link will be auto-generated on save if Google Calendar is configured.</p> : null}

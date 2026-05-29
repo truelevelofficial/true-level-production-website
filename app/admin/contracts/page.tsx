@@ -60,12 +60,12 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
               <summary className="no-print flex cursor-pointer flex-wrap items-center gap-4 p-6 transition hover:bg-[#F7F8FB]">
                 <span className={`rounded-full px-3 py-1 text-xs font-black uppercase ${contract.status === "SIGNED" ? "bg-green-100 text-green-700" : contract.status === "SENT" ? "bg-blue-100 text-blue-700" : contract.status === "CANCELLED" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{contractStatusArabic[contract.status]}</span>
                 <h2 className="text-xl font-black">{contract.title}</h2>
-                <p className="text-sm text-[#06111F]/55">{contract.client?.fullName || "بدون عميل"}</p>
+                <p className="blur-sensitive text-sm text-[#06111F]/55">{contract.client?.fullName || "بدون عميل"}</p>
                 <p className="mr-auto text-xs text-[#06111F]/40">{new Date(contract.createdAt).toLocaleDateString("ar-EG")}</p>
               </summary>
               <div className="px-6 pb-6">
                 <div className="no-print mb-6 flex flex-wrap items-center gap-3">
-                  <span className="rounded-full border border-[#06111F]/10 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]/45">
+                  <span className="blur-sensitive rounded-full border border-[#06111F]/10 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#06111F]/45">
                     {contract.totalPrice ? `قيمة العقد: ${Number(contract.totalPrice).toLocaleString("ar-EG")} EGP` : ""}
                   </span>
                   <form action={updateContractAction} className="flex flex-wrap gap-2">
