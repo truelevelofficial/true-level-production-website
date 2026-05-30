@@ -152,10 +152,10 @@ function LogoMark() {
     <Image
       src="/true-level-production-logo.png"
       alt="True Level Production"
-      width={210}
+      width={220}
       height={120}
       priority
-      className="w-[140px] md:w-[190px] h-auto object-contain"
+      className="w-[145px] md:w-[205px] max-h-[58px] md:max-h-[82px] object-contain"
     />
   );
 }
