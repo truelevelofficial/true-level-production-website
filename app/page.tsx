@@ -414,6 +414,7 @@ export default async function Home() {
       <section id="contact" className="mx-auto max-w-7xl scroll-mt-28 px-5 py-24">
         <div className="relative overflow-hidden rounded-[2.8rem] bg-[#0B7CFF] p-8 text-white md:p-14">
           <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full border-[38px] border-white/10" />
+          <div className="absolute -bottom-20 -left-20 h-80 w-80 rounded-full border-[48px] border-white/[0.04]" />
           <div className="relative grid gap-10 md:grid-cols-[1fr_0.7fr] md:items-end">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.25em] text-white/70">Open the brief</p>
@@ -421,39 +422,51 @@ export default async function Home() {
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/72">True Level turns a business objective into a creative concept, shoot plan, production day, and final content delivery.</p>
             </div>
             <div className="grid gap-3">
-              <a className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.07] p-4 font-black backdrop-blur transition hover:bg-white/[0.14] hover:shadow-lg" href="tel:01143331405">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/15 bg-white/10 text-white transition group-hover:bg-white/20"><Phone size={18} /></span>
-                <span className="text-sm tracking-wide">01143331405</span>
+              <a className="group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.12] bg-white/[0.06] p-4 backdrop-blur-xl transition hover:border-white/[0.2] hover:bg-white/[0.12] hover:shadow-xl" href="tel:01143331405">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/[0.12] bg-white/[0.08] text-white transition group-hover:bg-white/[0.18] group-hover:shadow-lg"><Phone size={20} /></span>
+                <span className="flex flex-col">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">Call us</span>
+                  <span className="mt-px text-sm tracking-wide">01143331405</span>
+                </span>
               </a>
-              <a className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.07] p-4 font-black backdrop-blur transition hover:bg-white/[0.14] hover:shadow-lg" href="mailto:contact@truelevel.co">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/15 bg-white/10 text-white transition group-hover:bg-white/20"><Mail size={18} /></span>
-                <span className="text-sm tracking-wide">contact@truelevel.co</span>
+              <a className="group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.12] bg-white/[0.06] p-4 backdrop-blur-xl transition hover:border-white/[0.2] hover:bg-white/[0.12] hover:shadow-xl" href="mailto:contact@truelevel.co">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/[0.12] bg-white/[0.08] text-white transition group-hover:bg-white/[0.18] group-hover:shadow-lg"><Mail size={20} /></span>
+                <span className="flex flex-col">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">Email us</span>
+                  <span className="mt-px text-sm tracking-wide">contact@truelevel.co</span>
+                </span>
               </a>
-              <div className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.07] p-4 font-black backdrop-blur transition hover:bg-white/[0.14] hover:shadow-lg">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/15 bg-white/10 text-white transition group-hover:bg-white/20"><MapPin size={18} /></span>
-                <span className="text-sm tracking-wide">Cairo, Egypt</span>
+              <div className="group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.12] bg-white/[0.06] p-4 backdrop-blur-xl transition hover:border-white/[0.2] hover:bg-white/[0.12] hover:shadow-xl">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/[0.12] bg-white/[0.08] text-white transition group-hover:bg-white/[0.18] group-hover:shadow-lg"><MapPin size={20} /></span>
+                <span className="flex flex-col">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">Location</span>
+                  <span className="mt-px text-sm tracking-wide">Cairo, Egypt</span>
+                </span>
               </div>
-              <div className="mt-2 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.07] p-5 backdrop-blur">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/60">We create for</p>
-                  <p className="text-[10px] font-medium tracking-[0.12em] text-white/40">Content made for every platform</p>
+              <div className="mt-2 rounded-2xl border border-white/[0.12] bg-white/[0.06] p-5 backdrop-blur-xl">
+                <div className="flex items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.24em] text-white/70">We create for</p>
+                    <p className="mt-1 text-[11px] font-medium tracking-[0.1em] text-white/40">Content made for every platform</p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-white/[0.08] px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/50">8 platforms</span>
                 </div>
                 <div className="mt-4">
                   <LogoLoop
                     logos={[
-                      { node: <span className="flex items-center text-white"><FaInstagram size={28} /></span>, title: "Instagram" },
-                      { node: <span className="flex items-center text-white"><FaTiktok size={28} /></span>, title: "TikTok" },
-                      { node: <span className="flex items-center text-white"><FaFacebookF size={28} /></span>, title: "Facebook" },
-                      { node: <span className="flex items-center text-white"><FaYoutube size={28} /></span>, title: "YouTube" },
-                      { node: <span className="flex items-center text-white"><FaWhatsapp size={28} /></span>, title: "WhatsApp" },
-                      { node: <span className="flex items-center text-white"><FaGoogle size={28} /></span>, title: "Google" },
-                      { node: <span className="flex items-center text-white"><FaLinkedinIn size={28} /></span>, title: "LinkedIn" },
-                      { node: <span className="flex items-center text-white"><FaDiscord size={28} /></span>, title: "Discord" },
+                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaInstagram size={32} /></span>, title: "Instagram" },
+                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaTiktok size={32} /></span>, title: "TikTok" },
+                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaFacebookF size={32} /></span>, title: "Facebook" },
+                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaYoutube size={32} /></span>, title: "YouTube" },
+                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaWhatsapp size={32} /></span>, title: "WhatsApp" },
+                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaGoogle size={32} /></span>, title: "Google" },
+                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaLinkedinIn size={32} /></span>, title: "LinkedIn" },
+                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaDiscord size={32} /></span>, title: "Discord" },
                     ]}
                     speed={70}
                     direction="left"
-                    logoHeight={36}
-                    gap={48}
+                    logoHeight={40}
+                    gap={52}
                     hoverSpeed={0}
                     scaleOnHover
                     fadeOut
