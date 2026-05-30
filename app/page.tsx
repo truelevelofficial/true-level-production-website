@@ -15,6 +15,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
+import { FaInstagram, FaTiktok, FaFacebookF, FaYoutube, FaWhatsapp, FaGoogle, FaLinkedinIn, FaDiscord } from "react-icons/fa";
 import { getSessionEmail, isAdminAuthenticated } from "@/lib/auth";
 import { UserMenu } from "@/components/user-menu";
 import { SafeImage } from "@/components/safe-image";
@@ -269,33 +270,6 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="border-y border-[#06111F]/10 bg-white py-20">
-        <div className="mx-auto max-w-7xl px-5">
-          <SectionLabel>Trusted by brands, creators, and production teams</SectionLabel>
-          <div className="mt-10">
-            <LogoLoop
-              logos={[
-                { node: <span className="text-2xl font-black uppercase tracking-[0.22em] text-[#06111F]/35">Broadcast Studio</span>, title: "Broadcast Studio" },
-                { node: <span className="text-2xl font-black uppercase tracking-[0.22em] text-[#06111F]/35">Creator Labs</span>, title: "Creator Labs" },
-                { node: <span className="text-2xl font-black uppercase tracking-[0.22em] text-[#06111F]/35">Pixel Frame</span>, title: "Pixel Frame" },
-                { node: <span className="text-2xl font-black uppercase tracking-[0.22em] text-[#06111F]/35">Vantage Media</span>, title: "Vantage Media" },
-                { node: <span className="text-2xl font-black uppercase tracking-[0.22em] text-[#06111F]/35">Scene Makers</span>, title: "Scene Makers" },
-                { node: <span className="text-2xl font-black uppercase tracking-[0.22em] text-[#06111F]/35">Format House</span>, title: "Format House" },
-              ]}
-              speed={80}
-              direction="left"
-              logoHeight={44}
-              gap={56}
-              hoverSpeed={0}
-              scaleOnHover
-              fadeOut
-              fadeOutColor="#ffffff"
-              ariaLabel="True Level client logos"
-            />
-          </div>
-        </div>
-      </section>
-
       <section id="services" className="mx-auto max-w-7xl scroll-mt-28 px-5 py-24">
         <div className="mb-12 grid gap-8 md:grid-cols-[0.85fr_1fr] md:items-end">
           <div>
@@ -444,6 +418,30 @@ export default async function Home() {
               <a className="flex items-center gap-3 rounded-2xl bg-white/10 p-4 font-black" href="tel:01143331405"><Phone size={18} /> 01143331405</a>
               <a className="flex items-center gap-3 rounded-2xl bg-white/10 p-4 font-black" href="mailto:contact@truelevel.co"><Mail size={18} /> contact@truelevel.co</a>
               <div className="flex items-center gap-3 rounded-2xl bg-white/10 p-4 font-black"><MapPin size={18} /> Cairo, Egypt</div>
+              <div className="mt-1 overflow-hidden rounded-2xl bg-white/10 p-4 backdrop-blur">
+                <p className="mb-3 text-[11px] font-black uppercase tracking-[0.22em] text-white/60">We create for</p>
+                <LogoLoop
+                  logos={[
+                    { node: <span className="flex items-center text-white"><FaInstagram size={26} /></span>, title: "Instagram" },
+                    { node: <span className="flex items-center text-white"><FaTiktok size={26} /></span>, title: "TikTok" },
+                    { node: <span className="flex items-center text-white"><FaFacebookF size={26} /></span>, title: "Facebook" },
+                    { node: <span className="flex items-center text-white"><FaYoutube size={26} /></span>, title: "YouTube" },
+                    { node: <span className="flex items-center text-white"><FaWhatsapp size={26} /></span>, title: "WhatsApp" },
+                    { node: <span className="flex items-center text-white"><FaGoogle size={26} /></span>, title: "Google" },
+                    { node: <span className="flex items-center text-white"><FaLinkedinIn size={26} /></span>, title: "LinkedIn" },
+                    { node: <span className="flex items-center text-white"><FaDiscord size={26} /></span>, title: "Discord" },
+                  ]}
+                  speed={70}
+                  direction="left"
+                  logoHeight={32}
+                  gap={40}
+                  hoverSpeed={0}
+                  scaleOnHover
+                  fadeOut
+                  fadeOutColor="#0B7CFF"
+                  ariaLabel="Social media platforms"
+                />
+              </div>
             </div>
           </div>
         </div>
