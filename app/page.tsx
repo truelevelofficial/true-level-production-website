@@ -150,12 +150,12 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 function LogoMark() {
   return (
     <Image
-      src="/true-level-logo-black.svg"
+      src="/black-logo-production.png"
       alt="True Level Production"
       width={180}
-      height={50}
+      height={90}
       priority
-      className="h-auto w-[150px] md:w-[180px]"
+      className="h-auto w-[160px] object-contain md:w-[180px]"
     />
   );
 }
