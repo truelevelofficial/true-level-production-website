@@ -15,6 +15,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
+import { FaInstagram, FaTiktok, FaFacebookF, FaYoutube, FaWhatsapp, FaGoogle, FaLinkedinIn, FaDiscord } from "react-icons/fa";
 import Image from "next/image";
 import { getSessionEmail, isAdminAuthenticated } from "@/lib/auth";
 import { UserMenu } from "@/components/user-menu";
@@ -434,20 +435,20 @@ export default async function Home() {
                 </span>
               </div>
               <div className="mt-2 rounded-3xl border border-white/[0.12] bg-white/[0.06] p-5 backdrop-blur-xl md:p-6">
-                <div className="mb-3 flex items-center gap-3">
+                <div className="mb-4 flex items-center gap-3">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full border border-white/[0.12] bg-white/[0.08] text-white"><span className="text-[10px] font-black">⊞</span></span>
                   <span className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">Platforms</span>
                 </div>
-                <TrueFocus
-                  sentence="WE CREATE FOR EVERY PLATFORM"
-                  manualMode={false}
-                  blurAmount={3}
-                  borderColor="#ffffff"
-                  glowColor="rgba(255, 255, 255, 0.55)"
-                  animationDuration={1.2}
-                  pauseBetweenAnimations={0.5}
-                  className="truefocus--brief"
-                />
+                <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
+                  <span className="flex items-center text-white/90 transition hover:scale-110 hover:text-white"><FaInstagram size={28} /></span>
+                  <span className="flex items-center text-white/90 transition hover:scale-110 hover:text-white"><FaTiktok size={28} /></span>
+                  <span className="flex items-center text-white/90 transition hover:scale-110 hover:text-white"><FaFacebookF size={28} /></span>
+                  <span className="flex items-center text-white/90 transition hover:scale-110 hover:text-white"><FaYoutube size={28} /></span>
+                  <span className="flex items-center text-white/90 transition hover:scale-110 hover:text-white"><FaWhatsapp size={28} /></span>
+                  <span className="flex items-center text-white/90 transition hover:scale-110 hover:text-white"><FaGoogle size={28} /></span>
+                  <span className="flex items-center text-white/90 transition hover:scale-110 hover:text-white"><FaLinkedinIn size={28} /></span>
+                  <span className="flex items-center text-white/90 transition hover:scale-110 hover:text-white"><FaDiscord size={28} /></span>
+                </div>
               </div>
             </div>
           </div>
