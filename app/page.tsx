@@ -155,7 +155,7 @@ function LogoMark() {
       width={210}
       height={90}
       priority
-      className="w-[145px] md:w-[195px] max-h-[54px] md:max-h-[70px] object-contain"
+      className="w-[135px] md:w-[185px] max-h-[54px] md:max-h-[76px] object-contain"
     />
   );
 }
