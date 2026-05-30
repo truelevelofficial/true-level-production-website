@@ -15,11 +15,9 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { FaInstagram, FaTiktok, FaFacebookF, FaYoutube, FaWhatsapp, FaGoogle, FaLinkedinIn, FaDiscord } from "react-icons/fa";
 import { getSessionEmail, isAdminAuthenticated } from "@/lib/auth";
 import { UserMenu } from "@/components/user-menu";
 import { SafeImage } from "@/components/safe-image";
-import { LogoLoop } from "@/components/LogoLoop/LogoLoop";
 import TrueFocus from "@/components/TrueFocus";
 
 type ButtonProps = {
@@ -443,37 +441,21 @@ export default async function Home() {
                   <span className="mt-px text-sm tracking-wide">Cairo, Egypt</span>
                 </span>
               </div>
-              <div className="mt-2 rounded-2xl border border-white/[0.12] bg-white/[0.06] p-5 backdrop-blur-xl">
-                <div className="flex items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.24em] text-white/70">We create for</p>
-                    <p className="mt-1 text-[11px] font-medium tracking-[0.1em] text-white/40">Content made for every platform</p>
-                  </div>
-                  <span className="shrink-0 rounded-full bg-white/[0.08] px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/50">8 platforms</span>
+              <div className="mt-2 rounded-3xl border border-white/[0.12] bg-white/[0.06] p-5 backdrop-blur-xl md:p-6">
+                <div className="mb-3 flex items-center gap-3">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full border border-white/[0.12] bg-white/[0.08] text-white"><span className="text-[10px] font-black">⊞</span></span>
+                  <span className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">Platforms</span>
                 </div>
-                <div className="mt-4">
-                  <LogoLoop
-                    logos={[
-                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaInstagram size={32} /></span>, title: "Instagram" },
-                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaTiktok size={32} /></span>, title: "TikTok" },
-                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaFacebookF size={32} /></span>, title: "Facebook" },
-                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaYoutube size={32} /></span>, title: "YouTube" },
-                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaWhatsapp size={32} /></span>, title: "WhatsApp" },
-                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaGoogle size={32} /></span>, title: "Google" },
-                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaLinkedinIn size={32} /></span>, title: "LinkedIn" },
-                      { node: <span className="flex items-center text-white transition hover:brightness-125"><FaDiscord size={32} /></span>, title: "Discord" },
-                    ]}
-                    speed={70}
-                    direction="left"
-                    logoHeight={40}
-                    gap={52}
-                    hoverSpeed={0}
-                    scaleOnHover
-                    fadeOut
-                    fadeOutColor="#0B7CFF"
-                    ariaLabel="Social media platforms"
-                  />
-                </div>
+                <TrueFocus
+                  sentence="WE CREATE FOR EVERY PLATFORM"
+                  manualMode={false}
+                  blurAmount={3}
+                  borderColor="#ffffff"
+                  glowColor="rgba(255, 255, 255, 0.55)"
+                  animationDuration={1.2}
+                  pauseBetweenAnimations={0.5}
+                  className="truefocus--brief"
+                />
               </div>
             </div>
           </div>

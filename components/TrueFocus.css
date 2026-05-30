@@ -10,11 +10,29 @@
   overflow: hidden;
 }
 
+.truefocus--brief {
+  border-radius: 14px;
+  padding: 10px 18px;
+  width: 100%;
+}
+
+.truefocus--brief .truefocus__char {
+  font-size: 24px;
+}
+
+@media (max-width: 768px) {
+  .truefocus--brief .truefocus__char {
+    font-size: 18px;
+  }
+}
+
 .truefocus__track {
   display: flex;
   align-items: center;
   gap: 0;
   white-space: nowrap;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .truefocus__char {

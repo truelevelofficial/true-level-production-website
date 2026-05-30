@@ -13,6 +13,7 @@ interface TrueFocusProps {
   animationDuration?: number;
   pauseBetweenAnimations?: number;
   noBorder?: boolean;
+  className?: string;
 }
 
 export default function TrueFocus({
@@ -24,6 +25,7 @@ export default function TrueFocus({
   animationDuration = 0.5,
   pauseBetweenAnimations = 1.5,
   noBorder = false,
+  className = "",
 }: TrueFocusProps) {
   const chars = sentence.split("");
   const [focusPos, setFocusPos] = useState(0);
@@ -80,7 +82,7 @@ export default function TrueFocus({
 
   return (
     <motion.div
-      className="truefocus"
+      className={`truefocus ${className}`}
       style={{ borderColor }}
       animate={{
         boxShadow: [
