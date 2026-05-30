@@ -18,6 +18,7 @@ import {
 import { getSessionEmail, isAdminAuthenticated } from "@/lib/auth";
 import { UserMenu } from "@/components/user-menu";
 import { SafeImage } from "@/components/safe-image";
+import { LogoLoop } from "@/components/LogoLoop/LogoLoop";
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -265,6 +266,33 @@ export default async function Home() {
         <div className="animate-marquee flex gap-12 whitespace-nowrap text-5xl font-black uppercase tracking-[-0.06em] md:text-7xl">
           <span>Film</span><span>UGC</span><span>Studio</span><span>Reels</span><span>Campaigns</span><span>Events</span><span>Design</span><span>Cyclorama</span>
           <span>Film</span><span>UGC</span><span>Studio</span><span>Reels</span><span>Campaigns</span><span>Events</span><span>Design</span><span>Cyclorama</span>
+        </div>
+      </section>
+
+      <section className="border-y border-[#06111F]/10 bg-white py-20">
+        <div className="mx-auto max-w-7xl px-5">
+          <SectionLabel>Trusted by brands, creators, and production teams</SectionLabel>
+          <div className="mt-10">
+            <LogoLoop
+              logos={[
+                { node: <span className="text-2xl font-black uppercase tracking-[0.22em] text-[#06111F]/35">Broadcast Studio</span>, title: "Broadcast Studio" },
+                { node: <span className="text-2xl font-black uppercase tracking-[0.22em] text-[#06111F]/35">Creator Labs</span>, title: "Creator Labs" },
+                { node: <span className="text-2xl font-black uppercase tracking-[0.22em] text-[#06111F]/35">Pixel Frame</span>, title: "Pixel Frame" },
+                { node: <span className="text-2xl font-black uppercase tracking-[0.22em] text-[#06111F]/35">Vantage Media</span>, title: "Vantage Media" },
+                { node: <span className="text-2xl font-black uppercase tracking-[0.22em] text-[#06111F]/35">Scene Makers</span>, title: "Scene Makers" },
+                { node: <span className="text-2xl font-black uppercase tracking-[0.22em] text-[#06111F]/35">Format House</span>, title: "Format House" },
+              ]}
+              speed={80}
+              direction="left"
+              logoHeight={44}
+              gap={56}
+              hoverSpeed={0}
+              scaleOnHover
+              fadeOut
+              fadeOutColor="#ffffff"
+              ariaLabel="True Level client logos"
+            />
+          </div>
         </div>
       </section>
 
