@@ -20,6 +20,7 @@ import { getSessionEmail, isAdminAuthenticated } from "@/lib/auth";
 import { UserMenu } from "@/components/user-menu";
 import { SafeImage } from "@/components/safe-image";
 import { LogoLoop } from "@/components/LogoLoop/LogoLoop";
+import TrueFocus from "@/components/TrueFocus";
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -149,15 +150,20 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 function LogoMark() {
   return (
     <div className="flex items-center gap-3">
-      <div className="relative h-11 w-[185px] overflow-hidden rounded-full bg-white px-4 shadow-sm ring-1 ring-[#06111F]/10">
-        <div className="flex h-full items-center justify-center">
-          <span className="text-[22px] font-black uppercase tracking-[-0.05em] text-[#0B7CFF]">TRUE LEVEL</span>
-          <span className="ml-2 h-3 w-3 rounded-full bg-[#0B7CFF]" />
+      <div className="relative flex h-11 w-[150px] items-center overflow-hidden rounded-full bg-white px-4 shadow-sm ring-1 ring-[#06111F]/10">
+        <div className="flex w-full flex-col items-center justify-center leading-none text-[#0B7CFF]">
+          <TrueFocus
+            sentence="True Level"
+            manualMode={false}
+            blurAmount={1.5}
+            borderColor="#1683ff"
+            glowColor="rgba(22, 131, 255, 0.35)"
+            animationDuration={0.5}
+            pauseBetweenAnimations={1.5}
+            noBorder
+          />
+          <span className="mt-[1px] text-[10px] font-black uppercase tracking-[0.22em] text-[#06111F]/45">Production</span>
         </div>
-      </div>
-      <div className="hidden sm:block">
-        <p className="text-xs font-black uppercase tracking-[0.22em] text-[#06111F]">Production</p>
-        <p className="text-[11px] uppercase tracking-[0.18em] text-[#06111F]/45">Creative Studio</p>
       </div>
     </div>
   );
@@ -415,32 +421,46 @@ export default async function Home() {
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/72">True Level turns a business objective into a creative concept, shoot plan, production day, and final content delivery.</p>
             </div>
             <div className="grid gap-3">
-              <a className="flex items-center gap-3 rounded-2xl bg-white/10 p-4 font-black" href="tel:01143331405"><Phone size={18} /> 01143331405</a>
-              <a className="flex items-center gap-3 rounded-2xl bg-white/10 p-4 font-black" href="mailto:contact@truelevel.co"><Mail size={18} /> contact@truelevel.co</a>
-              <div className="flex items-center gap-3 rounded-2xl bg-white/10 p-4 font-black"><MapPin size={18} /> Cairo, Egypt</div>
-              <div className="mt-1 overflow-hidden rounded-2xl bg-white/10 p-4 backdrop-blur">
-                <p className="mb-3 text-[11px] font-black uppercase tracking-[0.22em] text-white/60">We create for</p>
-                <LogoLoop
-                  logos={[
-                    { node: <span className="flex items-center text-white"><FaInstagram size={26} /></span>, title: "Instagram" },
-                    { node: <span className="flex items-center text-white"><FaTiktok size={26} /></span>, title: "TikTok" },
-                    { node: <span className="flex items-center text-white"><FaFacebookF size={26} /></span>, title: "Facebook" },
-                    { node: <span className="flex items-center text-white"><FaYoutube size={26} /></span>, title: "YouTube" },
-                    { node: <span className="flex items-center text-white"><FaWhatsapp size={26} /></span>, title: "WhatsApp" },
-                    { node: <span className="flex items-center text-white"><FaGoogle size={26} /></span>, title: "Google" },
-                    { node: <span className="flex items-center text-white"><FaLinkedinIn size={26} /></span>, title: "LinkedIn" },
-                    { node: <span className="flex items-center text-white"><FaDiscord size={26} /></span>, title: "Discord" },
-                  ]}
-                  speed={70}
-                  direction="left"
-                  logoHeight={32}
-                  gap={40}
-                  hoverSpeed={0}
-                  scaleOnHover
-                  fadeOut
-                  fadeOutColor="#0B7CFF"
-                  ariaLabel="Social media platforms"
-                />
+              <a className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.07] p-4 font-black backdrop-blur transition hover:bg-white/[0.14] hover:shadow-lg" href="tel:01143331405">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/15 bg-white/10 text-white transition group-hover:bg-white/20"><Phone size={18} /></span>
+                <span className="text-sm tracking-wide">01143331405</span>
+              </a>
+              <a className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.07] p-4 font-black backdrop-blur transition hover:bg-white/[0.14] hover:shadow-lg" href="mailto:contact@truelevel.co">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/15 bg-white/10 text-white transition group-hover:bg-white/20"><Mail size={18} /></span>
+                <span className="text-sm tracking-wide">contact@truelevel.co</span>
+              </a>
+              <div className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.07] p-4 font-black backdrop-blur transition hover:bg-white/[0.14] hover:shadow-lg">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/15 bg-white/10 text-white transition group-hover:bg-white/20"><MapPin size={18} /></span>
+                <span className="text-sm tracking-wide">Cairo, Egypt</span>
+              </div>
+              <div className="mt-2 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.07] p-5 backdrop-blur">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/60">We create for</p>
+                  <p className="text-[10px] font-medium tracking-[0.12em] text-white/40">Content made for every platform</p>
+                </div>
+                <div className="mt-4">
+                  <LogoLoop
+                    logos={[
+                      { node: <span className="flex items-center text-white"><FaInstagram size={28} /></span>, title: "Instagram" },
+                      { node: <span className="flex items-center text-white"><FaTiktok size={28} /></span>, title: "TikTok" },
+                      { node: <span className="flex items-center text-white"><FaFacebookF size={28} /></span>, title: "Facebook" },
+                      { node: <span className="flex items-center text-white"><FaYoutube size={28} /></span>, title: "YouTube" },
+                      { node: <span className="flex items-center text-white"><FaWhatsapp size={28} /></span>, title: "WhatsApp" },
+                      { node: <span className="flex items-center text-white"><FaGoogle size={28} /></span>, title: "Google" },
+                      { node: <span className="flex items-center text-white"><FaLinkedinIn size={28} /></span>, title: "LinkedIn" },
+                      { node: <span className="flex items-center text-white"><FaDiscord size={28} /></span>, title: "Discord" },
+                    ]}
+                    speed={70}
+                    direction="left"
+                    logoHeight={36}
+                    gap={48}
+                    hoverSpeed={0}
+                    scaleOnHover
+                    fadeOut
+                    fadeOutColor="#0B7CFF"
+                    ariaLabel="Social media platforms"
+                  />
+                </div>
               </div>
             </div>
           </div>

@@ -1,0 +1,30 @@
+.truefocus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-width: 1.5px;
+  border-style: solid;
+  border-radius: 8px;
+  padding: 6px 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.truefocus__track {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  white-space: nowrap;
+}
+
+.truefocus__char {
+  display: inline-block;
+  transition: filter 0.15s ease, opacity 0.15s ease;
+  font-weight: 900;
+  color: currentColor;
+}
+
+.truefocus-inline {
+  display: inline-flex;
+  align-items: center;
+}
