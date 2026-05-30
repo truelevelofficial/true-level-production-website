@@ -15,6 +15,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
+import Image from "next/image";
 import { getSessionEmail, isAdminAuthenticated } from "@/lib/auth";
 import { UserMenu } from "@/components/user-menu";
 import { SafeImage } from "@/components/safe-image";
@@ -147,23 +148,14 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function LogoMark() {
   return (
-    <div className="flex items-center gap-3">
-      <div className="relative flex h-11 w-[150px] items-center overflow-hidden rounded-full bg-white px-4 shadow-sm ring-1 ring-[#06111F]/10">
-        <div className="flex w-full flex-col items-center justify-center leading-none text-[#0B7CFF]">
-          <TrueFocus
-            sentence="True Level"
-            manualMode={false}
-            blurAmount={1.5}
-            borderColor="#1683ff"
-            glowColor="rgba(22, 131, 255, 0.35)"
-            animationDuration={0.5}
-            pauseBetweenAnimations={1.5}
-            noBorder
-          />
-          <span className="mt-[1px] text-[10px] font-black uppercase tracking-[0.22em] text-[#06111F]/45">Production</span>
-        </div>
-      </div>
-    </div>
+    <Image
+      src="/true-level-logo-black.svg"
+      alt="True Level Production"
+      width={180}
+      height={50}
+      priority
+      className="h-auto w-[150px] md:w-[180px]"
+    />
   );
 }
 
