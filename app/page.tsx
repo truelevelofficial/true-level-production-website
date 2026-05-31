@@ -309,10 +309,13 @@ export default async function Home() {
               ["05", "Lifestyle Setups", "/images/studio-lifestyle.jpg", "Designed spaces for brand scenes, UGC, and lifestyle content.", "4/3"],
               ["06", "Lighting Ready", "/images/studio-lighting.jpg", "Flexible lighting setups for fast content production.", "4/3"],
             ] as const).map(([num, item, image, subtitle, ratio]) => (
-              <div key={item} className="group relative overflow-hidden rounded-[28px] shadow-sm transition hover:shadow-lg" style={{ aspectRatio: ratio }}>
-                <SafeImage alt={item} className="absolute inset-0 h-full w-full" fallback="dark" src={image} />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#06111F]/80 via-[#06111F]/10 to-transparent" />
-                <div className="relative flex h-full flex-col justify-end p-4 md:p-5">
+              <div key={item} className="group relative overflow-hidden rounded-[28px] shadow-sm transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-2xl" style={{ aspectRatio: ratio }}>
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#06111F]/20 to-[#0B7CFF]/10" />
+                  <img alt={item} className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" src={image} />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#06111F]/80 via-[#06111F]/10 to-transparent transition-opacity duration-500 group-hover:from-[#06111F]/90" />
+                <div className="relative z-10 flex h-full flex-col justify-end p-4 transition-transform duration-500 group-hover:-translate-y-0.5 md:p-5">
                   <p className="text-2xl font-black text-white/30 md:text-3xl">{num}</p>
                   <p className="mt-1 text-lg font-black uppercase leading-none tracking-[-0.04em] text-white md:mt-2 md:text-xl">{item}</p>
                   <p className="mt-0.5 max-w-[180px] text-[11px] leading-snug text-white/60 md:mt-1 md:max-w-[200px] md:text-xs">{subtitle}</p>
