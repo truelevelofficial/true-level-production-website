@@ -300,15 +300,22 @@ export default async function Home() {
               <Button href="#work" variant="secondary">See The Setups</Button>
             </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-6">
-            {studioSetups.map(([num, item, image, subtitle], index) => (
-              <div key={item} className={`${index === 0 || index === 3 ? "sm:col-span-4" : index === 1 || index === 2 ? "sm:col-span-2" : "sm:col-span-3"} relative min-h-[280px] overflow-hidden rounded-[2rem] transition hover:-rotate-1`}>
+          <div className="grid grid-cols-2 gap-4 md:gap-5">
+            {([
+              ["01", "Cyclorama", "/images/studio-cyclorama.jpg", "Clean curved wall studio for reels, product shoots, and campaigns.", "3/5"],
+              ["02", "Creator Corners", "/images/studio-creator-corner.jpg", "Ready-made creator setups for talking-head reels and social content.", "4/5"],
+              ["03", "Product Zone", "/images/studio-product-zone.jpg", "Product shooting setup for beauty, food, fashion, and e-commerce brands.", "4/5"],
+              ["04", "Podcast Look", "/images/studio-podcast.jpg", "Cozy podcast-style setup with seating, mic, and warm background.", "16/9"],
+              ["05", "Lifestyle Setups", "/images/studio-lifestyle.jpg", "Designed spaces for brand scenes, UGC, and lifestyle content.", "4/3"],
+              ["06", "Lighting Ready", "/images/studio-lighting.jpg", "Flexible lighting setups for fast content production.", "4/3"],
+            ] as const).map(([num, item, image, subtitle, ratio]) => (
+              <div key={item} className="group relative overflow-hidden rounded-[28px] shadow-sm transition hover:shadow-lg" style={{ aspectRatio: ratio }}>
                 <SafeImage alt={item} className="absolute inset-0 h-full w-full" fallback="dark" src={image} />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#06111F]/70 via-[#06111F]/10 to-transparent" />
-                <div className="relative flex h-full min-h-[280px] flex-col justify-end p-6">
-                  <p className="text-4xl font-black text-white/40">{num}</p>
-                  <p className="mt-3 text-2xl font-black uppercase leading-none tracking-[-0.05em] text-white">{item}</p>
-                  <p className="mt-2 max-w-[220px] text-sm leading-snug text-white/65">{subtitle}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#06111F]/80 via-[#06111F]/10 to-transparent" />
+                <div className="relative flex h-full flex-col justify-end p-4 md:p-5">
+                  <p className="text-2xl font-black text-white/30 md:text-3xl">{num}</p>
+                  <p className="mt-1 text-lg font-black uppercase leading-none tracking-[-0.04em] text-white md:mt-2 md:text-xl">{item}</p>
+                  <p className="mt-0.5 max-w-[180px] text-[11px] leading-snug text-white/60 md:mt-1 md:max-w-[200px] md:text-xs">{subtitle}</p>
                 </div>
               </div>
             ))}
