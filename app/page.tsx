@@ -364,8 +364,8 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl px-5 py-20 md:py-24">
           <div className="mb-10 max-w-3xl">
             <SectionLabel>Packages</SectionLabel>
-            <h2 className="text-5xl font-black uppercase leading-[0.78] tracking-[-0.075em] md:text-8xl">Choose the production setup that fits your next campaign.</h2>
-            <p className="mt-4 max-w-xl text-lg leading-8 text-[#06111F]/58">Flexible packages for creators, brands, studio shoots, and monthly content.</p>
+            <h2 className="text-5xl font-black uppercase leading-[0.78] tracking-[-0.075em] md:text-8xl">Pick your<br />production mode.</h2>
+            <p className="mt-4 max-w-xl text-lg leading-8 text-[#06111F]/58">From studio sessions to full campaign production, choose the setup that matches your brief, timeline, and content goals.</p>
           </div>
           <FlowingMenu
             items={[
