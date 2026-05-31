@@ -369,11 +369,11 @@ export default async function Home() {
           </div>
           <FlowingMenu
             items={[
-                { link: "#book", text: "Studio Rent Package", image: "" },
-                { link: "#book", text: "Content Creators Campaign", image: "" },
-                { link: "#book", text: "Event Production", image: "" },
-                { link: "#book", text: "UGC Campaign", image: "" },
-                { link: "#book", text: "Monthly Marketing Campaign", image: "" },
+                { link: "/packages/studio-rent", text: "Studio Rent Package", image: "" },
+                { link: "/packages/content-creators-campaign", text: "Content Creators Campaign", image: "" },
+                { link: "/packages/event-production", text: "Event Production", image: "" },
+                { link: "/packages/ugc-campaign", text: "UGC Campaign", image: "" },
+                { link: "/packages/monthly-marketing-campaign", text: "Monthly Marketing Campaign", image: "" },
               ]}
             speed={16}
             textColor="#07111f"
