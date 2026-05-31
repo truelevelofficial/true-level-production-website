@@ -33,15 +33,12 @@ export default function FlowingMenu({
   speed = 16,
   textColor = "#07111f",
   bgColor = "#ffffff",
-  marqueeBgColor = "#1683ff",
   marqueeTextColor = "#ffffff",
   borderColor = "rgba(7, 17, 31, 0.12)",
 }: FlowingMenuProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const marqueeRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const itemRefs = useRef<(HTMLElement | null)[]>([]);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
-  const hoveredIndex = useRef<number | null>(null);
 
   const getGradient = (index: number) => {
     const gradients = [
@@ -59,7 +56,7 @@ export default function FlowingMenu({
       const marquee = marqueeRefs.current[index];
       if (!marquee) return;
       const text = items[index].text;
-      const cloneCount = 6;
+      const cloneCount = 8;
       marquee.innerHTML = "";
       for (let i = 0; i < cloneCount; i++) {
         const span = document.createElement("span");
@@ -88,29 +85,8 @@ export default function FlowingMenu({
     const tl = gsap.timeline({ paused: true });
     tlRef.current = tl;
 
-    itemRefs.current.forEach((item, i) => {
-      if (!item) return;
-      const overlay = item.querySelector(".flowing-menu__overlay") as HTMLElement;
-      const content = item.querySelector(".flowing-menu__content") as HTMLElement;
-      const marquee = marqueeRefs.current[i];
-      if (!overlay || !content || !marquee) return;
-
-      tl.to(
-        overlay,
-        { opacity: 1, duration: 0.35, ease: "power2.out" },
-        0
-      );
-      tl.to(
-        content,
-        { opacity: 0, duration: 0.2, ease: "power2.out" },
-        0
-      );
-      tl.to(
-        marquee,
-        { opacity: 1, duration: 0.3, ease: "power2.out" },
-        0.1
-      );
-
+    marqueeRefs.current.forEach((marquee, i) => {
+      if (!marquee) return;
       const marqueeTexts = marquee.querySelectorAll(".flowing-menu__marquee-text");
       if (marqueeTexts.length) {
         tl.to(
@@ -121,7 +97,7 @@ export default function FlowingMenu({
             ease: "none",
             repeat: -1,
           },
-          0.2
+          0
         );
       }
     });
@@ -131,62 +107,30 @@ export default function FlowingMenu({
     };
   }, [items, speed]);
 
-  const handleMouseEnter = useCallback(
+  const startMarquee = useCallback(
     (index: number) => {
-      hoveredIndex.current = index;
-      itemRefs.current.forEach((item, i) => {
-        if (!item) return;
-        const overlay = item.querySelector(".flowing-menu__overlay") as HTMLElement;
-        const content = item.querySelector(".flowing-menu__content") as HTMLElement;
-        const marquee = marqueeRefs.current[i];
-        if (!overlay || !content || !marquee) return;
-
-        if (i === index) {
-          gsap.to(overlay, { opacity: 1, duration: 0.35, ease: "power2.out" });
-          gsap.to(content, { opacity: 0, duration: 0.2, ease: "power2.out" });
-          gsap.to(marquee, { opacity: 1, duration: 0.3, ease: "power2.out" });
-
-          const marqueeTexts = marquee.querySelectorAll(".flowing-menu__marquee-text");
-          marqueeTexts.forEach((mt) => {
-            gsap.to(mt, {
-              xPercent: -50,
-              duration: speed,
-              ease: "none",
-              repeat: -1,
-            });
-          });
-        } else {
-          gsap.to(overlay, { opacity: 0, duration: 0.25, ease: "power2.out" });
-          gsap.to(content, { opacity: 1, duration: 0.2, ease: "power2.out" });
-          gsap.to(marquee, { opacity: 0, duration: 0.2, ease: "power2.out" });
-          const marqueeTexts = marquee.querySelectorAll(".flowing-menu__marquee-text");
-          marqueeTexts.forEach((mt) => {
-            gsap.killTweensOf(mt);
-            gsap.set(mt, { xPercent: 0 });
-          });
-        }
+      const marquee = marqueeRefs.current[index];
+      if (!marquee) return;
+      const marqueeTexts = marquee.querySelectorAll(".flowing-menu__marquee-text");
+      marqueeTexts.forEach((mt) => {
+        gsap.to(mt, {
+          xPercent: -50,
+          duration: speed,
+          ease: "none",
+          repeat: -1,
+        });
       });
     },
     [speed]
   );
 
-  const handleMouseLeave = useCallback(() => {
-    hoveredIndex.current = null;
-    itemRefs.current.forEach((item, i) => {
-      if (!item) return;
-      const overlay = item.querySelector(".flowing-menu__overlay") as HTMLElement;
-      const content = item.querySelector(".flowing-menu__content") as HTMLElement;
-      const marquee = marqueeRefs.current[i];
-      if (!overlay || !content || !marquee) return;
-
-      gsap.to(overlay, { opacity: 0, duration: 0.3, ease: "power2.out" });
-      gsap.to(content, { opacity: 1, duration: 0.25, ease: "power2.out" });
-      gsap.to(marquee, { opacity: 0, duration: 0.25, ease: "power2.out" });
-      const marqueeTexts = marquee.querySelectorAll(".flowing-menu__marquee-text");
-      marqueeTexts.forEach((mt) => {
-        gsap.killTweensOf(mt);
-        gsap.set(mt, { xPercent: 0 });
-      });
+  const stopMarquee = useCallback((index: number) => {
+    const marquee = marqueeRefs.current[index];
+    if (!marquee) return;
+    const marqueeTexts = marquee.querySelectorAll(".flowing-menu__marquee-text");
+    marqueeTexts.forEach((mt) => {
+      gsap.killTweensOf(mt);
+      gsap.set(mt, { xPercent: 0 });
     });
   }, []);
 
@@ -198,9 +142,8 @@ export default function FlowingMenu({
           href={item.link}
           className="flowing-menu__item"
           style={{ borderColor, backgroundColor: bgColor }}
-          onMouseEnter={() => handleMouseEnter(i)}
-          onMouseLeave={handleMouseLeave}
-          ref={(el) => { itemRefs.current[i] = el; }}
+          onMouseEnter={() => startMarquee(i)}
+          onMouseLeave={() => stopMarquee(i)}
         >
           <div className="flowing-menu__overlay" style={{ background: getGradient(i) }} />
           <div
@@ -212,7 +155,7 @@ export default function FlowingMenu({
             <span className="flowing-menu__number">0{i + 1}</span>
             <span className="flowing-menu__label">{item.text}</span>
             <span className="flowing-menu__arrow">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12" />
                 <polyline points="12 5 19 12 12 19" />
               </svg>

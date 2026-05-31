@@ -12,14 +12,13 @@
   border-bottom-width: 1px;
   border-bottom-style: solid;
   text-decoration: none;
-  transition: none;
   cursor: pointer;
-  min-height: 100px;
+  min-height: 78px;
 }
 
 @media (min-width: 768px) {
   .flowing-menu__item {
-    min-height: 120px;
+    min-height: 88px;
   }
 }
 
@@ -31,32 +30,44 @@
 .flowing-menu__overlay {
   position: absolute;
   inset: 0;
+  z-index: 2;
   opacity: 0;
+  transition: opacity 0.3s ease;
   pointer-events: none;
+}
+
+.flowing-menu__item:hover .flowing-menu__overlay {
+  opacity: 1;
 }
 
 .flowing-menu__marquee {
   position: absolute;
   inset: 0;
+  z-index: 3;
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 48px;
   opacity: 0;
   overflow: hidden;
   pointer-events: none;
   white-space: nowrap;
-  font-size: 48px;
+  font-size: 32px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -0.03em;
-  padding-left: 30px;
+  padding: 0 32px;
+  transition: opacity 0.25s ease;
+}
+
+.flowing-menu__item:hover .flowing-menu__marquee {
+  opacity: 1;
 }
 
 @media (max-width: 768px) {
   .flowing-menu__marquee {
-    font-size: 28px;
-    gap: 24px;
-    padding-left: 18px;
+    font-size: 22px;
+    gap: 32px;
+    padding: 0 18px;
   }
 }
 
@@ -67,9 +78,9 @@
 
 .flowing-menu__marquee-dot {
   display: inline-block;
-  font-size: 10px;
+  font-size: 8px;
   opacity: 0.5;
-  margin: 0 8px;
+  margin: 0 12px;
   vertical-align: middle;
 }
 
@@ -79,34 +90,39 @@
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 24px 30px;
+  padding: 18px 24px;
   gap: 16px;
+  transition: opacity 0.2s ease;
+}
+
+.flowing-menu__item:hover .flowing-menu__content {
+  opacity: 0;
 }
 
 @media (max-width: 768px) {
   .flowing-menu__content {
-    padding: 18px 18px;
+    padding: 14px 16px;
     gap: 12px;
   }
 }
 
 .flowing-menu__number {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 900;
-  opacity: 0.3;
-  width: 36px;
+  opacity: 0.25;
+  width: 32px;
   flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
   .flowing-menu__number {
-    width: 28px;
-    font-size: 12px;
+    width: 24px;
+    font-size: 11px;
   }
 }
 
 .flowing-menu__label {
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -0.04em;
@@ -116,7 +132,7 @@
 
 @media (max-width: 768px) {
   .flowing-menu__label {
-    font-size: 20px;
+    font-size: 18px;
   }
 }
 
@@ -124,22 +140,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   border: 1.5px solid;
-  opacity: 0.25;
+  opacity: 0.2;
   flex-shrink: 0;
   transition: opacity 0.2s ease;
 }
 
 .flowing-menu__item:hover .flowing-menu__arrow {
-  opacity: 1;
+  opacity: 0;
 }
 
 @media (max-width: 768px) {
   .flowing-menu__arrow {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
   }
 }
