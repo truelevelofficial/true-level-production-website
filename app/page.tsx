@@ -1,7 +1,6 @@
 import {
   ArrowRight,
   Camera,
-  CheckCircle2,
   Clapperboard,
   Film,
   Lightbulb,
@@ -21,6 +20,7 @@ import { getSessionEmail, isAdminAuthenticated } from "@/lib/auth";
 import { UserMenu } from "@/components/user-menu";
 import { SafeImage } from "@/components/safe-image";
 import TrueFocus from "@/components/TrueFocus";
+import FlowingMenu from "@/components/FlowingMenu";
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -104,24 +104,6 @@ const workItems = [
   ["Studio Sessions", "Cyclorama shoots, creators, podcasts, and content days."],
   ["Digital Visuals", "Campaign posts, ad creatives, thumbnails, and key visuals."],
   ["Content Strategy", "Concepts, scripts, moodboards, and full content planning."],
-] as const;
-
-const packages = [
-  {
-    name: "Studio Day",
-    best: "For brands and creators",
-    points: ["Cyclorama or setup location", "Lighting-ready space", "Shoot support available"],
-  },
-  {
-    name: "Content Sprint",
-    best: "For high-output reels",
-    points: ["Creative concepts", "One shoot day", "Multiple edited videos"],
-  },
-  {
-    name: "Campaign Build",
-    best: "For products and launches",
-    points: ["Campaign idea", "Production plan", "UGC and ad-ready assets"],
-  },
 ] as const;
 
 function Button({ children, variant = "primary", href }: ButtonProps) {
@@ -379,28 +361,27 @@ export default async function Home() {
       </section>
 
       <section id="packages" className="scroll-mt-28 border-y border-[#06111F]/10 bg-white">
-        <div className="mx-auto max-w-7xl px-5 py-24">
-          <div className="mb-12 max-w-3xl">
-            <SectionLabel>Production Lanes</SectionLabel>
-            <h2 className="text-5xl font-black uppercase leading-[0.78] tracking-[-0.075em] md:text-8xl">Pick the format. We build the output.</h2>
+        <div className="mx-auto max-w-7xl px-5 py-20 md:py-24">
+          <div className="mb-10 max-w-3xl">
+            <SectionLabel>Packages</SectionLabel>
+            <h2 className="text-5xl font-black uppercase leading-[0.78] tracking-[-0.075em] md:text-8xl">Choose the production setup that fits your next campaign.</h2>
+            <p className="mt-4 max-w-xl text-lg leading-8 text-[#06111F]/58">Flexible packages for creators, brands, studio shoots, and monthly content.</p>
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {packages.map((pack) => (
-              <div key={pack.name} className="rounded-[2.2rem] border border-[#06111F]/10 bg-[#F7F8FB] p-7 transition hover:-translate-y-2 hover:border-[#0B7CFF]/40 hover:bg-white hover:shadow-2xl hover:shadow-blue-950/10">
-                <p className="text-sm font-black uppercase tracking-[0.16em] text-[#0B7CFF]">{pack.best}</p>
-                <h3 className="mt-5 text-4xl font-black uppercase leading-none tracking-[-0.06em]">{pack.name}</h3>
-                <div className="mt-8 grid gap-4">
-                  {pack.points.map((point) => (
-                    <div key={point} className="flex items-center gap-3 text-[#06111F]/65">
-                      <CheckCircle2 className="text-[#0B7CFF]" size={18} />
-                      <span>{point}</span>
-                    </div>
-                  ))}
-                </div>
-                <a className="mt-8 inline-flex w-full justify-center rounded-full border border-[#06111F]/10 bg-white px-5 py-4 text-xs font-black uppercase tracking-[0.18em] hover:bg-[#0B7CFF] hover:text-white" href="/book/meeting">Request Package</a>
-              </div>
-            ))}
-          </div>
+          <FlowingMenu
+            items={[
+              { link: "#book", text: "Studio Starter", image: "" },
+              { link: "#book", text: "Creator Reels", image: "" },
+              { link: "#book", text: "Brand Production", image: "" },
+              { link: "#book", text: "UGC Campaign", image: "" },
+              { link: "#book", text: "Monthly Content", image: "" },
+            ]}
+            speed={16}
+            textColor="#07111f"
+            bgColor="#ffffff"
+            marqueeBgColor="#1683ff"
+            marqueeTextColor="#ffffff"
+            borderColor="rgba(7, 17, 31, 0.12)"
+          />
         </div>
       </section>
 

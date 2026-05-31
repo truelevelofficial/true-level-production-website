@@ -1,0 +1,145 @@
+.flowing-menu {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.flowing-menu__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  text-decoration: none;
+  transition: none;
+  cursor: pointer;
+  min-height: 100px;
+}
+
+@media (min-width: 768px) {
+  .flowing-menu__item {
+    min-height: 120px;
+  }
+}
+
+.flowing-menu__item:first-child {
+  border-top-width: 1px;
+  border-top-style: solid;
+}
+
+.flowing-menu__overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.flowing-menu__marquee {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+  font-size: 48px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  padding-left: 30px;
+}
+
+@media (max-width: 768px) {
+  .flowing-menu__marquee {
+    font-size: 28px;
+    gap: 24px;
+    padding-left: 18px;
+  }
+}
+
+.flowing-menu__marquee-text {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.flowing-menu__marquee-dot {
+  display: inline-block;
+  font-size: 10px;
+  opacity: 0.5;
+  margin: 0 8px;
+  vertical-align: middle;
+}
+
+.flowing-menu__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 24px 30px;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .flowing-menu__content {
+    padding: 18px 18px;
+    gap: 12px;
+  }
+}
+
+.flowing-menu__number {
+  font-size: 14px;
+  font-weight: 900;
+  opacity: 0.3;
+  width: 36px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .flowing-menu__number {
+    width: 28px;
+    font-size: 12px;
+  }
+}
+
+.flowing-menu__label {
+  font-size: 32px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .flowing-menu__label {
+    font-size: 20px;
+  }
+}
+
+.flowing-menu__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  opacity: 0.25;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+}
+
+.flowing-menu__item:hover .flowing-menu__arrow {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .flowing-menu__arrow {
+    width: 36px;
+    height: 36px;
+  }
+}
