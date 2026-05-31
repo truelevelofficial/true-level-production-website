@@ -888,3 +888,259 @@ export async function runCalendarDiagnosticAction(): Promise<{ steps: { step: st
   const steps = await diagnoseGoogleCalendar();
   return { steps };
 }
+
+// ─── Workflow: Team Members ───
+
+export async function createTeamMemberAction(formData: FormData) {
+  await requireAdmin();
+  const name = formData.get("name") as string;
+  if (!name?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.teamMember.create({ data: { name: name.trim(), role: (formData.get("role") as string) || null, department: (formData.get("department") as string) || null, email: (formData.get("email") as string) || null, phone: (formData.get("phone") as string) || null, notes: (formData.get("notes") as string) || null } });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+export async function updateTeamMemberAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    const data: Record<string, unknown> = {};
+    for (const key of ["name", "role", "department", "email", "phone", "notes"]) {
+      const v = formData.get(key) as string;
+      if (v !== null) data[key] = v.trim() || null;
+    }
+    await prisma.teamMember.update({ where: { id }, data });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+export async function toggleTeamMemberActiveAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    const member = await prisma.teamMember.findUnique({ where: { id } });
+    if (!member) return;
+    await prisma.teamMember.update({ where: { id }, data: { active: !member.active } });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+// ─── Workflow: Projects ───
+
+export async function createWorkflowProjectAction(formData: FormData) {
+  await requireAdmin();
+  const title = formData.get("title") as string;
+  if (!title?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.workflowProject.create({
+      data: {
+        title: title.trim(),
+        clientName: (formData.get("clientName") as string) || null,
+        serviceType: (formData.get("serviceType") as string) || null,
+        stage: (formData.get("stage") as string) || "NEW_LEAD",
+        priority: (formData.get("priority") as string) || "NORMAL",
+        ownerId: (formData.get("ownerId") as string) || null,
+        dueDate: (formData.get("dueDate") as string) ? new Date(formData.get("dueDate") as string) : null,
+        notes: (formData.get("notes") as string) || null,
+        quotationId: (formData.get("quotationId") as string) || null,
+        contractId: (formData.get("contractId") as string) || null,
+        invoiceId: (formData.get("invoiceId") as string) || null,
+        bookingId: (formData.get("bookingId") as string) || null,
+      },
+    });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+export async function updateWorkflowProjectAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    const data: Record<string, unknown> = {};
+    for (const key of ["title", "clientName", "serviceType", "stage", "priority", "notes", "quotationId", "contractId", "invoiceId", "bookingId"]) {
+      const v = formData.get(key) as string;
+      if (v !== null) data[key] = v.trim() || null;
+    }
+    const ownerId = formData.get("ownerId") as string;
+    if (ownerId !== null) data.ownerId = ownerId || null;
+    const dueDate = formData.get("dueDate") as string;
+    if (dueDate !== null) data.dueDate = dueDate ? new Date(dueDate) : null;
+    await prisma.workflowProject.update({ where: { id }, data });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+export async function updateWorkflowStageAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  const stage = formData.get("stage") as string;
+  if (!id || !stage) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.workflowProject.update({ where: { id }, data: { stage } });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+export async function archiveWorkflowProjectAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.workflowProject.update({ where: { id }, data: { archived: true } });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+// ─── Workflow: Tasks ───
+
+export async function createWorkflowTaskAction(formData: FormData) {
+  await requireAdmin();
+  const title = formData.get("title") as string;
+  if (!title?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.workflowTask.create({
+      data: {
+        title: title.trim(),
+        description: (formData.get("description") as string) || null,
+        projectId: (formData.get("projectId") as string) || null,
+        assigneeId: (formData.get("assigneeId") as string) || null,
+        department: (formData.get("department") as string) || null,
+        status: (formData.get("status") as string) || "TODO",
+        priority: (formData.get("priority") as string) || "NORMAL",
+        dueDate: (formData.get("dueDate") as string) ? new Date(formData.get("dueDate") as string) : null,
+        notes: (formData.get("notes") as string) || null,
+      },
+    });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+export async function updateWorkflowTaskAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    const data: Record<string, unknown> = {};
+    for (const key of ["title", "description", "department", "status", "priority", "notes"]) {
+      const v = formData.get(key) as string;
+      if (v !== null) data[key] = v.trim() || null;
+    }
+    const projectId = formData.get("projectId") as string;
+    if (projectId !== null) data.projectId = projectId || null;
+    const assigneeId = formData.get("assigneeId") as string;
+    if (assigneeId !== null) data.assigneeId = assigneeId || null;
+    const dueDate = formData.get("dueDate") as string;
+    if (dueDate !== null) data.dueDate = dueDate ? new Date(dueDate) : null;
+    if (data.status === "DONE") data.completedAt = new Date();
+    await prisma.workflowTask.update({ where: { id }, data });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+export async function deleteWorkflowTaskAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.workflowTask.delete({ where: { id } });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+// ─── Workflow: Approvals ───
+
+export async function createApprovalAction(formData: FormData) {
+  await requireAdmin();
+  const title = formData.get("title") as string;
+  if (!title?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.workflowApproval.create({
+      data: {
+        title: title.trim(),
+        projectId: (formData.get("projectId") as string) || null,
+        clientName: (formData.get("clientName") as string) || null,
+        status: (formData.get("status") as string) || "NOT_SENT",
+        sentDate: (formData.get("sentDate") as string) ? new Date(formData.get("sentDate") as string) : null,
+        dueDate: (formData.get("dueDate") as string) ? new Date(formData.get("dueDate") as string) : null,
+        notes: (formData.get("notes") as string) || null,
+      },
+    });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+export async function updateApprovalStatusAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  const status = formData.get("status") as string;
+  if (!id || !status) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.workflowApproval.update({ where: { id }, data: { status, notes: (formData.get("notes") as string) || null } });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+// ─── Workflow: Deliveries ───
+
+export async function createDeliveryAction(formData: FormData) {
+  await requireAdmin();
+  const title = formData.get("title") as string;
+  if (!title?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.workflowDelivery.create({
+      data: {
+        title: title.trim(),
+        projectId: (formData.get("projectId") as string) || null,
+        deliverableType: (formData.get("deliverableType") as string) || null,
+        deliveryLink: (formData.get("deliveryLink") as string) || null,
+        status: (formData.get("status") as string) || "PREPARING",
+        deliveryDate: (formData.get("deliveryDate") as string) ? new Date(formData.get("deliveryDate") as string) : null,
+        notes: (formData.get("notes") as string) || null,
+      },
+    });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+export async function updateDeliveryStatusAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  const status = formData.get("status") as string;
+  if (!id || !status) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.workflowDelivery.update({ where: { id }, data: { status, notes: (formData.get("notes") as string) || null } });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}

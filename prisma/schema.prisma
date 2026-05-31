@@ -407,3 +407,88 @@ model Task {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }
+
+model TeamMember {
+  id         String           @id @default(cuid())
+  name       String
+  role       String?
+  department String?
+  email      String?
+  phone      String?
+  active     Boolean          @default(true)
+  notes      String?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  tasks      WorkflowTask[]
+  projects   WorkflowProject[] @relation("ProjectOwner")
+}
+
+model WorkflowProject {
+  id          String             @id @default(cuid())
+  title       String
+  clientId    String?
+  clientName  String?
+  serviceType String?
+  stage       String             @default("NEW_LEAD")
+  priority    String             @default("NORMAL")
+  ownerId     String?
+  dueDate     DateTime?
+  notes       String?
+  quotationId String?
+  contractId  String?
+  invoiceId   String?
+  bookingId   String?
+  archived    Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  owner       TeamMember?        @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  tasks       WorkflowTask[]
+  approvals   WorkflowApproval[]
+  deliveries  WorkflowDelivery[]
+}
+
+model WorkflowTask {
+  id          String          @id @default(cuid())
+  title       String
+  description String?
+  projectId   String?
+  assigneeId  String?
+  department  String?
+  status      String          @default("TODO")
+  priority    String          @default("NORMAL")
+  dueDate     DateTime?
+  notes       String?
+  completedAt DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  project     WorkflowProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  assignee    TeamMember?     @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+}
+
+model WorkflowApproval {
+  id         String          @id @default(cuid())
+  projectId  String?
+  title      String
+  clientName String?
+  status     String          @default("NOT_SENT")
+  sentDate   DateTime?
+  dueDate    DateTime?
+  notes      String?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  project    WorkflowProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}
+
+model WorkflowDelivery {
+  id              String          @id @default(cuid())
+  projectId       String?
+  title           String
+  deliverableType String?
+  deliveryLink    String?
+  status          String          @default("PREPARING")
+  deliveryDate    DateTime?
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  project         WorkflowProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}

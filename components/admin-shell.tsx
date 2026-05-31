@@ -7,6 +7,7 @@ import { AdminBlurToggle } from "./admin-blur-toggle";
 
 const links = [
   ["/admin/bookings", "Management"],
+  ["/admin/workflow", "Work Flow"],
   ["/admin/analytics", "Analytics"],
   ["/admin/meetings", "Meetings"],
   ["/admin/studio", "Studio"],

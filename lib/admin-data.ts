@@ -185,4 +185,91 @@ export async function getInvoiceById(id: string) {
   }
 }
 
+// ─── Workflow Data ───
+import type { TeamMember, WorkflowProject, WorkflowTask, WorkflowApproval, WorkflowDelivery } from "@prisma/client";
+
+export async function getTeamMembers(): Promise<TeamMember[]> {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.teamMember.findMany({ orderBy: { name: "asc" }, take: 100 });
+  } catch { return []; }
+}
+
+export async function getWorkflowProjects(archived = false): Promise<(WorkflowProject & { owner: TeamMember | null; tasks: WorkflowTask[]; approvals: WorkflowApproval[]; deliveries: WorkflowDelivery[] })[]> {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.workflowProject.findMany({
+      where: { archived },
+      include: { owner: true, tasks: true, approvals: true, deliveries: true },
+      orderBy: { updatedAt: "desc" },
+      take: 200,
+    }) as any;
+  } catch { return []; }
+}
+
+export async function getWorkflowTasks(filters: { status?: string; projectId?: string; assigneeId?: string; priority?: string } = {}): Promise<(WorkflowTask & { assignee: TeamMember | null; project: WorkflowProject | null })[]> {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const where: Record<string, unknown> = {};
+    if (filters.status) where.status = filters.status;
+    if (filters.projectId) where.projectId = filters.projectId;
+    if (filters.assigneeId) where.assigneeId = filters.assigneeId;
+    if (filters.priority) where.priority = filters.priority;
+    return await prisma.workflowTask.findMany({
+      where,
+      include: { assignee: true, project: true },
+      orderBy: [{ priority: "asc" }, { dueDate: "asc" }],
+      take: 200,
+    }) as any;
+  } catch { return []; }
+}
+
+export async function getWorkflowApprovals(): Promise<(WorkflowApproval & { project: WorkflowProject | null })[]> {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.workflowApproval.findMany({
+      include: { project: true },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    }) as any;
+  } catch { return []; }
+}
+
+export async function getWorkflowDeliveries(): Promise<(WorkflowDelivery & { project: WorkflowProject | null })[]> {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.workflowDelivery.findMany({
+      include: { project: true },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    }) as any;
+  } catch { return []; }
+}
+
+export async function getWorkflowOverview() {
+  const prisma = getPrisma();
+  if (!prisma) return null;
+  try {
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const [activeProjects, pendingTasks, todayShoots, waitingApproval, inEditing, readyDelivery, overdueTasks, completedThisMonth] = await Promise.all([
+      prisma.workflowProject.count({ where: { archived: false, stage: { notIn: ["COMPLETED", "ARCHIVED"] } } }),
+      prisma.workflowTask.count({ where: { status: { in: ["TODO", "IN_PROGRESS"] } } }),
+      prisma.workflowProject.count({ where: { stage: "SHOOTING", dueDate: { gte: todayStart } } }),
+      prisma.workflowApproval.count({ where: { status: { in: ["SENT_TO_CLIENT", "WAITING_FEEDBACK"] } } }),
+      prisma.workflowProject.count({ where: { stage: "EDITING" } }),
+      prisma.workflowProject.count({ where: { stage: "FINAL_DELIVERY" } }),
+      prisma.workflowTask.count({ where: { status: { notIn: ["DONE", "CANCELLED"] }, dueDate: { lt: todayStart } } }),
+      prisma.workflowProject.count({ where: { stage: "COMPLETED", updatedAt: { gte: monthStart } } }),
+    ]);
+    return { activeProjects, pendingTasks, todayShoots, waitingApproval, inEditing, readyDelivery, overdueTasks, completedThisMonth };
+  } catch { return null; }
+}
+
 export { hasDatabase };
