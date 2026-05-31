@@ -149,14 +149,16 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function LogoMark() {
   return (
-    <Image
-      src="/true-level-production-logo.png"
-      alt="True Level Production"
-      width={220}
-      height={120}
-      priority
-      className="w-[100px] md:w-[140px] max-h-[38px] md:max-h-[52px] object-contain"
-    />
+    <div className="flex items-center pl-5 md:pl-7 translate-y-[1px]">
+      <Image
+        src="/true-level-production-logo.png"
+        alt="True Level Production"
+        width={220}
+        height={120}
+        priority
+        className="max-h-[38px] md:max-h-[52px] w-auto object-contain"
+      />
+    </div>
   );
 }
 
