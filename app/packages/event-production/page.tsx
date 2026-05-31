@@ -40,35 +40,40 @@ function Badge({ children }: { children: React.ReactNode }) {
 
 export default function EventProductionPage() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#06111F] text-white selection:bg-[#0B7CFF] selection:text-white">
-      <div className="pointer-events-none fixed inset-0 z-50 opacity-[0.12] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.08)_1px,transparent_0)] [background-size:22px_22px]" />
+    <main className="min-h-screen overflow-hidden bg-[#F7F8FB] text-[#06111F] selection:bg-[#0B7CFF] selection:text-white">
+      <div className="pointer-events-none fixed inset-0 z-50 opacity-[0.28] [background-image:radial-gradient(circle_at_1px_1px,rgba(6,17,31,0.16)_1px,transparent_0)] [background-size:22px_22px]" />
 
-      <div className="relative mx-auto max-w-7xl px-5 pb-24 pt-32">
-        <a href="/#packages" className="mb-8 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-white/40 transition hover:text-[#0B7CFF]">← Back to Packages</a>
+      <div className="mx-auto max-w-7xl px-5 pb-24 pt-32">
+        <a href="/#packages" className="mb-8 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-[#06111F]/40 transition hover:text-[#0B7CFF]">← Back to Packages</a>
 
-        <div className="relative overflow-hidden rounded-[2.8rem] bg-gradient-to-br from-[#0B7CFF]/20 via-[#06111F] to-[#06111F] p-10 md:p-16">
-          <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full border-[40px] border-white/5" />
-          <div className="relative">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-center">
+          <div>
             <Badge>Event Coverage</Badge>
-            <h1 className="max-w-4xl text-6xl font-black uppercase leading-[0.78] tracking-[-0.075em] md:text-8xl">Event Production</h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-white/60">Turn live moments into social-ready content, highlight edits, and campaign assets.</p>
-            <a href="/book?package=event-production" className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-[#0B7CFF] px-8 py-4 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-blue-500/20 transition hover:bg-white hover:text-[#06111F] active:scale-95">
+            <h1 className="text-6xl font-black uppercase leading-[0.78] tracking-[-0.075em] md:text-8xl">Event Production</h1>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-[#06111F]/58">Turn live moments into social-ready content, highlight edits, and campaign assets.</p>
+            <a href="/book?package=event-production" className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-[#0B7CFF] px-8 py-4 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-blue-500/20 transition hover:bg-[#06111F] active:scale-95">
               Book Event Production <ArrowRight size={16} />
             </a>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="h-48 rounded-[2rem] bg-gradient-to-br from-[#0B7CFF]/25 to-[#0B7CFF]/5 md:h-64" />
+            <div className="mt-6 h-48 rounded-[2rem] bg-gradient-to-br from-[#06111F]/15 to-[#0B7CFF]/10 md:h-64" />
+            <div className="-mt-6 h-48 rounded-[2rem] bg-gradient-to-br from-[#0B7CFF]/20 to-[#06111F]/5 md:h-64" />
+            <div className="h-48 rounded-[2rem] bg-gradient-to-br from-[#06111F]/20 to-[#0B7CFF]/5 md:h-64" />
           </div>
         </div>
 
         <div className="mt-20">
           <Badge>Coverage Types</Badge>
-          <h2 className="text-4xl font-black uppercase leading-[0.82] tracking-[-0.07em] text-white md:text-6xl">We cover every event.</h2>
+          <h2 className="text-4xl font-black uppercase leading-[0.82] tracking-[-0.07em] md:text-6xl">We cover every event.</h2>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {eventTypes.map((e) => {
               const Icon = e.icon;
               return (
-                <div key={e.title} className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:bg-white/[0.08]">
-                  <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#0B7CFF]/20 text-[#0B7CFF]"><Icon size={22} /></div>
-                  <h3 className="mt-4 text-2xl font-black uppercase leading-none tracking-[-0.04em] text-white">{e.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-white/50">{e.desc}</p>
+                <div key={e.title} className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+                  <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#0B7CFF]/10 text-[#0B7CFF]"><Icon size={22} /></div>
+                  <h3 className="mt-4 text-2xl font-black uppercase leading-none tracking-[-0.04em]">{e.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-[#06111F]/55">{e.desc}</p>
                 </div>
               );
             })}
@@ -77,15 +82,15 @@ export default function EventProductionPage() {
 
         <div className="mt-20">
           <Badge>Production Crew</Badge>
-          <h2 className="text-3xl font-black uppercase leading-[0.82] tracking-[-0.06em] text-white md:text-5xl">The team behind the frame.</h2>
+          <h2 className="text-3xl font-black uppercase leading-[0.82] tracking-[-0.06em] md:text-5xl">The team behind the frame.</h2>
           <div className="mt-10 grid gap-4 md:grid-cols-4">
             {crew.map((c) => {
               const Icon = c.icon;
               return (
-                <div key={c.title} className="rounded-[1.6rem] border border-white/10 bg-white/[0.04] p-5 text-center backdrop-blur">
-                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[#0B7CFF]/20 text-[#0B7CFF]"><Icon size={24} /></div>
-                  <h3 className="mt-4 text-lg font-black uppercase tracking-[-0.02em] text-white">{c.title}</h3>
-                  <p className="mt-2 text-xs leading-5 text-white/50">{c.desc}</p>
+                <div key={c.title} className="rounded-[1.6rem] border border-[#06111F]/10 bg-white p-5 text-center shadow-sm">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[#0B7CFF]/10 text-[#0B7CFF]"><Icon size={24} /></div>
+                  <h3 className="mt-4 text-lg font-black uppercase tracking-[-0.02em]">{c.title}</h3>
+                  <p className="mt-2 text-xs leading-5 text-[#06111F]/55">{c.desc}</p>
                 </div>
               );
             })}
@@ -94,21 +99,21 @@ export default function EventProductionPage() {
 
         <div className="mt-20">
           <Badge>Live to Final</Badge>
-          <h2 className="text-3xl font-black uppercase leading-[0.82] tracking-[-0.06em] text-white md:text-5xl">From capture to publish.</h2>
+          <h2 className="text-3xl font-black uppercase leading-[0.82] tracking-[-0.06em] md:text-5xl">From capture to publish.</h2>
           <div className="mt-10 grid gap-4 md:grid-cols-4">
             {process.map((p, i) => (
-              <div key={p.step} className="relative rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 backdrop-blur">
-                <p className="text-5xl font-black text-white/[0.06]">0{i + 1}</p>
-                <h3 className="mt-2 text-2xl font-black uppercase tracking-[-0.04em] text-white">{p.step}</h3>
-                <p className="mt-2 text-sm leading-6 text-white/50">{p.desc}</p>
+              <div key={p.step} className="relative rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm">
+                <p className="text-5xl font-black text-[#06111F]/[0.06]">0{i + 1}</p>
+                <h3 className="mt-2 text-2xl font-black uppercase tracking-[-0.04em]">{p.step}</h3>
+                <p className="mt-2 text-sm leading-6 text-[#06111F]/55">{p.desc}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="mt-20 rounded-[2.8rem] border border-white/10 bg-white/[0.04] p-8 backdrop-blur md:p-12">
+        <div className="mt-20 rounded-[2.8rem] border border-[#06111F]/10 bg-white p-8 shadow-sm md:p-12">
           <Badge>Deliverables</Badge>
-          <h2 className="text-3xl font-black uppercase leading-[0.82] tracking-[-0.06em] text-white md:text-5xl">What you get.</h2>
+          <h2 className="text-3xl font-black uppercase leading-[0.82] tracking-[-0.06em] md:text-5xl">What you get.</h2>
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             {[
               "Highlight video (60–90 seconds)",
@@ -118,7 +123,7 @@ export default function EventProductionPage() {
               "Social media cuts (vertical + horizontal)",
               "Raw footage archive (optional add-on)",
             ].map((d) => (
-              <div key={d} className="flex items-start gap-3 text-white/60">
+              <div key={d} className="flex items-start gap-3 text-[#06111F]/65">
                 <CheckCircle2 className="mt-0.5 shrink-0 text-[#0B7CFF]" size={16} />
                 <span className="text-sm leading-6">{d}</span>
               </div>
