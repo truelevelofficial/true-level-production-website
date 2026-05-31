@@ -309,10 +309,10 @@ export default async function Home() {
               ["05", "Lifestyle Setups", "/images/studio-lifestyle.jpg", "Designed spaces for brand scenes, UGC, and lifestyle content.", "4/3"],
               ["06", "Lighting Ready", "/images/studio-lighting.jpg", "Flexible lighting setups for fast content production.", "4/3"],
             ] as const).map(([num, item, image, subtitle, ratio]) => (
-              <div key={item} className="group relative overflow-hidden rounded-[28px] shadow-sm transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-2xl" style={{ aspectRatio: ratio }}>
+              <div key={item} className="group relative overflow-hidden rounded-[28px] shadow-sm transition-all duration-500 ease-out hover:z-20 hover:-translate-x-3 hover:scale-[1.035] hover:shadow-2xl" style={{ aspectRatio: ratio }}>
                 <div className="absolute inset-0 overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#06111F]/20 to-[#0B7CFF]/10" />
-                  <img alt={item} className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" src={image} />
+                  <img alt={item} className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.07]" src={image} />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-[#06111F]/80 via-[#06111F]/10 to-transparent transition-opacity duration-500 group-hover:from-[#06111F]/90" />
                 <div className="relative z-10 flex h-full flex-col justify-end p-4 transition-transform duration-500 group-hover:-translate-y-0.5 md:p-5">
