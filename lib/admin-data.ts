@@ -30,7 +30,8 @@ export async function getAdminSummary() {
     const monthCost = monthExpenses.reduce((sum, item) => sum + Number(item.amount), 0);
     const pendingPayments = pendingBalances.reduce((sum, item) => sum + Number(item.remainingAmount ?? 0), 0);
     return { bookings, clients, revenue, expenses: cost, pending, approved, completed, cancelled, profit: revenue - cost, pendingPayments, todayMeetings, monthStudioBookings, monthRevenue, monthExpenses: monthCost };
-  } catch {
+  } catch (error) {
+    console.error("getAdminSummary FAILED", error);
     return null;
   }
 }
@@ -40,7 +41,8 @@ export async function getBookings(where: Record<string, unknown> = {}) {
   if (!prisma) return [];
   try {
     return await prisma.booking.findMany({ where, include: { client: true }, orderBy: { createdAt: "desc" }, take: 200 });
-  } catch {
+  } catch (error) {
+    console.error("getBookings FAILED", error);
     return [];
   }
 }
@@ -58,7 +60,8 @@ export async function getClients() {
       orderBy: { createdAt: "desc" },
       take: 200,
     });
-  } catch {
+  } catch (error) {
+    console.error("getClients FAILED", error);
     return [];
   }
 }
@@ -115,7 +118,8 @@ export async function getUnreadNotificationCount() {
   if (!prisma) return 0;
   try {
     return await prisma.notification.count({ where: { read: false } });
-  } catch {
+  } catch (error) {
+    console.error("getUnreadNotificationCount FAILED", error);
     return 0;
   }
 }
@@ -465,7 +469,7 @@ export async function getUnreadWorkflowNotificationCount() {
   if (!prisma) return 0;
   try {
     return await prisma.workflowNotification.count({ where: { read: false } });
-  } catch { return 0; }
+  } catch (error) { console.error("getUnreadWorkflowNotificationCount FAILED", error); return 0; }
 }
 
 // ─── Approval Requests ───
@@ -644,7 +648,7 @@ export async function getRoles() {
 export async function getPendingTasksCount() {
   const prisma = getPrisma();
   if (!prisma) return 0;
-  try { return await prisma.workflowTask.count({ where: { status: { in: ["TODO", "IN_PROGRESS"] } } }); } catch { return 0; }
+  try { return await prisma.workflowTask.count({ where: { status: { in: ["TODO", "IN_PROGRESS"] } } }); } catch (error) { console.error("getPendingTasksCount FAILED", error); return 0; }
 }
 
 export async function getUpcomingMeetingsCount() {
@@ -653,7 +657,7 @@ export async function getUpcomingMeetingsCount() {
   try {
     const now = new Date();
     return await prisma.booking.count({ where: { type: { in: ["GOOGLE_MEETING", "COMPANY_MEETING"] }, status: { in: ["PENDING", "APPROVED"] }, startTime: { gte: now } } });
-  } catch { return 0; }
+  } catch (error) { console.error("getUpcomingMeetingsCount FAILED", error); return 0; }
 }
 
 export async function getOverdueItemsCount() {
@@ -666,7 +670,7 @@ export async function getOverdueItemsCount() {
       prisma.invoice.count({ where: { paymentStatus: { in: ["UNPAID", "PARTIALLY_PAID"] }, dueDate: { lt: today } } }),
     ]);
     return tasks + invoices;
-  } catch { return 0; }
+  } catch (error) { console.error("getOverdueItemsCount FAILED", error); return 0; }
 }
 
 // ─── Activity Log ───
