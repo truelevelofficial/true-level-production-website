@@ -220,8 +220,23 @@ export default async function DashboardPage() {
       </AdminShell>
     );
   } catch (error) {
-    console.error("DASHBOARD CRASHED", error);
-    return <div className="flex min-h-screen items-center justify-center bg-[#F7F8FB] p-6"><pre className="max-w-4xl overflow-auto whitespace-pre-wrap break-all rounded-2xl border border-red-300 bg-red-50 p-6 text-sm text-red-900">{String(error)}</pre></div>;
+    console.error(error);
+
+    return (
+      <pre style={{ whiteSpace: "pre-wrap" }}>
+        {JSON.stringify(
+          {
+            name: error instanceof Error ? error.name : null,
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : null,
+            digest: (error as any)?.digest ?? null,
+            cause: (error as any)?.cause ?? null
+          },
+          null,
+          2
+        )}
+      </pre>
+    );
   }
 }
 
