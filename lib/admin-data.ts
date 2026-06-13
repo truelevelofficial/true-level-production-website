@@ -274,6 +274,88 @@ export async function getWorkflowOverview() {
 
 // ─── Dashboard Data ───
 
+export type ActivityItem = {
+  id: string;
+  type: "project" | "booking" | "quotation" | "contract";
+  action: string;
+  label: string;
+  subtitle: string;
+  timestamp: Date;
+};
+
+export async function getRecentActivity(limit = 20): Promise<ActivityItem[]> {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const [projects, bookings, quotations, contracts] = await Promise.all([
+      prisma.workflowProject.findMany({ select: { id: true, title: true, stage: true, clientName: true, updatedAt: true }, orderBy: { updatedAt: "desc" }, take: limit }),
+      prisma.booking.findMany({ select: { id: true, type: true, status: true, client: { select: { fullName: true } }, updatedAt: true }, orderBy: { updatedAt: "desc" }, take: limit }),
+      prisma.quotation.findMany({ select: { id: true, quotationNo: true, status: true, client: { select: { fullName: true } }, updatedAt: true }, orderBy: { updatedAt: "desc" }, take: limit }),
+      prisma.contract.findMany({ select: { id: true, title: true, status: true, client: { select: { fullName: true } }, updatedAt: true }, orderBy: { updatedAt: "desc" }, take: limit }),
+    ]);
+    const items: ActivityItem[] = [
+      ...projects.map(p => ({ id: p.id, type: "project" as const, action: `Project ${p.stage?.replace(/_/g, " ")}`, label: p.title, subtitle: p.clientName || "", timestamp: p.updatedAt })),
+      ...bookings.map(b => ({ id: b.id, type: "booking" as const, action: `Booking ${b.status}`, label: `${b.type.replace("_", " ")}`, subtitle: b.client?.fullName || "", timestamp: b.updatedAt })),
+      ...quotations.map(q => ({ id: q.id, type: "quotation" as const, action: `Quotation ${q.status}`, label: q.quotationNo || "", subtitle: q.client?.fullName || "", timestamp: q.updatedAt })),
+      ...contracts.map(c => ({ id: c.id, type: "contract" as const, action: `Contract ${c.status}`, label: c.title, subtitle: c.client?.fullName || "", timestamp: c.updatedAt })),
+    ];
+    return items.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, limit);
+  } catch { return []; }
+}
+
+export async function getUpcomingMeetings(limit = 10) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const now = new Date();
+    return await prisma.booking.findMany({
+      where: { type: { in: ["GOOGLE_MEETING", "COMPANY_MEETING"] }, status: { in: ["PENDING", "APPROVED"] }, startTime: { gte: now } },
+      include: { client: true },
+      orderBy: { startTime: "asc" },
+      take: limit,
+    });
+  } catch { return []; }
+}
+
+export async function getUpcomingShoots(limit = 10) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const now = new Date();
+    return await prisma.booking.findMany({
+      where: { type: "STUDIO", status: { in: ["PENDING", "APPROVED"] }, startTime: { gte: now } },
+      include: { client: true },
+      orderBy: { startTime: "asc" },
+      take: limit,
+    });
+  } catch { return []; }
+}
+
+export async function getPendingQuotationsCount() {
+  const prisma = getPrisma();
+  if (!prisma) return 0;
+  try {
+    return await prisma.quotation.count({ where: { status: { in: ["DRAFT", "SENT"] } } });
+  } catch { return 0; }
+}
+
+export async function searchEntities(q: string) {
+  const prisma = getPrisma();
+  if (!prisma || !q.trim()) return { projects: [], clients: [], bookings: [], quotations: [], contracts: [], tasks: [] };
+  try {
+    const term = q.trim();
+    const [projects, clients, bookings, quotations, contracts, tasks] = await Promise.all([
+      prisma.workflowProject.findMany({ where: { OR: [{ title: { contains: term, mode: "insensitive" } }, { clientName: { contains: term, mode: "insensitive" } }] }, include: { owner: true }, orderBy: { updatedAt: "desc" }, take: 10 }),
+      prisma.client.findMany({ where: { OR: [{ fullName: { contains: term, mode: "insensitive" } }, { companyName: { contains: term, mode: "insensitive" } }, { email: { contains: term, mode: "insensitive" } }] }, orderBy: { updatedAt: "desc" }, take: 10 }),
+      prisma.booking.findMany({ where: { OR: [{ client: { fullName: { contains: term, mode: "insensitive" } } }, { notes: { contains: term, mode: "insensitive" } }] }, include: { client: true }, orderBy: { updatedAt: "desc" }, take: 10 }),
+      prisma.quotation.findMany({ where: { OR: [{ quotationNo: { contains: term, mode: "insensitive" } }, { client: { fullName: { contains: term, mode: "insensitive" } } }] }, include: { client: true }, orderBy: { updatedAt: "desc" }, take: 10 }),
+      prisma.contract.findMany({ where: { OR: [{ title: { contains: term, mode: "insensitive" } }, { client: { fullName: { contains: term, mode: "insensitive" } } }] }, include: { client: true }, orderBy: { updatedAt: "desc" }, take: 10 }),
+      prisma.workflowTask.findMany({ where: { title: { contains: term, mode: "insensitive" } }, include: { project: true, assignee: true }, orderBy: { updatedAt: "desc" }, take: 10 }),
+    ]);
+    return { projects: projects as any, clients, bookings, quotations, contracts, tasks: tasks as any };
+  } catch { return { projects: [], clients: [], bookings: [], quotations: [], contracts: [], tasks: [] }; }
+}
+
 export async function getMonthlyRevenue() {
   const prisma = getPrisma();
   if (!prisma) return [];

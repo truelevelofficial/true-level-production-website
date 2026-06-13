@@ -1,6 +1,6 @@
 import { AdminShell, SetupNotice } from "@/components/admin-shell";
 import { requireAdmin } from "@/lib/auth";
-import { getAdminSummary, getMonthlyRevenue, getRevenueByService, getTopClients, getTodaysSchedule, getTeamWorkload, getWorkflowProjects, hasDatabase } from "@/lib/admin-data";
+import { getAdminSummary, getMonthlyRevenue, getRevenueByService, getTopClients, getTodaysSchedule, getTeamWorkload, getWorkflowProjects, getRecentActivity, getUpcomingMeetings, getPendingQuotationsCount, hasDatabase } from "@/lib/admin-data";
 import Link from "next/link";
 
 function MiniBar({ value, max, color }: { value: number; max: number; color: string }) {
@@ -20,14 +20,17 @@ function StatCard({ label, value, sub, financial }: { label: string; value: stri
 
 export default async function DashboardPage() {
   await requireAdmin();
-  const [summary, monthlyRevenue, revenueByService, topClients, todaySchedule, teamWorkload, projects] = await Promise.all([
-    getAdminSummary(), getMonthlyRevenue(), getRevenueByService(), getTopClients(5), getTodaysSchedule(), getTeamWorkload(), getWorkflowProjects(),
+  const [summary, monthlyRevenue, revenueByService, topClients, todaySchedule, teamWorkload, projects, recentActivity, upcomingMeetings, pendingQuotations] = await Promise.all([
+    getAdminSummary(), getMonthlyRevenue(), getRevenueByService(), getTopClients(5), getTodaysSchedule(), getTeamWorkload(), getWorkflowProjects(), getRecentActivity(15), getUpcomingMeetings(8), getPendingQuotationsCount(),
   ]);
   const noData = !hasDatabase() || !summary;
   const maxMonthlyRev = monthlyRevenue.length > 0 ? Math.max(...monthlyRevenue.map(r => r.revenue)) : 0;
   const maxServiceRev = revenueByService.length > 0 ? Math.max(...revenueByService.map(([, v]) => v)) : 0;
   const services = ["#0B7CFF", "#06D6A0", "#FFD166", "#EF476F", "#118AB2", "#073B4C", "#F78C6B", "#7B2CBF"];
   const activeProjects = projects.filter(p => !p.archived);
+  const activeStageProjects = activeProjects.filter(p => !["DELIVERED", "ARCHIVED"].includes(p.stage));
+  const overheadPct = summary && summary.revenue > 0 ? Math.round((summary.expenses / summary.revenue) * 100) : 0;
+  const teamUtilPct = teamWorkload.length > 0 ? Math.round(teamWorkload.filter(m => m.taskCount > 0).length / teamWorkload.length * 100) : 0;
 
   return (
     <AdminShell title="Dashboard">
@@ -35,12 +38,17 @@ export default async function DashboardPage() {
 
       {summary ? (
         <>
-          <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard label="Revenue" value={`${summary.revenue.toLocaleString()} EGP`} sub={`This month: ${summary.monthRevenue.toLocaleString()} EGP`} financial />
-            <StatCard label="Expenses" value={`${summary.expenses.toLocaleString()} EGP`} sub={`This month: ${summary.monthExpenses.toLocaleString()} EGP`} financial />
+            <StatCard label="Expenses" value={`${summary.expenses.toLocaleString()} EGP`} sub={`Overhead: ${overheadPct}% of revenue`} financial />
             <StatCard label="Net Profit" value={`${summary.profit.toLocaleString()} EGP`} sub={summary.profit >= 0 ? "Profitable" : "Operating at loss"} financial />
+            <StatCard label="Pending Payments" value={`${summary.pendingPayments.toLocaleString()} EGP`} sub="Unpaid / partial" financial />
+          </div>
+          <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard label="Active Projects" value={String(activeStageProjects.length)} sub={`${activeProjects.length} total non-archived`} />
             <StatCard label="Active Clients" value={String(summary.clients)} sub={`${summary.pending} pending bookings`} />
-            <StatCard label="Active Projects" value={String(activeProjects.length)} sub={`${summary.completed} completed`} />
+            <StatCard label="Pending Quotations" value={String(pendingQuotations)} sub="Draft or sent" />
+            <StatCard label="Team Utilization" value={`${teamUtilPct}%`} sub={`${teamWorkload.filter(m => m.taskCount > 0).length}/${teamWorkload.length} members active`} />
           </div>
 
           <div className="mb-6 grid gap-6 lg:grid-cols-2">
@@ -100,17 +108,24 @@ export default async function DashboardPage() {
             <div className="rounded-[1.6rem] border border-[#06111F]/10 bg-white p-5 shadow-sm">
               <p className="mb-4 text-xs font-black uppercase tracking-[0.16em] text-[#06111F]/40">Team Workload</p>
               <div className="grid gap-3">
-                {teamWorkload.length > 0 ? teamWorkload.map((m) => (
-                  <div key={m.id} className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-black uppercase tracking-[-0.02em]">{m.name}</p>
-                      <p className="text-[11px] text-[#06111F]/40">{m.role || m.department || "Team Member"}</p>
+                {teamWorkload.length > 0 ? teamWorkload.map((m) => {
+                  const capPct = Math.min(100, Math.round((m.taskCount / Math.max(...teamWorkload.map(t => t.taskCount), 1)) * 100));
+                  const capColor = capPct > 75 ? "bg-red-500" : capPct > 40 ? "bg-amber-500" : "bg-emerald-500";
+                  return (
+                    <div key={m.id} className="flex items-center justify-between gap-3">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-black uppercase tracking-[-0.02em]">{m.name}</p>
+                          <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-black ${capPct > 75 ? "bg-red-100 text-red-700" : capPct > 40 ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}>{capPct}%</span>
+                        </div>
+                        <p className="text-[11px] text-[#06111F]/40">{m.role || m.department || "Team Member"}</p>
+                        <div className="mt-1 h-1.5 w-full rounded-full bg-[#06111F]/5">
+                          <div className={`h-1.5 rounded-full ${capColor} transition-all`} style={{ width: `${capPct}%` }} />
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${m.taskCount > 3 ? "bg-red-100 text-red-700" : m.taskCount > 0 ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-500"}`}>{m.taskCount} tasks</span>
-                    </div>
-                  </div>
-                )) : <p className="py-6 text-center text-sm text-[#06111F]/30">No team workload data</p>}
+                  );
+                }) : <p className="py-6 text-center text-sm text-[#06111F]/30">No team workload data</p>}
               </div>
             </div>
 
@@ -129,6 +144,51 @@ export default async function DashboardPage() {
               </div>
             </div>
           </div>
+
+          <div className="mb-6 grid gap-6 lg:grid-cols-2">
+            <div className="rounded-[1.6rem] border border-[#06111F]/10 bg-white p-5 shadow-sm">
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-[#06111F]/40">Recent Activity</p>
+                <Link className="text-[11px] font-black uppercase tracking-[0.1em] text-[#0B7CFF] transition hover:text-[#06111F]" href="/admin/workflow">View All</Link>
+              </div>
+              <div className="grid gap-2.5 max-h-[320px] overflow-y-auto">
+                {recentActivity.length > 0 ? recentActivity.map((a) => (
+                  <div key={`${a.type}-${a.id}-${a.timestamp.getTime()}`} className="flex items-start gap-3 border-b border-[#06111F]/5 pb-2.5 last:border-0">
+                    <span className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-[9px] font-black text-white ${
+                      a.type === "project" ? "bg-[#0B7CFF]" : a.type === "booking" ? "bg-[#06D6A0]" : a.type === "quotation" ? "bg-[#FFD166]" : "bg-[#7B2CBF]"
+                    }`}>
+                      {a.type === "project" ? "P" : a.type === "booking" ? "B" : a.type === "quotation" ? "Q" : "C"}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="truncate text-xs font-bold uppercase tracking-[-0.01em]">{a.label || a.subtitle || a.action}</p>
+                      <p className="text-[10px] text-[#06111F]/40">{a.action} &middot; {timeAgo(a.timestamp)}</p>
+                    </div>
+                  </div>
+                )) : <p className="py-6 text-center text-sm text-[#06111F]/30">No recent activity</p>}
+              </div>
+            </div>
+            <div className="rounded-[1.6rem] border border-[#06111F]/10 bg-white p-5 shadow-sm">
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-[#06111F]/40">Upcoming Meetings</p>
+                <Link className="text-[11px] font-black uppercase tracking-[0.1em] text-[#0B7CFF] transition hover:text-[#06111F]" href="/admin/meetings">Manage</Link>
+              </div>
+              <div className="grid gap-3 max-h-[320px] overflow-y-auto">
+                {upcomingMeetings.length > 0 ? upcomingMeetings.map((b) => (
+                  <div key={b.id} className="flex items-start gap-3">
+                    <span className="mt-0.5 grid h-2 w-2 shrink-0 rounded-full bg-[#0B7CFF]" />
+                    <div className="flex-1">
+                      <p className="blur-sensitive text-sm font-bold uppercase tracking-[-0.01em]">{b.client?.fullName || "Unknown"}</p>
+                      <p className="text-[11px] text-[#06111F]/45">
+                        {new Date(b.startTime).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })} &middot; {new Date(b.startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        {b.meetingType ? ` &middot; ${b.meetingType}` : ""}
+                      </p>
+                    </div>
+                    <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] ${b.status === "APPROVED" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>{b.status}</span>
+                  </div>
+                )) : <p className="py-6 text-center text-sm text-[#06111F]/30">No upcoming meetings</p>}
+              </div>
+            </div>
+          </div>
         </>
       ) : (
         <div className="rounded-[1.6rem] border border-[#06111F]/10 bg-white p-8 text-center shadow-sm">
@@ -141,4 +201,16 @@ export default async function DashboardPage() {
       )}
     </AdminShell>
   );
+}
+
+function timeAgo(date: Date) {
+  const sec = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (sec < 60) return "just now";
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hrs = Math.floor(min / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return date.toLocaleDateString();
 }
