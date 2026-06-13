@@ -33,3 +33,15 @@ a {
   pointer-events: none;
   opacity: 0.65;
 }
+.admin-blur-mode .blur-financial {
+  filter: blur(8px);
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.5;
+}
+.admin-blur-mode .blur-chart {
+  filter: blur(12px);
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.35;
+}

@@ -6,9 +6,8 @@ import { getUnreadNotificationCount } from "@/lib/admin-data";
 import { AdminBlurToggle } from "./admin-blur-toggle";
 
 const links = [
-  ["/admin/bookings", "Management"],
-  ["/admin/workflow", "Work Flow"],
-  ["/admin/analytics", "Analytics"],
+  ["/admin/dashboard", "Dashboard"],
+  ["/admin/workflow", "Workflow"],
   ["/admin/meetings", "Meetings"],
   ["/admin/studio", "Studio"],
   ["/admin/clients", "Clients"],

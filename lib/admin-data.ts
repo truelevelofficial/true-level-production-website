@@ -272,4 +272,64 @@ export async function getWorkflowOverview() {
   } catch { return null; }
 }
 
+// ─── Dashboard Data ───
+
+export async function getMonthlyRevenue() {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const payments = await prisma.payment.findMany({ select: { amount: true, date: true } });
+    const months: Record<string, number> = {};
+    payments.forEach(p => {
+      const key = `${p.date.getFullYear()}-${String(p.date.getMonth() + 1).padStart(2, "0")}`;
+      months[key] = (months[key] || 0) + Number(p.amount);
+    });
+    return Object.entries(months).sort(([a], [b]) => a.localeCompare(b)).slice(-12).map(([month, revenue]) => ({ month, revenue }));
+  } catch { return []; }
+}
+
+export async function getRevenueByService() {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const bookings = await prisma.booking.findMany({ where: { serviceType: { not: null } }, select: { serviceType: true, payments: { select: { amount: true } } } });
+    const services: Record<string, number> = {};
+    bookings.forEach(b => {
+      const type = b.serviceType || "Other";
+      const total = b.payments.reduce((s, p) => s + Number(p.amount), 0);
+      services[type] = (services[type] || 0) + total;
+    });
+    return Object.entries(services).sort(([, a], [, b]) => b - a);
+  } catch { return []; }
+}
+
+export async function getTopClients(limit = 5) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const clients = await prisma.client.findMany({ include: { payments: { select: { amount: true } } } });
+    return clients.map(c => ({ id: c.id, name: c.fullName, company: c.companyName, total: c.payments.reduce((s, p) => s + Number(p.amount), 0) })).sort((a, b) => b.total - a.total).slice(0, limit);
+  } catch { return []; }
+}
+
+export async function getTodaysSchedule() {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const end = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+    return await prisma.booking.findMany({ where: { startTime: { gte: start, lt: end } }, include: { client: true }, orderBy: { startTime: "asc" }, take: 20 });
+  } catch { return []; }
+}
+
+export async function getTeamWorkload() {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const members = await prisma.teamMember.findMany({ where: { active: true }, include: { tasks: { where: { status: { notIn: ["DONE", "CANCELLED"] } } } } });
+    return members.map(m => ({ id: m.id, name: m.name, role: m.role, department: m.department, taskCount: m.tasks.length }));
+  } catch { return []; }
+}
+
 export { hasDatabase };
