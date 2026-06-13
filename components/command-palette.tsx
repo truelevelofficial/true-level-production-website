@@ -9,6 +9,7 @@ const quickActions = [
   { label: "New Project", href: "/admin/workflow" },
   { label: "New Task", href: "/admin/workflow" },
   { label: "New Invoice", href: "/admin/accounting" },
+  { label: "Add File", href: "/admin/files" },
 ];
 
 const searchCategories = [
@@ -18,6 +19,12 @@ const searchCategories = [
   { label: "Search Quotations", href: "/admin/search?q=", prefix: "quotations" },
   { label: "Search Meetings", href: "/admin/search?q=", prefix: "bookings" },
   { label: "Search Tasks", href: "/admin/search?q=", prefix: "tasks" },
+];
+
+const pageLinks = [
+  { label: "Activity Log", href: "/admin/activity" },
+  { label: "File Manager", href: "/admin/files" },
+  { label: "Project Profitability", href: "/admin/profitability" },
 ];
 
 export function CommandPalette() {
@@ -113,6 +120,17 @@ export function CommandPalette() {
                     >
                       <svg className="h-4 w-4 text-[#06111F]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                       {cat.label}
+                    </button>
+                  ))}
+                  <p className="mb-2 mt-4 text-[10px] font-black uppercase tracking-[0.16em] text-[#06111F]/30">Pages</p>
+                  {pageLinks.map(page => (
+                    <button
+                      key={page.label}
+                      onClick={() => navigateTo(page.href)}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#06111F]/60 transition hover:bg-[#06111F]/5 hover:text-[#06111F]"
+                    >
+                      <svg className="h-4 w-4 text-[#06111F]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                      {page.label}
                     </button>
                   ))}
                 </div>

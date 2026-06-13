@@ -669,4 +669,257 @@ export async function getOverdueItemsCount() {
   } catch { return 0; }
 }
 
+// ─── Activity Log ───
+
+export async function getActivityLogs(limit = 100, entityType?: string) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const where: Record<string, unknown> = {};
+    if (entityType) where.entityType = entityType;
+    return await prisma.activityLog.findMany({ where, orderBy: { createdAt: "desc" }, take: limit });
+  } catch { return []; }
+}
+
+export async function getActivityLogsByEntity(entityType: string, entityId: string) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.activityLog.findMany({ where: { entityType, entityId }, orderBy: { createdAt: "desc" }, take: 50 });
+  } catch { return []; }
+}
+
+// ─── Activity Log: Helper ───
+
+export async function logActivity(params: { action: string; entityType: string; entityId?: string; entityName?: string; description?: string; metadata?: Record<string, unknown>; userName?: string }) {
+  const prisma = getPrisma();
+  if (!prisma) return;
+  try {
+    await prisma.activityLog.create({
+      data: {
+        action: params.action,
+        entityType: params.entityType,
+        entityId: params.entityId || null,
+        entityName: params.entityName || null,
+        description: params.description || null,
+        metadata: params.metadata ? JSON.stringify(params.metadata) : null,
+        userName: params.userName || "System",
+      },
+    });
+  } catch { /* silent */ }
+}
+
+// ─── File Attachments ───
+
+export async function getFileAttachments(projectId?: string, folder?: string) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const where: Record<string, unknown> = {};
+    if (projectId) where.projectId = projectId;
+    if (folder) where.folder = folder;
+    return await prisma.fileAttachment.findMany({ where, orderBy: { createdAt: "desc" }, take: 200 });
+  } catch { return []; }
+}
+
+export async function getFileAttachmentById(id: string) {
+  const prisma = getPrisma();
+  if (!prisma) return null;
+  try {
+    return await prisma.fileAttachment.findUnique({ where: { id } });
+  } catch { return null; }
+}
+
+export async function getProjectFolders() {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const folders = await prisma.fileAttachment.findMany({ select: { folder: true }, distinct: ["folder"] });
+    return folders.map(f => f.folder).filter(Boolean) as string[];
+  } catch { return []; }
+}
+
+export async function getProjectsWithFiles() {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const projects = await prisma.workflowProject.findMany({
+      where: { fileAttachments: { some: {} } },
+      include: { fileAttachments: { orderBy: { createdAt: "desc" }, take: 5 } },
+      orderBy: { updatedAt: "desc" },
+      take: 100,
+    }) as any;
+    return projects;
+  } catch { return []; }
+}
+
+// ─── Notification Auto-Triggers ───
+
+export async function createWorkflowNotification(data: { type: string; title: string; message?: string; projectId?: string; taskId?: string; targetEmail?: string; autoTriggered?: boolean }) {
+  const prisma = getPrisma();
+  if (!prisma) return null;
+  try {
+    return await prisma.workflowNotification.create({ data });
+  } catch { return null; }
+}
+
+export async function getUnreadNotificationsForUser(email?: string) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const where: Record<string, unknown> = { read: false };
+    if (email) where.targetEmail = email;
+    return await prisma.workflowNotification.findMany({ where, orderBy: { createdAt: "desc" }, take: 50 });
+  } catch { return []; }
+}
+
+// ─── Project Profitability ───
+
+export async function getProjectProfitability() {
+  const prisma = getPrisma();
+  if (!prisma) return null;
+  try {
+    const projects = await prisma.workflowProject.findMany({
+      where: { archived: false },
+      include: {
+        tasks: { select: { id: true, status: true } },
+        fileAttachments: { select: { id: true } },
+      },
+      orderBy: { updatedAt: "desc" },
+      take: 200,
+    }) as any;
+
+    // Get all payments linked to projects via booking/client
+    // Get invoice totals linked to projects
+    const allInvoices = await prisma.invoice.findMany({
+      where: { projectId: { not: null } },
+      select: { projectId: true, total: true, paidAmount: true, remainingAmount: true },
+    });
+
+    // Get expenses
+    const allExpenses = await prisma.expense.findMany({ select: { amount: true, description: true, date: true } });
+    const totalExpenses = allExpenses.reduce((s, e) => s + Number(e.amount), 0);
+
+    // Calculate per-project metrics
+    interface ProjectEntry { id: string; title: string; stage: string; taskCount: number; completedTasks: number; invoiceTotal: number; paidAmount: number; fileCount: number }
+    const projectMap: Record<string, ProjectEntry> = {};
+    for (const p of projects) {
+      projectMap[p.id] = {
+        id: p.id, title: p.title, stage: p.stage,
+        taskCount: p.tasks?.length || 0,
+        completedTasks: p.tasks?.filter((t: any) => t.status === "DONE").length || 0,
+        invoiceTotal: 0, paidAmount: 0, fileCount: p.fileAttachments?.length || 0,
+      };
+    }
+    for (const inv of allInvoices) {
+      const pid = inv.projectId!;
+      if (projectMap[pid]) {
+        projectMap[pid].invoiceTotal += Number(inv.total);
+        projectMap[pid].paidAmount += Number(inv.paidAmount);
+      }
+    }
+
+    const profitability = Object.values(projectMap).map(p => ({
+      ...p,
+      estimatedProfit: p.invoiceTotal,
+      margin: p.invoiceTotal > 0 ? Math.round((p.invoiceTotal / (p.invoiceTotal + totalExpenses * 0.01)) * 100) : 0,
+      progress: p.taskCount > 0 ? Math.round((p.completedTasks / p.taskCount) * 100) : 0,
+    })).sort((a, b) => b.estimatedProfit - a.estimatedProfit);
+
+    const totalRevenue = profitability.reduce((s, p) => s + p.estimatedProfit, 0);
+    const totalProfit = totalRevenue - totalExpenses;
+    const avgMargin = totalRevenue > 0 ? Math.round((totalProfit / totalRevenue) * 100) : 0;
+
+    return { profitability, totalRevenue, totalExpenses, totalProfit, avgMargin, projectCount: profitability.length };
+  } catch { return null; }
+}
+
+// ─── Client Portal ───
+
+export async function getClientPortalUser(email: string) {
+  const prisma = getPrisma();
+  if (!prisma) return null;
+  try {
+    return await prisma.clientPortalUser.findUnique({
+      where: { email },
+      include: { client: true },
+    });
+  } catch { return null; }
+}
+
+export async function getClientPortalUserByClientId(clientId: string) {
+  const prisma = getPrisma();
+  if (!prisma) return null;
+  try {
+    return await prisma.clientPortalUser.findUnique({
+      where: { clientId },
+      include: { client: true },
+    });
+  } catch { return null; }
+}
+
+export async function getPortalDeliverables(clientName: string) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.workflowDelivery.findMany({
+      where: { project: { clientName } },
+      include: { project: { select: { id: true, title: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    }) as any;
+  } catch { return []; }
+}
+
+export async function getPortalQuotations(clientId: string) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.quotation.findMany({
+      where: { clientId, status: { in: ["SENT", "ACCEPTED"] } },
+      include: { items: true },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }) as any;
+  } catch { return []; }
+}
+
+export async function getPortalContracts(clientId: string) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.contract.findMany({
+      where: { clientId, status: { in: ["SENT", "SIGNED"] } },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }) as any;
+  } catch { return []; }
+}
+
+export async function getPortalInvoices(clientId: string) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.invoice.findMany({
+      where: { clientId, status: "SENT" },
+      include: { items: true },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }) as any;
+  } catch { return []; }
+}
+
+export async function getPortalProjects(clientName: string) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.workflowProject.findMany({
+      where: { clientName, archived: false },
+      include: { deliveries: true, fileAttachments: true },
+      orderBy: { updatedAt: "desc" },
+      take: 50,
+    }) as any;
+  } catch { return []; }
+}
+
 export { hasDatabase };

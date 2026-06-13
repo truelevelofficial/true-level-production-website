@@ -44,6 +44,10 @@ export default async function WorkflowPage({ searchParams }: { searchParams: Pro
         <Link href="#new-project" className="rounded-full border border-[#0B7CFF]/20 bg-[#0B7CFF]/5 px-5 py-2.5 text-xs font-black uppercase tracking-[0.1em] text-[#0B7CFF] transition hover:bg-[#0B7CFF]/10 hover:shadow-sm">+ Create Project</Link>
         <Link href="/admin/workflow?task=1" className="rounded-full border border-[#0B7CFF]/20 bg-[#0B7CFF]/5 px-5 py-2.5 text-xs font-black uppercase tracking-[0.1em] text-[#0B7CFF] transition hover:bg-[#0B7CFF]/10 hover:shadow-sm">+ Create Task</Link>
         <Link href="/admin/approvals" className="rounded-full border border-[#0B7CFF]/20 bg-[#0B7CFF]/5 px-5 py-2.5 text-xs font-black uppercase tracking-[0.1em] text-[#0B7CFF] transition hover:bg-[#0B7CFF]/10 hover:shadow-sm">+ Create Approval</Link>
+        <span className="ml-auto flex gap-2">
+          <Link href="/admin/files" className="rounded-full border border-[#06111F]/10 px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#06111F]/40 transition hover:border-[#0B7CFF] hover:text-[#0B7CFF]">Files</Link>
+          <Link href="/admin/profitability" className="rounded-full border border-[#06111F]/10 px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#06111F]/40 transition hover:border-[#0B7CFF] hover:text-[#0B7CFF]">Profitability</Link>
+        </span>
       </div>
 
       <div className="mb-6 rounded-[1.6rem] border border-[#06111F]/10 bg-white p-5 shadow-sm">

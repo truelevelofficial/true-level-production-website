@@ -1159,16 +1159,6 @@ export async function markNotificationReadAction(formData: FormData) {
   } catch { /* empty */ }
 }
 
-export async function markAllNotificationsReadAction() {
-  await requireAdmin();
-  try {
-    const prisma = getPrisma();
-    if (!prisma) return;
-    await prisma.workflowNotification.updateMany({ where: { read: false }, data: { read: true } });
-    revalidatePath("/admin/notifications");
-  } catch { /* empty */ }
-}
-
 export async function createNotificationAction(formData: FormData) {
   await requireAdmin();
   const title = formData.get("title") as string;
@@ -1467,4 +1457,150 @@ export async function deleteReportAction(formData: FormData) {
     await prisma.report.delete({ where: { id } });
     revalidatePath("/admin/reporting");
   } catch { /* empty */ }
+}
+
+// ─── File Manager ───
+
+export async function createFileAttachmentAction(formData: FormData) {
+  await requireAdmin();
+  const fileName = formData.get("fileName") as string;
+  if (!fileName?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.fileAttachment.create({
+      data: {
+        fileName: fileName.trim(),
+        originalName: (formData.get("originalName") as string) || fileName.trim(),
+        mimeType: (formData.get("mimeType") as string) || null,
+        fileSize: formData.get("fileSize") ? parseInt(formData.get("fileSize") as string) : null,
+        url: (formData.get("url") as string) || null,
+        projectId: (formData.get("projectId") as string) || null,
+        clientId: (formData.get("clientId") as string) || null,
+        invoiceId: (formData.get("invoiceId") as string) || null,
+        uploaderName: (formData.get("uploaderName") as string) || null,
+        notes: (formData.get("notes") as string) || null,
+        folder: (formData.get("folder") as string) || "General",
+      },
+    });
+    revalidatePath("/admin/files");
+    if (formData.get("projectId")) revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+export async function deleteFileAttachmentAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.fileAttachment.delete({ where: { id } });
+    revalidatePath("/admin/files");
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+// ─── Notification Engine: Auto-Trigger ───
+
+export async function triggerNotificationAction(formData: FormData) {
+  await requireAdmin();
+  const title = formData.get("title") as string;
+  if (!title?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.workflowNotification.create({
+      data: {
+        type: (formData.get("type") as string) || "CUSTOM",
+        title: title.trim(),
+        message: (formData.get("message") as string) || null,
+        projectId: (formData.get("projectId") as string) || null,
+        taskId: (formData.get("taskId") as string) || null,
+        targetEmail: (formData.get("targetEmail") as string) || null,
+        autoTriggered: true,
+      },
+    });
+    revalidatePath("/admin/notifications");
+  } catch { /* empty */ }
+}
+
+export async function markAllNotificationsReadAction() {
+  await requireAdmin();
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.workflowNotification.updateMany({ where: { read: false }, data: { read: true, readAt: new Date() } });
+    revalidatePath("/admin/notifications");
+  } catch { /* empty */ }
+}
+
+export async function dismissOldNotificationsAction() {
+  await requireAdmin();
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    await prisma.workflowNotification.deleteMany({ where: { read: true, createdAt: { lt: thirtyDaysAgo } } });
+    revalidatePath("/admin/notifications");
+  } catch { /* empty */ }
+}
+
+// ─── Client Portal ───
+
+export async function createPortalUserAction(formData: FormData) {
+  await requireAdmin();
+  const clientId = formData.get("clientId") as string;
+  const email = (formData.get("email") as string)?.trim().toLowerCase();
+  const password = formData.get("password") as string;
+  if (!clientId || !email || !password || password.length < 6) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    const existing = await prisma.clientPortalUser.findUnique({ where: { clientId } }).catch(() => null);
+    if (existing) return;
+    const { hash } = await import("bcryptjs");
+    await prisma.clientPortalUser.create({
+      data: { clientId, email, passwordHash: await hash(password, 12) },
+    });
+    revalidatePath("/admin/clients");
+  } catch { /* empty */ }
+}
+
+export async function portalLoginAction(_prev: { error?: string } | undefined, formData: FormData) {
+  const email = (formData.get("email") as string)?.trim().toLowerCase();
+  const password = formData.get("password") as string;
+  if (!email || !password) return { error: "Email and password required." };
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return { error: "System unavailable." };
+    const user = await prisma.clientPortalUser.findUnique({ where: { email }, include: { client: true } });
+    if (!user || !user.isActive) return { error: "Invalid credentials." };
+    const { compare } = await import("bcryptjs");
+    if (!(await compare(password, user.passwordHash))) return { error: "Invalid credentials." };
+    const { cookies } = await import("next/headers");
+    const c = await cookies();
+    c.set("portal-token", user.id, { httpOnly: true, secure: true, sameSite: "lax", path: "/portal", maxAge: 60 * 60 * 24 });
+    await prisma.clientPortalUser.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+    redirect("/portal/dashboard");
+  } catch { return { error: "Login failed." }; }
+}
+
+export async function portalLogoutAction() {
+  const { cookies } = await import("next/headers");
+  const c = await cookies();
+  c.delete("portal-token");
+  redirect("/portal");
+}
+
+// ─── Activity Log: Bulk auto-log helper ───
+
+export async function autoLogActivity(entityType: string, entityId: string, action: string, metadata?: Record<string, unknown>) {
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.activityLog.create({
+      data: { action, entityType, entityId, metadata: metadata ? JSON.stringify(metadata) : null, userName: "System" },
+    });
+  } catch { /* silent */ }
 }

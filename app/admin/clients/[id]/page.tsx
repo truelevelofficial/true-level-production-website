@@ -4,7 +4,7 @@ import { AdminShell, Card, SetupNotice } from "@/components/admin-shell";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { Field, inputClass } from "@/components/form-fields";
 import { getClientById, getClientTimeline, hasDatabase } from "@/lib/admin-data";
-import { createExpenseAction } from "@/lib/actions";
+import { createExpenseAction, createPortalUserAction } from "@/lib/actions";
 import { requireAdmin } from "@/lib/auth";
 import { displayDate } from "@/lib/dates";
 import { expenseCategories, paymentMethods, expenseCategoryArabic, paymentMethodArabic } from "@/lib/constants";
@@ -131,6 +131,17 @@ export default async function ClientProfilePage({ params }: { params: Promise<{ 
           <input name="clientId" type="hidden" value={id} />
           <input name="date" type="hidden" defaultValue={new Date().toISOString().slice(0, 10)} />
           <button className="rounded-full bg-[#06111F] px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white">حفظ المصروف</button>
+        </form>
+      </section>
+
+      <section className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-black uppercase tracking-[-0.05em]">Portal Access</h2>
+        <p className="mt-1 text-sm text-[#06111F]/45">Grant this client secure access to view their projects, deliverables, quotations, contracts, and invoices.</p>
+        <form action={createPortalUserAction} className="mt-4 grid gap-3 md:grid-cols-3">
+          <input name="clientId" type="hidden" value={id} />
+          <input name="email" type="email" defaultValue={client.email} className={inputClass} placeholder="Login email" required />
+          <input name="password" type="password" className={inputClass} placeholder="Password (min 6 chars)" required minLength={6} />
+          <button className="rounded-full bg-[#0B7CFF] px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-blue-500/20 transition hover:bg-[#06111F]">Create Portal User</button>
         </form>
       </section>
     </AdminShell>

@@ -136,6 +136,8 @@ model Client {
   notifications Notification[]
   quotations   Quotation[]
   projects     Project[]
+  portalUser   ClientPortalUser?
+  fileAttachments FileAttachment[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -231,6 +233,7 @@ model Invoice {
   terms          String?
   items          InvoiceItem[]
   payments       Payment[]
+  fileAttachments FileAttachment[]
   sentAt         DateTime?
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
@@ -455,6 +458,7 @@ model WorkflowProject {
   contentProductions  ContentProduction[]
   approvalRequests    ApprovalRequest[]
   workflowNotifications WorkflowNotification[]
+  fileAttachments     FileAttachment[]
 }
 
 model WorkflowTask {
@@ -546,16 +550,81 @@ model ApprovalRequest {
 // ─── Workflow Notifications ───
 
 model WorkflowNotification {
-  id        String          @id @default(cuid())
-  type      String          @default("TASK_ASSIGNED")
-  title     String
-  message   String?
-  projectId String?
-  taskId    String?
-  read      Boolean         @default(false)
-  createdAt DateTime        @default(now())
-  project   WorkflowProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  task      WorkflowTask?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  id            String          @id @default(cuid())
+  type          String          @default("TASK_ASSIGNED")
+  title         String
+  message       String?
+  projectId     String?
+  taskId        String?
+  targetEmail   String?
+  read          Boolean         @default(false)
+  readAt        DateTime?
+  autoTriggered Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+  project       WorkflowProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  task          WorkflowTask?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
+}
+
+// ─── Activity Log ───
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  action      String
+  entityType  String
+  entityId    String?
+  entityName  String?
+  description String?
+  metadata    String?  // JSON payload
+  userId      String?
+  userName    String?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entityType, entityId])
+  @@index([action])
+}
+
+// ─── File Attachments ───
+
+model FileAttachment {
+  id           String          @id @default(cuid())
+  fileName     String
+  originalName String
+  mimeType     String?
+  fileSize     Int?
+  url          String?
+  projectId    String?
+  project      WorkflowProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  clientId     String?
+  client       Client?         @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  invoiceId    String?
+  invoice      Invoice?        @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  uploaderName String?
+  notes        String?
+  folder       String?         @default("General")
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([projectId])
+  @@index([clientId])
+  @@index([folder])
+}
+
+// ─── Client Portal ───
+
+model ClientPortalUser {
+  id           String   @id @default(cuid())
+  clientId     String
+  client       Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  email        String
+  passwordHash String
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([clientId])
+  @@unique([email])
 }
 
 // ─── Automation Rules ───
