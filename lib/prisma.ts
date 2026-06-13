@@ -9,8 +9,12 @@ export function hasDatabase() {
 
 export function getPrisma() {
   if (!hasDatabase()) return null;
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-  const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
-  if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-  return prisma;
+  try {
+    const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+    const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
+    if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+    return prisma;
+  } catch {
+    return null;
+  }
 }

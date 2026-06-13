@@ -33,7 +33,12 @@ function safeEqual(a: string, b: string) {
 }
 
 export async function getSessionEmail() {
-  const store = await cookies();
+  let store;
+  try {
+    store = await cookies();
+  } catch {
+    return null;
+  }
   const value = store.get(cookieName)?.value;
   if (!value) return null;
   const separatorIndex = value.lastIndexOf(".");
@@ -71,7 +76,14 @@ export async function isAdminAuthenticated() {
 }
 
 export async function requireAdmin() {
-  if (!(await isAdminAuthenticated())) redirect("/account");
+  try {
+    if (!(await isAdminAuthenticated())) redirect("/account");
+  } catch (e) {
+    // isAdminAuthenticated throws if cookies() is unavailable (static generation, SSR edge case).
+    // redirect("/account") throws NEXT_REDIRECT — let it propagate.
+    if ((e as { digest?: string }).digest?.startsWith("NEXT_REDIRECT")) throw e;
+    redirect("/account");
+  }
 }
 
 export async function requireAuth() {

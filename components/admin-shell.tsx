@@ -16,8 +16,14 @@ export async function AdminShell({ title, children }: { title: string; children:
     getOverdueItemsCount(),
   ]);
   const totalNotifs = notifCount + wfNotifCount;
-  const h = await headers();
-  const currentPath = h.get("x-invoke-path") || h.get("next-url") || "";
+  let currentPath = "";
+  try {
+    const h = await headers();
+    currentPath = h.get("x-invoke-path") || h.get("next-url") || "";
+  } catch {
+    // headers() throws if called during static generation or SSR without request context.
+    // Safe fallback — SidebarNav and breadcrumbs work with empty path.
+  }
   const breadcrumbs = getAdminBreadcrumbs(currentPath);
 
   const indicators = [
