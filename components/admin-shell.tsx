@@ -2,65 +2,84 @@ import { ReactNode } from "react";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { logoutAction } from "@/lib/actions";
-import { getUnreadNotificationCount, getUnreadWorkflowNotificationCount } from "@/lib/admin-data";
+import { getUnreadNotificationCount, getUnreadWorkflowNotificationCount, getPendingTasksCount, getUpcomingMeetingsCount, getOverdueItemsCount } from "@/lib/admin-data";
 import { AdminBlurToggle } from "./admin-blur-toggle";
-import { GlobalSearch } from "./admin-search";
-
-const links = [
-  ["/admin/dashboard", "Dashboard"],
-  ["/admin/workflow", "Workflow"],
-  ["/admin/meetings", "Meetings"],
-  ["/admin/studio", "Studio"],
-  ["/admin/clients", "Clients"],
-  ["/admin/accounting", "Accounting"],
-  ["/admin/quotations", "Quotations"],
-  ["/admin/contracts", "Contracts"],
-  ["/admin/settings", "Settings"],
-  ["/admin/team-center", "Team"],
-  ["/admin/content", "Content"],
-  ["/admin/approvals", "Approvals"],
-  ["/admin/reporting", "Reporting"],
-  ["/admin/automation", "Automation"],
-] as const;
+import { CommandPalette } from "./command-palette";
+import { SidebarNav, getAdminBreadcrumbs } from "./admin-nav-sidebar";
 
 export async function AdminShell({ title, children }: { title: string; children: ReactNode }) {
-  const [notificationCount, workflowNotifCount] = await Promise.all([getUnreadNotificationCount(), getUnreadWorkflowNotificationCount()]);
-  const totalNotifs = notificationCount + workflowNotifCount;
+  const [notifCount, wfNotifCount, pendingTasks, upcomingMeetings, overdueItems] = await Promise.all([
+    getUnreadNotificationCount(),
+    getUnreadWorkflowNotificationCount(),
+    getPendingTasksCount(),
+    getUpcomingMeetingsCount(),
+    getOverdueItemsCount(),
+  ]);
+  const totalNotifs = notifCount + wfNotifCount;
   const h = await headers();
   const currentPath = h.get("x-invoke-path") || h.get("next-url") || "";
+  const breadcrumbs = getAdminBreadcrumbs(currentPath);
+
+  const indicators = [
+    { count: pendingTasks, label: "Pending Tasks", href: "/admin/workflow", color: "text-amber-600" },
+    { count: upcomingMeetings, label: "Upcoming Meetings", href: "/admin/meetings", color: "text-blue-600" },
+    { count: totalNotifs, label: "Notifications", href: "/admin/notifications", color: "text-red-600" },
+    { count: overdueItems, label: "Overdue Items", href: "/admin/workflow", color: "text-rose-600" },
+  ];
+
   return (
-    <main className="min-h-screen bg-[#F7F8FB] px-6 py-8 text-[#06111F]">
-      <div className="mx-auto max-w-[1440px]">
-        <header className="mb-10 rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-4">
-              <div>
-                <p className="text-sm font-black uppercase tracking-[0.22em] text-[#0B7CFF]">True Level Operations</p>
-                <Link className="mt-1 block text-4xl font-black uppercase tracking-[-0.05em] transition hover:text-[#0B7CFF]" href="/">{title} / الإدارة</Link>
+    <div className="flex min-h-screen bg-[#F7F8FB] text-[#06111F]">
+      <SidebarNav currentPath={currentPath} totalNotifs={totalNotifs} />
+
+      <div className="flex min-w-0 flex-1 flex-col lg:ml-0">
+        <header className="sticky top-0 z-30 border-b border-[#06111F]/10 bg-white/95 backdrop-blur-sm">
+          <div className="flex items-center justify-between px-4 py-2.5 lg:px-6">
+            <div className="flex items-center gap-3 overflow-hidden">
+              <div className="hidden lg:flex lg:items-center lg:gap-1.5 text-xs font-bold text-[#06111F]/50">
+                {breadcrumbs.map((crumb, i) => (
+                  <span key={crumb.href} className="flex items-center gap-1.5">
+                    {i > 0 ? <svg className="h-3 w-3 text-[#06111F]/20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg> : null}
+                    {i === breadcrumbs.length - 1 ? (
+                      <span className="truncate text-[#06111F]">{crumb.label}</span>
+                    ) : (
+                      <Link href={crumb.href} className="truncate transition hover:text-[#0B7CFF]">{crumb.label}</Link>
+                    )}
+                  </span>
+                ))}
               </div>
-              <a href="/admin/notifications" className="relative">
-                <div className="grid h-10 w-10 place-items-center rounded-full border border-[#06111F]/10 transition hover:border-[#0B7CFF] hover:bg-[#0B7CFF]/5">
-                  <svg className="h-5 w-5 text-[#06111F]/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                </div>
-                {totalNotifs > 0 ? <span className="absolute -right-1 -top-1 grid h-5 min-w-[20px] place-items-center rounded-full bg-red-600 px-1.5 text-[9px] font-black text-white">{totalNotifs > 99 ? "99+" : totalNotifs}</span> : null}
-              </a>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <GlobalSearch />
-              <nav className="flex flex-wrap items-center gap-2">
-                {links.map(([href, label]) => {
-                  const isActive = currentPath === href || currentPath.startsWith(href);
-                  return <a className={`rounded-full px-5 py-3 text-sm font-black uppercase tracking-[0.12em] transition-colors ${isActive ? "bg-[#0B7CFF] text-white shadow-lg shadow-blue-500/25" : "border border-[#06111F]/10 text-[#06111F] hover:border-[#0B7CFF] hover:text-[#0B7CFF]"}`} href={href} key={href}>{label}</a>;
-                })}
-                <AdminBlurToggle />
-                <form action={logoutAction}><button className="ml-2 rounded-full bg-[#06111F] px-5 py-3 text-sm font-black uppercase tracking-[0.12em] text-white/60 transition hover:text-white">Logout</button></form>
-              </nav>
+
+            <div className="flex items-center gap-2.5">
+              {indicators.map(ind => ind.count > 0 ? (
+                <Link
+                  key={ind.label}
+                  href={ind.href}
+                  className="hidden items-center gap-1.5 rounded-full border border-[#06111F]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.08em] transition hover:border-[#0B7CFF]/40 sm:flex"
+                >
+                  <span className={ind.color}>{ind.count}</span>
+                  <span className="text-[#06111F]/40">{ind.label}</span>
+                </Link>
+              ) : null)}
+
+              <div className="hidden sm:block">
+                <CommandPalette />
+              </div>
+
+              <AdminBlurToggle />
+              <form action={logoutAction}>
+                <button className="rounded-full bg-[#06111F] px-4 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-white/60 transition hover:text-white">Logout</button>
+              </form>
             </div>
           </div>
         </header>
-        {children}
+
+        <main className="flex-1 px-4 py-6 lg:px-6">
+          <div className="mx-auto w-full max-w-[1440px]">
+            {children}
+          </div>
+        </main>
       </div>
-    </main>
+    </div>
   );
 }
 

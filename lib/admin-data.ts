@@ -639,4 +639,34 @@ export async function getRoles() {
   } catch { return []; }
 }
 
+// ─── Header Indicators ───
+
+export async function getPendingTasksCount() {
+  const prisma = getPrisma();
+  if (!prisma) return 0;
+  try { return await prisma.workflowTask.count({ where: { status: { in: ["TODO", "IN_PROGRESS"] } } }); } catch { return 0; }
+}
+
+export async function getUpcomingMeetingsCount() {
+  const prisma = getPrisma();
+  if (!prisma) return 0;
+  try {
+    const now = new Date();
+    return await prisma.booking.count({ where: { type: { in: ["GOOGLE_MEETING", "COMPANY_MEETING"] }, status: { in: ["PENDING", "APPROVED"] }, startTime: { gte: now } } });
+  } catch { return 0; }
+}
+
+export async function getOverdueItemsCount() {
+  const prisma = getPrisma();
+  if (!prisma) return 0;
+  try {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const [tasks, invoices] = await Promise.all([
+      prisma.workflowTask.count({ where: { status: { notIn: ["DONE", "CANCELLED"] }, dueDate: { lt: today } } }),
+      prisma.invoice.count({ where: { paymentStatus: { in: ["UNPAID", "PARTIALLY_PAID"] }, dueDate: { lt: today } } }),
+    ]);
+    return tasks + invoices;
+  } catch { return 0; }
+}
+
 export { hasDatabase };

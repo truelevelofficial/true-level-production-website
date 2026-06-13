@@ -38,6 +38,13 @@ export default async function DashboardPage() {
 
       {summary ? (
         <>
+          <div className="mb-6 flex flex-wrap gap-2">
+            <Link href="/admin/clients" className="rounded-full border border-[#0B7CFF]/20 bg-[#0B7CFF]/5 px-5 py-2.5 text-xs font-black uppercase tracking-[0.1em] text-[#0B7CFF] transition hover:bg-[#0B7CFF]/10 hover:shadow-sm">+ New Client</Link>
+            <Link href="/admin/meetings" className="rounded-full border border-[#0B7CFF]/20 bg-[#0B7CFF]/5 px-5 py-2.5 text-xs font-black uppercase tracking-[0.1em] text-[#0B7CFF] transition hover:bg-[#0B7CFF]/10 hover:shadow-sm">+ New Meeting</Link>
+            <Link href="/admin/quotations" className="rounded-full border border-[#0B7CFF]/20 bg-[#0B7CFF]/5 px-5 py-2.5 text-xs font-black uppercase tracking-[0.1em] text-[#0B7CFF] transition hover:bg-[#0B7CFF]/10 hover:shadow-sm">+ New Quotation</Link>
+            <Link href="/admin/workflow" className="rounded-full border border-[#0B7CFF]/20 bg-[#0B7CFF]/5 px-5 py-2.5 text-xs font-black uppercase tracking-[0.1em] text-[#0B7CFF] transition hover:bg-[#0B7CFF]/10 hover:shadow-sm">+ New Project</Link>
+            <Link href="/admin/workflow" className="rounded-full border border-[#0B7CFF]/20 bg-[#0B7CFF]/5 px-5 py-2.5 text-xs font-black uppercase tracking-[0.1em] text-[#0B7CFF] transition hover:bg-[#0B7CFF]/10 hover:shadow-sm">+ New Task</Link>
+          </div>
           <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard label="Revenue" value={`${summary.revenue.toLocaleString()} EGP`} sub={`This month: ${summary.monthRevenue.toLocaleString()} EGP`} financial />
             <StatCard label="Expenses" value={`${summary.expenses.toLocaleString()} EGP`} sub={`Overhead: ${overheadPct}% of revenue`} financial />

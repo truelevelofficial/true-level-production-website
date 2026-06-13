@@ -2,8 +2,9 @@ import { AdminShell } from "@/components/admin-shell";
 import { inputClass } from "@/components/form-fields";
 import { getTeamMembers, getWorkflowProjects, hasDatabase } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
-import { createWorkflowProjectAction, updateWorkflowProjectAction, updateWorkflowStageAction, archiveWorkflowProjectAction } from "@/lib/actions";
+import { createWorkflowProjectAction, updateWorkflowProjectAction, updateWorkflowStageAction, archiveWorkflowProjectAction, createWorkflowTaskAction, createApprovalAction } from "@/lib/actions";
 import { ProjectDrawer } from "@/components/project-drawer";
+import Link from "next/link";
 
 const kanbanStages = [
   ["NEW_LEAD", "New Lead", "bg-blue-100 text-blue-800"],
@@ -39,8 +40,14 @@ export default async function WorkflowPage({ searchParams }: { searchParams: Pro
     <AdminShell title="Workflow">
       <ProjectDrawer project={selectedProject} />
 
+      <div className="mb-6 flex flex-wrap gap-2">
+        <Link href="#new-project" className="rounded-full border border-[#0B7CFF]/20 bg-[#0B7CFF]/5 px-5 py-2.5 text-xs font-black uppercase tracking-[0.1em] text-[#0B7CFF] transition hover:bg-[#0B7CFF]/10 hover:shadow-sm">+ Create Project</Link>
+        <Link href="/admin/workflow?task=1" className="rounded-full border border-[#0B7CFF]/20 bg-[#0B7CFF]/5 px-5 py-2.5 text-xs font-black uppercase tracking-[0.1em] text-[#0B7CFF] transition hover:bg-[#0B7CFF]/10 hover:shadow-sm">+ Create Task</Link>
+        <Link href="/admin/approvals" className="rounded-full border border-[#0B7CFF]/20 bg-[#0B7CFF]/5 px-5 py-2.5 text-xs font-black uppercase tracking-[0.1em] text-[#0B7CFF] transition hover:bg-[#0B7CFF]/10 hover:shadow-sm">+ Create Approval</Link>
+      </div>
+
       <div className="mb-6 rounded-[1.6rem] border border-[#06111F]/10 bg-white p-5 shadow-sm">
-        <details className="group">
+        <details className="group" id="new-project">
           <summary className="cursor-pointer text-sm font-black uppercase tracking-[0.12em] text-[#0B7CFF] transition hover:text-[#06111F]">+ New Project</summary>
           <form action={createWorkflowProjectAction} className="mt-4 grid gap-3 md:grid-cols-4">
             <div className="md:col-span-2">
