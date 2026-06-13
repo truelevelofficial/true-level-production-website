@@ -3,7 +3,7 @@ import { ConfirmSubmit } from "@/components/confirm-submit";
 import { Field, inputClass } from "@/components/form-fields";
 import { createExpenseAction, createPaymentAction, deleteExpenseAction, deletePaymentAction, updateExpenseAction, updatePaymentAction } from "@/lib/actions";
 import { expenseCategories, expenseCategoryArabic, invoicePaymentStatusArabic, invoiceStatusArabic, invoiceStatuses, invoicePaymentStatuses, paymentMethodArabic, paymentMethods, paymentStatusArabic, paymentStatuses } from "@/lib/constants";
-import { getAccounting, getInvoices, getClients, hasDatabase } from "@/lib/admin-data";
+import { getAccounting, getFinanceCenter, getInvoices, getClients, hasDatabase } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
 import { InvoiceActions } from "./invoices/invoice-actions";
 
@@ -50,7 +50,7 @@ export default async function AccountingPage({ searchParams }: { searchParams: P
 }
 
 async function OverviewTab() {
-  const data = await getAccounting();
+  const [data, finance] = await Promise.all([getAccounting(), getFinanceCenter()]);
   if (!data) return <div className="rounded-[2rem] border border-[#06111F]/10 bg-white p-10 text-center shadow-sm" dir="rtl"><h2 className="text-2xl font-black">لا توجد بيانات</h2></div>;
 
   const month = new Date();
@@ -73,6 +73,75 @@ async function OverviewTab() {
           <Card title="أرباح الشهر" value={`${(monthRevenue - monthExpensesVal).toLocaleString()} EGP`} />
         </div>
       </div>
+
+      {finance ? (
+        <>
+          <div className="mb-8" dir="rtl">
+            <h2 className="mb-4 text-base font-black uppercase tracking-[0.18em] text-[#06111F]/40">Finance Center</h2>
+            <div className="grid gap-4 md:grid-cols-4">
+              <Card title="MRR" value={`${finance.mrr.toLocaleString()} EGP`} text="Monthly Recurring Revenue" />
+              <Card title="ARR" value={`${finance.arr.toLocaleString()} EGP`} text="Annual Run Rate" />
+              <Card title="Cash Flow" value={`${finance.cashFlow.toLocaleString()} EGP`} text={finance.cashFlow >= 0 ? "Positive" : "Negative"} />
+              <Card title="Outstanding" value={`${finance.outstandingInvoices.toLocaleString()} EGP`} text="Unpaid invoices" />
+            </div>
+          </div>
+
+          {finance.monthlyTrend.length > 0 ? (
+            <div className="mb-8">
+              <h2 className="mb-4 text-base font-black uppercase tracking-[0.18em] text-[#06111F]/40">Monthly Trend</h2>
+              <div className="blur-chart rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm">
+                <div className="grid auto-rows-min gap-4" style={{ gridTemplateColumns: `repeat(${finance.monthlyTrend.length}, 1fr)` }}>
+                  {finance.monthlyTrend.map(m => {
+                    const maxVal = Math.max(...finance.monthlyTrend.map(x => Math.max(x.revenue, x.expenses, 1)));
+                    return (
+                      <div key={m.month} className="flex flex-col items-center gap-1">
+                        <span className="text-[9px] font-bold text-[#06111F]/40">{m.month.slice(5)}</span>
+                        <div className="flex h-20 w-full items-end gap-0.5 justify-center">
+                          <div className="w-3 rounded-t-sm bg-[#0B7CFF]" style={{ height: `${(m.revenue / maxVal) * 100}%` }} />
+                          <div className="w-3 rounded-t-sm bg-[#EF476F]" style={{ height: `${(m.expenses / maxVal) * 100}%` }} />
+                        </div>
+                        <div className="flex gap-1 text-[7px] font-bold">
+                          <span className="text-[#0B7CFF]">{(m.revenue / 1000).toFixed(0)}k</span>
+                          <span className="text-[#EF476F]">{(m.expenses / 1000).toFixed(0)}k</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-3 flex justify-center gap-4 text-[10px] font-bold">
+                  <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#0B7CFF]" /> Revenue</span>
+                  <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#EF476F]" /> Expenses</span>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {finance.revenueByClient.length > 0 ? (
+            <div className="mb-8">
+              <h2 className="mb-4 text-base font-black uppercase tracking-[0.18em] text-[#06111F]/40">Revenue by Client</h2>
+              <div className="blur-chart rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm">
+                <div className="grid gap-3">
+                  {finance.revenueByClient.map(([name, amount], i) => (
+                    <div key={name} className="flex items-center gap-3">
+                      <span className="w-6 text-xs font-black text-[#06111F]/40">{i + 1}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="blur-sensitive text-xs font-bold">{name}</span>
+                          <span className="blur-financial text-xs font-black text-[#0B7CFF]">{amount.toLocaleString()} EGP</span>
+                        </div>
+                        <div className="mt-1 h-2 w-full rounded-full bg-[#06111F]/5">
+                          <div className="h-2 rounded-full bg-[#0B7CFF]" style={{ width: `${(amount / finance.revenueByClient[0][1]) * 100}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </>
+      ) : null}
+
       <a className="inline-flex rounded-full border border-[#06111F]/10 bg-white px-6 py-3 text-sm font-black uppercase tracking-[0.14em] text-[#06111F] transition hover:border-[#0B7CFF] hover:text-[#0B7CFF]" href="/admin/export/accounting">تصدير الحسابات CSV</a>
     </>
   );

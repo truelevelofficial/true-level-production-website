@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { logoutAction } from "@/lib/actions";
-import { getUnreadNotificationCount } from "@/lib/admin-data";
+import { getUnreadNotificationCount, getUnreadWorkflowNotificationCount } from "@/lib/admin-data";
 import { AdminBlurToggle } from "./admin-blur-toggle";
 import { GlobalSearch } from "./admin-search";
 
@@ -16,10 +16,16 @@ const links = [
   ["/admin/quotations", "Quotations"],
   ["/admin/contracts", "Contracts"],
   ["/admin/settings", "Settings"],
+  ["/admin/team-center", "Team"],
+  ["/admin/content", "Content"],
+  ["/admin/approvals", "Approvals"],
+  ["/admin/reporting", "Reporting"],
+  ["/admin/automation", "Automation"],
 ] as const;
 
 export async function AdminShell({ title, children }: { title: string; children: ReactNode }) {
-  const notificationCount = await getUnreadNotificationCount();
+  const [notificationCount, workflowNotifCount] = await Promise.all([getUnreadNotificationCount(), getUnreadWorkflowNotificationCount()]);
+  const totalNotifs = notificationCount + workflowNotifCount;
   const h = await headers();
   const currentPath = h.get("x-invoke-path") || h.get("next-url") || "";
   return (
@@ -32,7 +38,12 @@ export async function AdminShell({ title, children }: { title: string; children:
                 <p className="text-sm font-black uppercase tracking-[0.22em] text-[#0B7CFF]">True Level Operations</p>
                 <Link className="mt-1 block text-4xl font-black uppercase tracking-[-0.05em] transition hover:text-[#0B7CFF]" href="/">{title} / الإدارة</Link>
               </div>
-              {notificationCount > 0 ? <div className="rounded-full bg-red-600 px-3 py-1 text-xs font-black text-white">{notificationCount}</div> : null}
+              <a href="/admin/notifications" className="relative">
+                <div className="grid h-10 w-10 place-items-center rounded-full border border-[#06111F]/10 transition hover:border-[#0B7CFF] hover:bg-[#0B7CFF]/5">
+                  <svg className="h-5 w-5 text-[#06111F]/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                </div>
+                {totalNotifs > 0 ? <span className="absolute -right-1 -top-1 grid h-5 min-w-[20px] place-items-center rounded-full bg-red-600 px-1.5 text-[9px] font-black text-white">{totalNotifs > 99 ? "99+" : totalNotifs}</span> : null}
+              </a>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <GlobalSearch />

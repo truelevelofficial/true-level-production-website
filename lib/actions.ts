@@ -1144,3 +1144,327 @@ export async function updateDeliveryStatusAction(formData: FormData) {
     revalidatePath("/admin/workflow");
   } catch { /* empty */ }
 }
+
+// ─── Workflow Notifications ───
+
+export async function markNotificationReadAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.workflowNotification.update({ where: { id }, data: { read: true } });
+    revalidatePath("/admin/notifications");
+  } catch { /* empty */ }
+}
+
+export async function markAllNotificationsReadAction() {
+  await requireAdmin();
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.workflowNotification.updateMany({ where: { read: false }, data: { read: true } });
+    revalidatePath("/admin/notifications");
+  } catch { /* empty */ }
+}
+
+export async function createNotificationAction(formData: FormData) {
+  await requireAdmin();
+  const title = formData.get("title") as string;
+  if (!title?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.workflowNotification.create({
+      data: {
+        type: (formData.get("type") as string) || "TASK_ASSIGNED",
+        title: title.trim(),
+        message: (formData.get("message") as string) || null,
+        projectId: (formData.get("projectId") as string) || null,
+        taskId: (formData.get("taskId") as string) || null,
+      },
+    });
+    revalidatePath("/admin/notifications");
+  } catch { /* empty */ }
+}
+
+// ─── Approval Requests ───
+
+export async function createApprovalRequestAction(formData: FormData) {
+  await requireAdmin();
+  const title = formData.get("title") as string;
+  if (!title?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.approvalRequest.create({
+      data: {
+        type: (formData.get("type") as string) || "QUOTATION",
+        title: title.trim(),
+        requestedBy: (formData.get("requestedBy") as string) || null,
+        projectId: (formData.get("projectId") as string) || null,
+        quotationId: (formData.get("quotationId") as string) || null,
+        contractId: (formData.get("contractId") as string) || null,
+        notes: (formData.get("notes") as string) || null,
+      },
+    });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+export async function approveApprovalRequestAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.approvalRequest.update({
+      where: { id },
+      data: { status: "APPROVED", approvedBy: (formData.get("approvedBy") as string) || "Admin", approvedAt: new Date(), notes: (formData.get("notes") as string) || undefined },
+    });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+export async function rejectApprovalRequestAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.approvalRequest.update({
+      where: { id },
+      data: { status: "REJECTED", rejectedBy: (formData.get("rejectedBy") as string) || "Admin", rejectedAt: new Date(), notes: (formData.get("notes") as string) || undefined },
+    });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+// ─── Content Production ───
+
+export async function createContentProductionAction(formData: FormData) {
+  await requireAdmin();
+  const title = formData.get("title") as string;
+  if (!title?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.contentProduction.create({
+      data: {
+        title: title.trim(),
+        contentType: (formData.get("contentType") as string) || "REEL",
+        stage: (formData.get("stage") as string) || "IDEA",
+        platform: (formData.get("platform") as string) || null,
+        script: (formData.get("script") as string) || null,
+        dueDate: (formData.get("dueDate") as string) ? new Date(formData.get("dueDate") as string) : null,
+        projectId: (formData.get("projectId") as string) || null,
+        notes: (formData.get("notes") as string) || null,
+      },
+    });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+export async function updateContentStageAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  const stage = formData.get("stage") as string;
+  if (!id || !stage) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    const data: Record<string, unknown> = { stage };
+    if (stage === "PUBLISHED") data.publishedAt = new Date();
+    await prisma.contentProduction.update({ where: { id }, data });
+    revalidatePath("/admin/workflow");
+  } catch { /* empty */ }
+}
+
+// ─── Automation Rules ───
+
+export async function createAutomationRuleAction(formData: FormData) {
+  await requireAdmin();
+  const name = formData.get("name") as string;
+  if (!name?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.automationRule.create({
+      data: {
+        name: name.trim(),
+        trigger: (formData.get("trigger") as string) || "",
+        action: (formData.get("action") as string) || "{}",
+        active: formData.get("active") !== "false",
+      },
+    });
+    revalidatePath("/admin/automation");
+  } catch { /* empty */ }
+}
+
+export async function toggleAutomationRuleAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    const rule = await prisma.automationRule.findUnique({ where: { id } });
+    if (!rule) return;
+    await prisma.automationRule.update({ where: { id }, data: { active: !rule.active } });
+    revalidatePath("/admin/automation");
+  } catch { /* empty */ }
+}
+
+export async function deleteAutomationRuleAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.automationRule.delete({ where: { id } });
+    revalidatePath("/admin/automation");
+  } catch { /* empty */ }
+}
+
+// ─── Studio Operations ───
+
+export async function createStudioRoomAction(formData: FormData) {
+  await requireAdmin();
+  const name = formData.get("name") as string;
+  if (!name?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.studioRoom.create({ data: { name: name.trim(), type: (formData.get("type") as string) || "STUDIO" } });
+    revalidatePath("/admin/studio");
+  } catch { /* empty */ }
+}
+
+export async function createStudioEquipmentAction(formData: FormData) {
+  await requireAdmin();
+  const name = formData.get("name") as string;
+  if (!name?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.studioEquipment.create({ data: { name: name.trim(), category: (formData.get("category") as string) || null } });
+    revalidatePath("/admin/studio");
+  } catch { /* empty */ }
+}
+
+export async function createCreatorAction(formData: FormData) {
+  await requireAdmin();
+  const name = formData.get("name") as string;
+  if (!name?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.creator.create({
+      data: {
+        name: name.trim(),
+        email: (formData.get("email") as string) || null,
+        phone: (formData.get("phone") as string) || null,
+        specialty: (formData.get("specialty") as string) || null,
+      },
+    });
+    revalidatePath("/admin/studio");
+  } catch { /* empty */ }
+}
+
+// ─── Team Member Capacity ───
+
+export async function updateTeamMemberCapacityAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    const capacity = formData.get("capacity") ? parseInt(formData.get("capacity") as string) : undefined;
+    const performanceScore = formData.get("performanceScore") ? parseFloat(formData.get("performanceScore") as string) : undefined;
+    const availability = (formData.get("availability") as string) || undefined;
+    await prisma.teamMember.update({
+      where: { id },
+      data: { capacity: capacity ?? undefined, performanceScore: performanceScore ?? undefined, availability: availability ?? undefined },
+    });
+    revalidatePath("/admin/team-center");
+  } catch { /* empty */ }
+}
+
+// ─── Roles ───
+
+export async function createRoleAction(formData: FormData) {
+  await requireAdmin();
+  const name = formData.get("name") as string;
+  if (!name?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.role.create({
+      data: {
+        name: name.trim(),
+        description: (formData.get("description") as string) || null,
+      },
+    });
+    revalidatePath("/admin/settings");
+  } catch { /* empty */ }
+}
+
+export async function updateRolePermissionsAction(formData: FormData) {
+  await requireAdmin();
+  const roleId = formData.get("roleId") as string;
+  const resource = formData.get("resource") as string;
+  const action = formData.get("action") as string;
+  const grant = formData.get("grant") === "true";
+  if (!roleId || !resource || !action) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    if (grant) {
+      await prisma.permission.upsert({
+        where: { roleId_resource_action: { roleId, resource, action } },
+        create: { roleId, resource, action },
+        update: {},
+      });
+    } else {
+      await prisma.permission.deleteMany({ where: { roleId, resource, action } });
+    }
+    revalidatePath("/admin/settings");
+  } catch { /* empty */ }
+}
+
+// ─── Reports ───
+
+export async function saveReportAction(formData: FormData) {
+  await requireAdmin();
+  const name = formData.get("name") as string;
+  if (!name?.trim()) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.report.create({
+      data: {
+        type: (formData.get("type") as string) || "REVENUE",
+        name: name.trim(),
+        config: (formData.get("config") as string) || null,
+      },
+    });
+    revalidatePath("/admin/reporting");
+  } catch { /* empty */ }
+}
+
+export async function deleteReportAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  try {
+    const prisma = getPrisma();
+    if (!prisma) return;
+    await prisma.report.delete({ where: { id } });
+    revalidatePath("/admin/reporting");
+  } catch { /* empty */ }
+}

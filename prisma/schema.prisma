@@ -119,6 +119,10 @@ model Client {
   commercialRegistrationNumber String?
   clientType  String?
   leadSource  String?
+  industry    String?
+  companySize String?
+  decisionMaker String?
+  socialLinks String?
   pipelineStatus String?
   assignedTeamMember String?
   lostReason  String?
@@ -409,18 +413,21 @@ model Task {
 }
 
 model TeamMember {
-  id         String           @id @default(cuid())
-  name       String
-  role       String?
-  department String?
-  email      String?
-  phone      String?
-  active     Boolean          @default(true)
-  notes      String?
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
-  tasks      WorkflowTask[]
-  projects   WorkflowProject[] @relation("ProjectOwner")
+  id               String                    @id @default(cuid())
+  name             String
+  role             String?
+  department       String?
+  email            String?
+  phone            String?
+  active           Boolean                   @default(true)
+  capacity         Int?                      @default(100)
+  performanceScore Float?
+  availability     String?                   @default("AVAILABLE")
+  notes            String?
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+  tasks            WorkflowTask[]
+  projects         WorkflowProject[]         @relation("ProjectOwner")
 }
 
 model WorkflowProject {
@@ -441,10 +448,13 @@ model WorkflowProject {
   archived    Boolean            @default(false)
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
-  owner       TeamMember?        @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  owner       TeamMember?         @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   tasks       WorkflowTask[]
   approvals   WorkflowApproval[]
   deliveries  WorkflowDelivery[]
+  contentProductions  ContentProduction[]
+  approvalRequests    ApprovalRequest[]
+  workflowNotifications WorkflowNotification[]
 }
 
 model WorkflowTask {
@@ -461,8 +471,9 @@ model WorkflowTask {
   completedAt DateTime?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
-  project     WorkflowProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  assignee    TeamMember?     @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+  project     WorkflowProject?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  assignee    TeamMember?           @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+  workflowNotifications WorkflowNotification[]
 }
 
 model WorkflowApproval {
@@ -491,4 +502,135 @@ model WorkflowDelivery {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   project         WorkflowProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}
+
+// ─── Content Production Pipeline ───
+
+model ContentProduction {
+  id          String             @id @default(cuid())
+  projectId   String?
+  title       String
+  contentType String             @default("REEL")
+  stage       String             @default("IDEA")
+  platform    String?
+  script      String?
+  dueDate     DateTime?
+  publishedAt DateTime?
+  notes       String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  project     WorkflowProject?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}
+
+// ─── Approval Requests ───
+
+model ApprovalRequest {
+  id          String          @id @default(cuid())
+  type        String          @default("QUOTATION")
+  title       String
+  status      String          @default("PENDING")
+  requestedBy String?
+  approvedBy  String?
+  rejectedBy  String?
+  notes       String?
+  projectId   String?
+  quotationId String?
+  contractId  String?
+  approvedAt  DateTime?
+  rejectedAt  DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  project     WorkflowProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}
+
+// ─── Workflow Notifications ───
+
+model WorkflowNotification {
+  id        String          @id @default(cuid())
+  type      String          @default("TASK_ASSIGNED")
+  title     String
+  message   String?
+  projectId String?
+  taskId    String?
+  read      Boolean         @default(false)
+  createdAt DateTime        @default(now())
+  project   WorkflowProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  task      WorkflowTask?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
+}
+
+// ─── Automation Rules ───
+
+model AutomationRule {
+  id        String   @id @default(cuid())
+  name      String
+  trigger   String
+  action    String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Reports ───
+
+model Report {
+  id        String   @id @default(cuid())
+  type      String
+  name      String
+  config    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Roles & Permissions ───
+
+model Role {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  description String?
+  permissions Permission[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Permission {
+  id        String   @id @default(cuid())
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  resource  String
+  action    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([roleId, resource, action])
+}
+
+// ─── Studio Rooms & Equipment ───
+
+model StudioRoom {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   @default("STUDIO")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StudioEquipment {
+  id        String   @id @default(cuid())
+  name      String
+  category  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Creator {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  specialty String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

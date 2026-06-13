@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { AdminShell, Card, SetupNotice } from "@/components/admin-shell";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { Field, inputClass } from "@/components/form-fields";
-import { getClientById, hasDatabase } from "@/lib/admin-data";
+import { getClientById, getClientTimeline, hasDatabase } from "@/lib/admin-data";
 import { createExpenseAction } from "@/lib/actions";
 import { requireAdmin } from "@/lib/auth";
 import { displayDate } from "@/lib/dates";
@@ -14,11 +14,20 @@ export default async function ClientProfilePage({ params }: { params: Promise<{ 
   const { id } = await params;
   const client = await getClientById(id);
   if (!client) notFound();
+  const timeline = await getClientTimeline(id);
 
   const meetings = client.bookings.filter((booking) => booking.type === "GOOGLE_MEETING" || booking.type === "COMPANY_MEETING");
   const studioBookings = client.bookings.filter((booking) => booking.type === "STUDIO");
   const revenue = client.payments.reduce((sum, payment) => sum + Number(payment.amount), 0);
   const expenses = client.expenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
+
+  const allEvents = [
+    ...(timeline?.bookings || []).map(b => ({ date: b.startTime, label: `${b.type.replace("_", " ")} - ${b.status}`, type: "booking" as const })),
+    ...(timeline?.quotations || []).map(q => ({ date: q.createdAt, label: `Quotation ${q.quotationNo || ""} - ${q.status}`, type: "quotation" as const })),
+    ...(timeline?.contracts || []).map(c => ({ date: c.createdAt, label: `Contract: ${c.title} - ${c.status}`, type: "contract" as const })),
+    ...(timeline?.invoices || []).map(i => ({ date: i.createdAt, label: `Invoice ${i.invoiceNo} - ${i.status}`, type: "invoice" as const })),
+    ...(timeline?.projects || []).map(p => ({ date: p.updatedAt, label: `Project: ${p.title} - ${p.stage?.replace(/_/g, " ")}`, type: "project" as const })),
+  ].sort((a, b) => b.date.getTime() - a.date.getTime());
 
   return (
     <AdminShell title="Client Profile">
@@ -39,7 +48,7 @@ export default async function ClientProfilePage({ params }: { params: Promise<{ 
         <Card title="Contracts" value={String(client.contracts.length)} />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
         <section className="rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm">
           <h2 className="text-2xl font-black uppercase tracking-[-0.05em]">Client Information</h2>
           <div className="mt-5 grid gap-3 text-sm font-bold text-[#06111F]/65">
@@ -51,6 +60,10 @@ export default async function ClientProfilePage({ params }: { params: Promise<{ 
             <p className="blur-sensitive">Commercial registration: {client.commercialRegistrationNumber || "-"}</p>
             <p>Client type: {client.clientType || "-"}</p>
             <p>Lead source: {client.leadSource || "-"}</p>
+            <p>Industry: {client.industry || "-"}</p>
+            <p>Company size: {client.companySize || "-"}</p>
+            <p>Decision maker: {client.decisionMaker || "-"}</p>
+            <p>Social: {client.socialLinks || "-"}</p>
             <p>Assigned team member: {client.assignedTeamMember || "-"}</p>
             <p>Created: {displayDate(client.createdAt)}</p>
           </div>
@@ -65,18 +78,47 @@ export default async function ClientProfilePage({ params }: { params: Promise<{ 
             <Card title="Payments" value={String(client.payments.length)} />
             <Card title="Expenses" value={`${expenses} EGP`} />
           </div>
+          {timeline && (
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <Card title="Total Revenue" value={`${timeline.totalRevenue.toLocaleString()} EGP`} />
+              <Card title="Total Expenses" value={`${timeline.totalExpenses.toLocaleString()} EGP`} />
+            </div>
+          )}
         </section>
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <History title="Meetings" rows={meetings.map((booking) => `${booking.meetingType || booking.type} / ${booking.status} / ${displayDate(booking.startTime)}`)} />
-        <History title="Bookings" rows={studioBookings.map((booking) => `${booking.studioSetup || booking.type} / ${booking.status} / ${displayDate(booking.startTime)}`)} />
+        <History title="Studio Bookings" rows={studioBookings.map((booking) => `${booking.studioSetup || booking.type} / ${booking.status} / ${displayDate(booking.startTime)}`)} />
         <History title="Payments" rows={client.payments.map((payment) => `${displayDate(payment.date)} / ${String(payment.amount)} EGP / ${payment.method} / ${payment.status}`)} />
         <History title="Contracts" rows={client.contracts.map((contract) => `${contract.title} / ${contract.status} / ${displayDate(contract.createdAt)}`)} />
-        <Placeholder title="Projects" />
-        <Placeholder title="Quotations" />
+        {timeline?.projects && timeline.projects.length > 0 ? (
+          <History title="Projects" rows={timeline.projects.map((p) => `${p.title} / ${p.stage?.replace(/_/g, " ") || "No stage"} / ${displayDate(p.updatedAt)}`)} />
+        ) : <Placeholder title="Projects" />}
+        {timeline?.quotations && timeline.quotations.length > 0 ? (
+          <History title="Quotations" rows={timeline.quotations.map((q) => `${q.quotationNo || "QTN"} / ${q.status} / ${q.totalAmount ? `${q.totalAmount} EGP` : ""} / ${displayDate(q.createdAt)}`)} />
+        ) : <Placeholder title="Quotations" />}
+        {allEvents.length > 0 ? (
+          <div className="lg:col-span-2 rounded-[2rem] border border-[#06111F]/10 bg-white p-6 shadow-sm">
+            <h2 className="text-2xl font-black uppercase tracking-[-0.05em]">Client Timeline</h2>
+            <div className="mt-4 grid gap-3 max-h-[400px] overflow-y-auto">
+              {allEvents.map((e, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <span className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-[9px] font-black text-white ${
+                    e.type === "booking" ? "bg-[#06D6A0]" : e.type === "quotation" ? "bg-[#FFD166]" : e.type === "contract" ? "bg-[#7B2CBF]" : e.type === "invoice" ? "bg-[#EF476F]" : "bg-[#0B7CFF]"
+                  }`}>
+                    {e.type === "booking" ? "B" : e.type === "quotation" ? "Q" : e.type === "contract" ? "C" : e.type === "invoice" ? "I" : "P"}
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-xs font-bold uppercase tracking-[-0.01em]">{e.label}</p>
+                    <p className="text-[10px] text-[#06111F]/40">{displayDate(e.date)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : <div className="lg:col-span-2"><Placeholder title="Client Timeline" /></div>}
         <Placeholder title="Files" />
-        <Placeholder title="Activity Log" />
       </div>
 
       <section className="mb-6 rounded-[2rem] border border-[#06111F]/10 bg-white p-6">

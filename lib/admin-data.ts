@@ -414,4 +414,229 @@ export async function getTeamWorkload() {
   } catch { return []; }
 }
 
+// ─── Team Center ───
+
+export async function getTeamCenter() {
+  const prisma = getPrisma();
+  if (!prisma) return null;
+  try {
+    const members = await prisma.teamMember.findMany({
+      where: { active: true },
+      include: {
+        tasks: { where: { status: { notIn: ["DONE", "CANCELLED"] } } },
+        projects: { where: { archived: false }, select: { id: true, title: true, stage: true } },
+      },
+      orderBy: { name: "asc" },
+    });
+    const totalMembers = members.length;
+    const overloaded = members.filter(m => (m.capacity ?? 100) > 0 && m.tasks.length > Math.round((m.capacity ?? 100) / 20));
+    const available = members.filter(m => m.availability === "AVAILABLE" && m.tasks.length === 0);
+    const avgPerformance = members.reduce((s, m) => s + (m.performanceScore ?? 0), 0) / (totalMembers || 1);
+    const deptStats: Record<string, { count: number; tasks: number; score: number }> = {};
+    members.forEach(m => {
+      const dept = m.department || "General";
+      if (!deptStats[dept]) deptStats[dept] = { count: 0, tasks: 0, score: 0 };
+      deptStats[dept].count++;
+      deptStats[dept].tasks += m.tasks.length;
+      deptStats[dept].score += m.performanceScore ?? 0;
+    });
+    return { members: members as any, totalMembers, overloaded, available, avgPerformance, deptStats };
+  } catch { return null; }
+}
+
+// ─── Workflow Notifications ───
+
+export async function getWorkflowNotifications(unreadOnly = false) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const where = unreadOnly ? { read: false } : {};
+    return await prisma.workflowNotification.findMany({
+      where,
+      include: { project: { select: { id: true, title: true } }, task: { select: { id: true, title: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    });
+  } catch { return []; }
+}
+
+export async function getUnreadWorkflowNotificationCount() {
+  const prisma = getPrisma();
+  if (!prisma) return 0;
+  try {
+    return await prisma.workflowNotification.count({ where: { read: false } });
+  } catch { return 0; }
+}
+
+// ─── Approval Requests ───
+
+export async function getApprovalRequests(filters: { status?: string; type?: string } = {}) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const where: Record<string, unknown> = {};
+    if (filters.status) where.status = filters.status;
+    if (filters.type) where.type = filters.type;
+    return await prisma.approvalRequest.findMany({
+      where,
+      include: { project: { select: { id: true, title: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    });
+  } catch { return []; }
+}
+
+// ─── Content Production ───
+
+export async function getContentProductions(filters: { stage?: string; projectId?: string } = {}) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const where: Record<string, unknown> = {};
+    if (filters.stage) where.stage = filters.stage;
+    if (filters.projectId) where.projectId = filters.projectId;
+    return await prisma.contentProduction.findMany({
+      where,
+      include: { project: { select: { id: true, title: true } } },
+      orderBy: { updatedAt: "desc" },
+      take: 100,
+    });
+  } catch { return []; }
+}
+
+// ─── Automation Rules ───
+
+export async function getAutomationRules() {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.automationRule.findMany({ orderBy: { name: "asc" } });
+  } catch { return []; }
+}
+
+// ─── Reports ───
+
+export async function getReports() {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.report.findMany({ orderBy: { createdAt: "desc" } });
+  } catch { return []; }
+}
+
+// ─── Studio Operations ───
+
+export async function getStudioRooms() {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.studioRoom.findMany({ orderBy: { name: "asc" } });
+  } catch { return []; }
+}
+
+export async function getStudioEquipment() {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.studioEquipment.findMany({ orderBy: { name: "asc" } });
+  } catch { return []; }
+}
+
+export async function getCreators() {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.creator.findMany({ orderBy: { name: "asc" } });
+  } catch { return []; }
+}
+
+export async function getStudioCalendar(from?: Date, to?: Date) {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    const start = from || new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const end = to || new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
+    return await prisma.booking.findMany({
+      where: { type: "STUDIO", startTime: { gte: start }, endTime: { lte: end } },
+      include: { client: true },
+      orderBy: { startTime: "asc" },
+    });
+  } catch { return []; }
+}
+
+// ─── CRM: Client Timeline ───
+
+export async function getClientTimeline(clientId: string) {
+  const prisma = getPrisma();
+  if (!prisma) return null;
+  try {
+    const clientData = await prisma.client.findUnique({
+      where: { id: clientId },
+      include: { payments: { orderBy: { date: "desc" }, take: 50 }, expenses: { orderBy: { date: "desc" }, take: 50 } },
+    });
+    if (!clientData) return null;
+    const [bookings, quotations, contracts, invoices, projects] = await Promise.all([
+      prisma.booking.findMany({ where: { clientId }, include: { client: true }, orderBy: { startTime: "desc" }, take: 50 }),
+      prisma.quotation.findMany({ where: { clientId }, include: { client: true }, orderBy: { createdAt: "desc" }, take: 50 }),
+      prisma.contract.findMany({ where: { clientId }, include: { client: true }, orderBy: { createdAt: "desc" }, take: 50 }),
+      prisma.invoice.findMany({ where: { clientId }, include: { client: true }, orderBy: { createdAt: "desc" }, take: 50 }),
+      prisma.workflowProject.findMany({ where: { clientName: clientData.fullName || undefined }, orderBy: { updatedAt: "desc" }, take: 50 }),
+    ]);
+    const totalRevenue = clientData.payments.reduce((s, p) => s + Number(p.amount), 0);
+    const totalExpenses = clientData.expenses.reduce((s, e) => s + Number(e.amount), 0);
+    return { client: clientData, bookings, quotations, contracts, invoices, projects, totalRevenue, totalExpenses };
+  } catch { return null; }
+}
+
+// ─── Finance Center ───
+
+export async function getFinanceCenter() {
+  const prisma = getPrisma();
+  if (!prisma) return null;
+  try {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const yearStart = new Date(now.getFullYear(), 0, 1);
+    const [allPayments, allExpenses, invoices, monthlyPayments, monthlyExpenses, yearlyPayments, yearlyExpenses] = await Promise.all([
+      prisma.payment.findMany({ select: { amount: true, date: true, clientId: true, client: { select: { fullName: true } } } }),
+      prisma.expense.findMany({ select: { amount: true, date: true, category: true } }),
+      prisma.invoice.findMany({ select: { total: true, paidAmount: true, remainingAmount: true, status: true, paymentStatus: true } }),
+      prisma.payment.findMany({ where: { date: { gte: monthStart } }, select: { amount: true } }),
+      prisma.expense.findMany({ where: { date: { gte: monthStart } }, select: { amount: true } }),
+      prisma.payment.findMany({ where: { date: { gte: yearStart } }, select: { amount: true } }),
+      prisma.expense.findMany({ where: { date: { gte: yearStart } }, select: { amount: true } }),
+    ]);
+    const totalRevenue = allPayments.reduce((s, p) => s + Number(p.amount), 0);
+    const totalExpenses = allExpenses.reduce((s, e) => s + Number(e.amount), 0);
+    const mrr = monthlyPayments.reduce((s, p) => s + Number(p.amount), 0);
+    const arr = mrr * 12;
+    const outstandingInvoices = invoices.filter(i => i.paymentStatus !== "PAID" && i.paymentStatus !== "REFUNDED");
+    const outstandingTotal = outstandingInvoices.reduce((s, i) => s + Number(i.remainingAmount), 0);
+    const cashFlow = mrr - monthlyExpenses.reduce((s, e) => s + Number(e.amount), 0);
+
+    // Revenue by client
+    const byClient: Record<string, number> = {};
+    allPayments.forEach(p => { const name = p.client?.fullName || "Unknown"; byClient[name] = (byClient[name] || 0) + Number(p.amount); });
+    const revenueByClient = Object.entries(byClient).sort(([, a], [, b]) => b - a).slice(0, 10);
+
+    // Monthly trend
+    const months: Record<string, { revenue: number; expenses: number }> = {};
+    allPayments.forEach(p => { const k = `${p.date.getFullYear()}-${String(p.date.getMonth() + 1).padStart(2, "0")}`; if (!months[k]) months[k] = { revenue: 0, expenses: 0 }; months[k].revenue += Number(p.amount); });
+    allExpenses.forEach(e => { const k = `${e.date.getFullYear()}-${String(e.date.getMonth() + 1).padStart(2, "0")}`; if (!months[k]) months[k] = { revenue: 0, expenses: 0 }; months[k].expenses += Number(e.amount); });
+    const monthlyTrend = Object.entries(months).sort(([a], [b]) => a.localeCompare(b)).slice(-12).map(([month, d]) => ({ month, revenue: d.revenue, expenses: d.expenses, profit: d.revenue - d.expenses }));
+
+    return { totalRevenue, totalExpenses, profit: totalRevenue - totalExpenses, mrr, arr, outstandingInvoices: outstandingTotal, cashFlow, revenueByClient, monthlyTrend };
+  } catch { return null; }
+}
+
+// ─── Roles ───
+
+export async function getRoles() {
+  const prisma = getPrisma();
+  if (!prisma) return [];
+  try {
+    return await prisma.role.findMany({ include: { permissions: true }, orderBy: { name: "asc" } });
+  } catch { return []; }
+}
+
 export { hasDatabase };
