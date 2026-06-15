@@ -5,7 +5,8 @@ import { logoutAction } from "@/lib/actions";
 import { getUnreadNotificationCount, getUnreadWorkflowNotificationCount, getPendingTasksCount, getUpcomingMeetingsCount, getOverdueItemsCount } from "@/lib/admin-data";
 import { AdminBlurToggle } from "./admin-blur-toggle";
 import { CommandPalette } from "./command-palette";
-import { SidebarNav, getAdminBreadcrumbs } from "./admin-nav-sidebar";
+import { SidebarNav } from "./admin-nav-sidebar";
+import { getAdminBreadcrumbs } from "@/lib/admin-breadcrumbs";
 
 export async function AdminShell({ title, children }: { title: string; children: ReactNode }) {
   const [notifCount, wfNotifCount, pendingTasks, upcomingMeetings, overdueItems] = await Promise.all([
