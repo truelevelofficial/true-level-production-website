@@ -2,10 +2,6 @@ import { PDFDocument, rgb, PageSizes } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import fs from "fs";
 import path from "path";
-import { ArabicShaper } from "arabic-persian-reshaper";
-import getBidi from "bidi-js";
-
-const bidi = getBidi();
 
 const COMPANY_INFO = {
   name: "True Level Production",
@@ -14,17 +10,14 @@ const COMPANY_INFO = {
   email: "info@truelevelproduction.com",
 };
 
-const ARABIC_RE = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+const ARABIC_RE = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/;
 
 function hasArabic(text: string): boolean {
   return ARABIC_RE.test(text);
 }
 
 function shapeText(text: string): string {
-  if (!text || !hasArabic(text)) return text;
-  const levels = bidi.getEmbeddingLevels(text);
-  const reordered = bidi.getReorderedString(text, levels);
-  return ArabicShaper.convertArabic(reordered);
+  return text;
 }
 
 function textWidth(font: any, text: string, size: number): number {
