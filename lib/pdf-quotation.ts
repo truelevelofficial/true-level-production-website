@@ -3,9 +3,6 @@ import fontkit from "@pdf-lib/fontkit";
 import fs from "fs";
 import path from "path";
 import { ArabicShaper } from "arabic-persian-reshaper";
-import getBidi from "bidi-js";
-
-const bidi = getBidi();
 
 const COMPANY_INFO = {
   name: "True Level Production",
@@ -22,9 +19,7 @@ function hasArabic(text: string): boolean {
 
 function shapeText(text: string): string {
   if (!text || !hasArabic(text)) return text;
-  const levels = bidi.getEmbeddingLevels(text);
-  const reordered = bidi.getReorderedString(text, levels);
-  return ArabicShaper.convertArabic(reordered);
+  return ArabicShaper.convertArabic(text);
 }
 
 function textWidth(font: any, text: string, size: number): number {
