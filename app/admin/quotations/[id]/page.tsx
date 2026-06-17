@@ -20,6 +20,12 @@ export default async function QuotationDetailPage({ params }: { params: Promise<
         <div className="flex items-center gap-4">
           <h2 className="text-2xl font-black uppercase tracking-[-0.05em]">{quotation.quotationNo || "عرض سعر"}</h2>
           <span className={`rounded-full px-3 py-1 text-xs font-bold ${quotation.status === "ACCEPTED" ? "bg-green-100 text-green-700" : quotation.status === "REJECTED" || quotation.status === "EXPIRED" ? "bg-red-100 text-red-700" : quotation.status === "SENT" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>{quotationStatusArabic[quotation.status]}</span>
+          <a
+            href={`/api/quotations/${quotation.id}/pdf`}
+            className="mr-auto rounded-full bg-[#0B7CFF] px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-white shadow-sm"
+          >
+            Download PDF
+          </a>
         </div>
       </div>
 
