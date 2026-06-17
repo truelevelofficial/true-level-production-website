@@ -38,7 +38,8 @@ export function QuotationForm({ clients, settings, quotation }: { clients: any[]
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const fd = new FormData(form);
     fd.set("items", JSON.stringify(items.map((i) => ({ ...i, total: (Number(i.quantity) || 0) * (Number(i.unitPrice) || 0) - (Number(i.discount) || 0) }))));
     fd.set("subtotal", String(subtotal));
     fd.set("discount", String(totalDiscount));
@@ -50,7 +51,7 @@ export function QuotationForm({ clients, settings, quotation }: { clients: any[]
       const res = await createQuotationAction(fd);
       setResult(res);
       if (res.success && !quotation) {
-        e.currentTarget.reset();
+        form.reset();
         setItems([{ key: String(nextKey()), description: "", quantity: "1", unitPrice: "", discount: "0" }]);
       }
     });
