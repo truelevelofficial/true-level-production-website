@@ -42,7 +42,7 @@ const services: Service[] = [
     title: "Brand Films",
     number: "01",
     text: "Launch films, campaign videos, product stories, interviews, reels, and social-first edits.",
-    image: "/images/service-video-production.jpg",
+    image: "",
   },
   {
     icon: Lightbulb,
@@ -56,7 +56,7 @@ const services: Service[] = [
     title: "UGC Content",
     number: "03",
     text: "Creator-led videos that feel native, build trust, and give brands ad-ready content.",
-    image: "/images/service-ugc.jpg",
+    image: "",
   },
   {
     icon: Camera,
@@ -70,7 +70,7 @@ const services: Service[] = [
     title: "Event Coverage",
     number: "05",
     text: "Live coverage, interviews, instant reels, recap videos, and on-ground production teams.",
-    image: "/images/service-event-coverage.jpg",
+    image: "",
   },
   {
     icon: Megaphone,
@@ -90,11 +90,11 @@ const process = [
 
 const studioSetups = [
   ["01", "Cyclorama", "/images/studio-cyclorama.jpg", "Clean curved wall studio for reels, product shoots, and campaigns."],
-  ["02", "Creator Corners", "/images/studio-creator-corner.jpg", "Ready-made creator setups for talking-head reels and social content."],
-  ["03", "Product Zone", "/images/studio-product-zone.jpg", "Product shooting setup for beauty, food, fashion, and e-commerce brands."],
-  ["04", "Podcast Look", "/images/studio-podcast.jpg", "Cozy podcast-style setup with seating, mic, and warm background."],
-  ["05", "Lifestyle Setups", "/images/studio-lifestyle.jpg", "Designed spaces for brand scenes, UGC, and lifestyle content."],
-  ["06", "Lighting Ready", "/images/studio-lighting.jpg", "Flexible lighting setups for fast content production."],
+  ["02", "Creator Corners", "", "Ready-made creator setups for talking-head reels and social content."],
+  ["03", "Product Zone", "", "Product shooting setup for beauty, food, fashion, and e-commerce brands."],
+  ["04", "Podcast Look", "", "Cozy podcast-style setup with seating, mic, and warm background."],
+  ["05", "Lifestyle Setups", "", "Designed spaces for brand scenes, UGC, and lifestyle content."],
+  ["06", "Lighting Ready", "", "Flexible lighting setups for fast content production."],
 ] as const;
 
 const workItems = [
@@ -303,16 +303,16 @@ export default async function Home() {
           <div className="grid grid-cols-2 gap-4 md:gap-5">
             {([
               ["01", "Cyclorama", "/images/studio-cyclorama.jpg", "Clean curved wall studio for reels, product shoots, and campaigns.", "3/5"],
-              ["02", "Creator Corners", "/images/studio-creator-corner.jpg", "Ready-made creator setups for talking-head reels and social content.", "4/5"],
-              ["03", "Product Zone", "/images/studio-product-zone.jpg", "Product shooting setup for beauty, food, fashion, and e-commerce brands.", "4/5"],
-              ["04", "Podcast Look", "/images/studio-podcast.jpg", "Cozy podcast-style setup with seating, mic, and warm background.", "16/9"],
-              ["05", "Lifestyle Setups", "/images/studio-lifestyle.jpg", "Designed spaces for brand scenes, UGC, and lifestyle content.", "4/3"],
-              ["06", "Lighting Ready", "/images/studio-lighting.jpg", "Flexible lighting setups for fast content production.", "4/3"],
+              ["02", "Creator Corners", "", "Ready-made creator setups for talking-head reels and social content.", "4/5"],
+              ["03", "Product Zone", "", "Product shooting setup for beauty, food, fashion, and e-commerce brands.", "4/5"],
+              ["04", "Podcast Look", "", "Cozy podcast-style setup with seating, mic, and warm background.", "16/9"],
+              ["05", "Lifestyle Setups", "", "Designed spaces for brand scenes, UGC, and lifestyle content.", "4/3"],
+              ["06", "Lighting Ready", "", "Flexible lighting setups for fast content production.", "4/3"],
             ] as const).map(([num, item, image, subtitle, ratio]) => (
               <div key={item} className="group relative overflow-hidden rounded-[28px] shadow-sm transition-all duration-500 ease-out hover:z-30 hover:-translate-x-3 hover:scale-[1.035] hover:-rotate-2 hover:shadow-2xl" style={{ aspectRatio: ratio }}>
                 <div className="absolute inset-0 overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#06111F]/20 to-[#0B7CFF]/10" />
-                  <img alt={item} className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.07]" src={image} />
+                  {image ? <img alt={item} className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.07]" src={image} /> : null}
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-[#06111F]/80 via-[#06111F]/10 to-transparent transition-opacity duration-500 group-hover:from-[#06111F]/90" />
                 <div className="relative z-10 flex h-full flex-col justify-end p-4 transition-transform duration-500 group-hover:-translate-y-0.5 md:p-5">
