@@ -28,9 +28,20 @@ export async function generateQuotationPdf(quotation: any): Promise<Uint8Array> 
   const fontBoldPath = path.join(process.cwd(), "public", "fonts", "NotoNaskhArabic-Bold.ttf");
   const logoPath = path.join(process.cwd(), "public", "true-level-logo-black.png");
 
+  console.log("[PDF] fontPath:", fontPath);
+  console.log("[PDF] fontBoldPath:", fontBoldPath);
+  console.log("[PDF] logoPath:", logoPath);
+
+  if (!fs.existsSync(fontPath)) throw new Error(`Font not found: ${fontPath}`);
+  if (!fs.existsSync(fontBoldPath)) throw new Error(`Bold font not found: ${fontBoldPath}`);
+  if (!fs.existsSync(logoPath)) throw new Error(`Logo not found: ${logoPath}`);
+
   const fontBytes = fs.readFileSync(fontPath);
   const fontBoldBytes = fs.readFileSync(fontBoldPath);
   const logoBytes = fs.readFileSync(logoPath);
+
+  console.log("[PDF] Font bytes loaded:", fontBytes.length);
+  console.log("[PDF] Logo bytes loaded:", logoBytes.length);
 
   const doc = await PDFDocument.create();
   doc.registerFontkit(fontkit);
