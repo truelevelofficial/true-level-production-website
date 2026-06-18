@@ -17,10 +17,28 @@ function hasArabic(text: string): boolean {
 }
 
 function shapeText(text: string): string {
-  return text;
+  if (!text || !hasArabic(text)) return text;
+  try {
+    const { ArabicShaper } = require("arabic-persian-reshaper") as {
+      ArabicShaper: { convertArabic: (s: string) => string };
+    };
+    const bidiFactory = require("bidi-js") as () => {
+      getEmbeddingLevels: (s: string) => any;
+      getReorderedString: (s: string, levels: any) => string;
+    };
+    const bidi = bidiFactory();
+    const reshaped = ArabicShaper.convertArabic(text);
+    const levels = bidi.getEmbeddingLevels(reshaped);
+    return bidi.getReorderedString(reshaped, levels);
+  } catch {
+    return text;
+  }
 }
 
-function textWidth(font: any, text: string, size: number): number {
+function getFontWidth(font: any, text: string, size: number): number {
+  if (!font || typeof font.widthOfTextAtSize !== "function") {
+    return text.length * size * 0.55;
+  }
   try {
     return font.widthOfTextAtSize(text, size);
   } catch {
@@ -49,8 +67,8 @@ function drawText(page: any, text: string, x: number, y: number, opts: {
   if (font) page.setFont(font);
   page.setFontSize(size);
   let drawX = x;
-  if (rightAlign && rightEdge > 0) {
-    drawX = rightEdge - textWidth(font || page, displayText, size);
+  if (rightAlign && rightEdge > 0 && font) {
+    drawX = rightEdge - getFontWidth(font, displayText, size);
   }
   page.drawText(displayText, { x: drawX, y, size, color });
 }
@@ -242,8 +260,10 @@ export async function generateQuotationPdf(quotation: any): Promise<Uint8Array> 
     summaryY -= item.bold ? 22 : 18;
   }
 
-  const detailsStartY = margin + 120;
-  let detailsY = detailsStartY;
+  const footerY = margin - 10;
+  const footerTop = footerY + 40;
+  let detailsY = Math.min(summaryY - 20, height - margin - 200);
+  detailsY = Math.max(detailsY, footerTop);
 
   if (quotation.notes) {
     page.drawLine({ start: { x: margin, y: detailsY }, end: { x: width - margin, y: detailsY }, thickness: 1, color: dividerColor });
@@ -280,8 +300,8 @@ export async function generateQuotationPdf(quotation: any): Promise<Uint8Array> 
     }
   }
 
-  const footerY = margin - 10;
-  page.drawLine({ start: { x: margin, y: footerY + 10 }, end: { x: width - margin, y: footerY + 10 }, thickness: 1, color: dividerColor });
+  const footerLineY = footerY + 10;
+  page.drawLine({ start: { x: margin, y: footerLineY }, end: { x: width - margin, y: footerLineY }, thickness: 1, color: dividerColor });
 
   drawText(page, "Thank you for your business!", margin, footerY - 4, { size: 8, color: rgb(0.3, 0.3, 0.3) });
   drawText(page, COMPANY_INFO.name, margin, footerY - 18, { font: fontBold, size: 8 });

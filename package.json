@@ -25,6 +25,8 @@
     "motion": "^12.40.0",
     "next": "16.2.6",
     "pdf-lib": "^1.17.1",
+    "arabic-persian-reshaper": "^1.0.1",
+    "bidi-js": "^1.0.3",
     "pg": "^8.21.0",
     "prisma": "^7.8.0",
     "react": "19.2.6",
