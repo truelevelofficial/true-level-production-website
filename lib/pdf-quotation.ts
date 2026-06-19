@@ -1,13 +1,13 @@
-import { PDFDocument, rgb, PageSizes, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb, PageSizes, StandardFonts, degrees } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import fs from "fs";
 import path from "path";
 
 const COMPANY_INFO = {
   name: "True Level Production",
-  address: "Cairo, Egypt",
-  phone: "+20 100 123 4567",
-  email: "info@truelevelproduction.com",
+  phone: "01143331405",
+  address1: "1ج عمارات الفاروقيه، جسر السويس، النزهة، القاهرة",
+  address2: "الدور ٤، شقة 406",
 };
 
 const ARABIC_RE = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/;
@@ -143,11 +143,6 @@ export async function generateQuotationPdf(quotation: any): Promise<Uint8Array> 
   const borderColor = rgb(0.82, 0.82, 0.84);
   const half = contentWidth / 2;
 
-  const statusMap: Record<string, string> = {
-    DRAFT: "Draft", SENT: "Sent", ACCEPTED: "Accepted",
-    REJECTED: "Rejected", EXPIRED: "Expired",
-  };
-
   const infoData: { label: string; value: string }[][] = [
     [
       { label: "QUOTATION NO", value: quotation.quotationNo || "---" },
@@ -155,7 +150,6 @@ export async function generateQuotationPdf(quotation: any): Promise<Uint8Array> 
     ],
     [
       { label: "VALID UNTIL", value: formatDate(quotation.validUntil) },
-      { label: "STATUS", value: statusMap[quotation.status] || quotation.status },
     ],
   ];
 
@@ -175,7 +169,8 @@ export async function generateQuotationPdf(quotation: any): Promise<Uint8Array> 
   // ══════════════════════════════════════════════════════
   // CLIENT SECTION
   // ══════════════════════════════════════════════════════
-  const clientSectionBgH = 100;
+  const clientSectionTop = y;
+  const clientSectionBgH = 80;
   page.drawRectangle({ x: margin, y: y - clientSectionBgH, width: contentWidth, height: clientSectionBgH, color: cardBg });
 
   drawText(page, "CLIENT", margin, y - 6, { font: helvBold, size: 11, color: nearBlack });
@@ -183,19 +178,13 @@ export async function generateQuotationPdf(quotation: any): Promise<Uint8Array> 
 
   y -= 30;
 
-  const clientName = quotation.client?.fullName || "---";
-  drawText(page, clientName, margin, y, { font: arabicFont, size: 12, color: nearBlack, rightAlign: hasArabic(clientName), rightEdge });
+  const clientDisplayName = quotation.client?.fullName || quotation.client?.companyName || "---";
+  drawText(page, clientDisplayName, margin, y, { font: arabicFont, size: 12, color: nearBlack, rightAlign: hasArabic(clientDisplayName), rightEdge });
   y -= 18;
 
-  if (quotation.client?.companyName) {
-    drawText(page, quotation.client.companyName, margin, y, { font: arabicFont, size: 10, color: midGray, rightAlign: hasArabic(quotation.client.companyName), rightEdge });
-    y -= 16;
-  }
   drawText(page, quotation.client?.phone || "---", margin, y, { font: arabicFont, size: 10, color: midGray });
-  y -= 16;
-  drawText(page, quotation.client?.email || "", margin, y, { font: arabicFont, size: 10, color: midGray });
 
-  y = y - clientSectionBgH + 100 - 16;
+  y = clientSectionTop - clientSectionBgH - 16;
 
   // ══════════════════════════════════════════════════════
   // SERVICE SECTION
@@ -270,7 +259,8 @@ export async function generateQuotationPdf(quotation: any): Promise<Uint8Array> 
   const summaryBoxW = contentWidth * 0.42;
   const summaryBoxX = rightEdge - summaryBoxW;
   const summaryBoxY = tableBottom - 16;
-  const summaryBoxH = 90;
+  const summaryBoxH = 120;
+  const summaryPad = 18;
 
   page.drawRectangle({ x: summaryBoxX, y: summaryBoxY - summaryBoxH, width: summaryBoxW, height: summaryBoxH, color: white });
   page.drawRectangle({ x: summaryBoxX, y: summaryBoxY - summaryBoxH, width: summaryBoxW, height: summaryBoxH, color: rgb(0.92, 0.92, 0.94), borderColor: lightDivider, borderWidth: 1 });
@@ -285,15 +275,15 @@ export async function generateQuotationPdf(quotation: any): Promise<Uint8Array> 
   }
   summaryItems.push({ label: "GRAND TOTAL", value: formatCurrency(Number(quotation.grandTotal)), bold: true });
 
-  let summaryInnerY = summaryBoxY - 16;
+  let summaryInnerY = summaryBoxY - summaryPad;
   for (const item of summaryItems) {
     if (item.bold) {
-      page.drawLine({ start: { x: summaryBoxX + 10, y: summaryInnerY + 4 }, end: { x: summaryBoxX + summaryBoxW - 10, y: summaryInnerY + 4 }, thickness: 1, color: lightDivider });
-      summaryInnerY += 4;
+      page.drawLine({ start: { x: summaryBoxX + 12, y: summaryInnerY + 6 }, end: { x: summaryBoxX + summaryBoxW - 12, y: summaryInnerY + 6 }, thickness: 1.2, color: lightDivider });
+      summaryInnerY += 6;
     }
-    drawText(page, item.label, summaryBoxX + 14, summaryInnerY, { font: helv, size: item.bold ? 11 : 9, color: item.bold ? nearBlack : midGray });
-    drawText(page, item.value, summaryBoxX + summaryBoxW - 14, summaryInnerY, { font: helvBold, size: item.bold ? 12 : 10, color: item.bold ? nearBlack : nearBlack, rightAlign: true, rightEdge: summaryBoxX + summaryBoxW - 14 });
-    summaryInnerY -= item.bold ? 24 : 20;
+    drawText(page, item.label, summaryBoxX + 16, summaryInnerY, { font: helv, size: item.bold ? 13 : 9, color: item.bold ? nearBlack : midGray });
+    drawText(page, item.value, summaryBoxX + summaryBoxW - 16, summaryInnerY, { font: helvBold, size: item.bold ? 14 : 10, color: nearBlack, rightAlign: true, rightEdge: summaryBoxX + summaryBoxW - 16 });
+    summaryInnerY -= item.bold ? 30 : 22;
   }
 
   y = summaryBoxY - summaryBoxH - 20;
@@ -301,7 +291,7 @@ export async function generateQuotationPdf(quotation: any): Promise<Uint8Array> 
   // ══════════════════════════════════════════════════════
   // NOTES & TERMS
   // ══════════════════════════════════════════════════════
-  const footerY = margin - 10;
+  const footerY = margin;
   const footerTop = footerY + 60;
   let detailsY = Math.min(y, height - margin - 200);
   detailsY = Math.max(detailsY, footerTop);
@@ -331,36 +321,82 @@ export async function generateQuotationPdf(quotation: any): Promise<Uint8Array> 
   page.drawLine({ start: { x: margin, y: footerY + 18 }, end: { x: rightEdge, y: footerY + 18 }, thickness: 1, color: lightDivider });
 
   drawText(page, COMPANY_INFO.name, margin, footerY + 2, { font: helvBold, size: 9, color: nearBlack });
-  drawText(page, COMPANY_INFO.phone, margin, footerY - 12, { font: helv, size: 7, color: midGray });
-  drawText(page, COMPANY_INFO.email, margin + 160, footerY - 12, { font: helv, size: 7, color: midGray });
-  drawText(page, "truelevelproduction.com", margin + 310, footerY - 12, { font: helv, size: 7, color: midGray });
+  drawText(page, COMPANY_INFO.phone, margin, footerY - 12, { font: helv, size: 8, color: midGray });
+  drawText(page, COMPANY_INFO.address1, margin, footerY - 26, { font: arabicFont, size: 8, color: midGray, rightAlign: hasArabic(COMPANY_INFO.address1), rightEdge });
+  drawText(page, COMPANY_INFO.address2, margin, footerY - 40, { font: arabicFont, size: 8, color: midGray, rightAlign: hasArabic(COMPANY_INFO.address2), rightEdge });
 
   // ══════════════════════════════════════════════════════
   // COMPANY STAMP (watermark, bottom-right corner)
   // ══════════════════════════════════════════════════════
-  const stampCX = rightEdge - 70;
-  const stampCY = footerY + 52;
-  const stampR2 = 42;
+  const stampCX = rightEdge - 74;
+  const stampCY = footerY + 48;
+  const stampR = 40;
   const stampClr = rgb(0.18, 0.18, 0.18);
   const sOp = 0.16;
+  const sRot = 5;
 
+  const rotP = (x: number, y: number): { x: number; y: number } => {
+    const rad = (sRot * Math.PI) / 180;
+    const c = Math.cos(rad), s = Math.sin(rad);
+    const dx = x - stampCX, dy = y - stampCY;
+    return { x: stampCX + dx * c - dy * s, y: stampCY + dx * s + dy * c };
+  };
+
+  // Outer circle border
   page.drawEllipse({
-    x: stampCX, y: stampCY, xScale: stampR2, yScale: stampR2,
-    borderColor: stampClr, borderWidth: 1.2,
+    x: stampCX, y: stampCY, xScale: stampR, yScale: stampR,
+    borderColor: stampClr, borderWidth: 1.5,
     opacity: sOp, borderOpacity: sOp,
+    rotate: degrees(sRot),
   });
 
-  const sf = helvBold;
-  const ts = 6;
-  page.drawText("TRUE LEVEL", { x: stampCX - sf.widthOfTextAtSize("TRUE LEVEL", ts) / 2, y: stampCY + 9, size: ts, font: sf, color: stampClr, opacity: sOp });
-  page.drawText("PRODUCTION", { x: stampCX - sf.widthOfTextAtSize("PRODUCTION", ts) / 2, y: stampCY - 1, size: ts, font: sf, color: stampClr, opacity: sOp });
+  // Inner circle (double-ring rubber stamp effect)
+  page.drawEllipse({
+    x: stampCX, y: stampCY, xScale: stampR - 4.5, yScale: stampR - 4.5,
+    borderColor: stampClr, borderWidth: 0.8,
+    opacity: sOp, borderOpacity: sOp,
+    rotate: degrees(sRot),
+  });
 
-  page.drawLine({ start: { x: stampCX - 20, y: stampCY - 8 }, end: { x: stampCX + 20, y: stampCY - 8 }, thickness: 0.4, color: stampClr, opacity: sOp });
+  // Center approval text
+  const t1 = "APPROVED";
+  const t1s = 10;
+  const t1w = helvBold.widthOfTextAtSize(t1, t1s);
+  const t1p = rotP(stampCX - t1w / 2, stampCY + 3);
+  page.drawText(t1, { x: t1p.x, y: t1p.y, size: t1s, font: helvBold, color: stampClr, opacity: sOp, rotate: degrees(sRot) });
 
-  const sf2 = helv;
-  page.drawText("EST. 2024", { x: stampCX - sf2.widthOfTextAtSize("EST. 2024", 5.5) / 2, y: stampCY - 16, size: 5.5, font: sf2, color: stampClr, opacity: sOp });
-  page.drawText("OFFICIAL", { x: stampCX - sf2.widthOfTextAtSize("OFFICIAL", 4.5) / 2, y: stampCY - 25, size: 4.5, font: sf2, color: stampClr, opacity: sOp });
-  page.drawText("DOCUMENT", { x: stampCX - sf2.widthOfTextAtSize("DOCUMENT", 4.5) / 2, y: stampCY - 31, size: 4.5, font: sf2, color: stampClr, opacity: sOp });
+  // TRUE LEVEL above center
+  const t2 = "TRUE LEVEL";
+  const t2s = 5.5;
+  const t2w = helvBold.widthOfTextAtSize(t2, t2s);
+  const t2p = rotP(stampCX - t2w / 2, stampCY + 17);
+  page.drawText(t2, { x: t2p.x, y: t2p.y, size: t2s, font: helvBold, color: stampClr, opacity: sOp, rotate: degrees(sRot) });
+
+  // PRODUCTION below center
+  const t3 = "PRODUCTION";
+  const t3s = 5.5;
+  const t3w = helvBold.widthOfTextAtSize(t3, t3s);
+  const t3p = rotP(stampCX - t3w / 2, stampCY - 8);
+  page.drawText(t3, { x: t3p.x, y: t3p.y, size: t3s, font: helvBold, color: stampClr, opacity: sOp, rotate: degrees(sRot) });
+
+  // Separator line before OFFICIAL DOCUMENT
+  const l1 = rotP(stampCX - 18, stampCY - 14);
+  const l2 = rotP(stampCX + 18, stampCY - 14);
+  page.drawLine({ start: { x: l1.x, y: l1.y }, end: { x: l2.x, y: l2.y }, thickness: 0.4, color: stampClr, opacity: sOp });
+
+  // OFFICIAL DOCUMENT at bottom
+  const t4 = "OFFICIAL DOCUMENT";
+  const t4s = 4.5;
+  const t4w = helv.widthOfTextAtSize(t4, t4s);
+  const t4p = rotP(stampCX - t4w / 2, stampCY - 20);
+  page.drawText(t4, { x: t4p.x, y: t4p.y, size: t4s, font: helv, color: stampClr, opacity: sOp, rotate: degrees(sRot) });
+
+  // Subtle ink texture dots (deterministic pattern)
+  const inkDots: [number, number][] = [[-12,-8],[10,4],[-4,14],[16,-7],[-10,-16],[7,-13],[-18,6],[13,-10],[-6,-4],[4,-16],[-16,-2],[2,8],[-8,10],[10,-2],[-2,-10],[14,8],[-14,0],[0,12],[8,-6],[-8,2]];
+  for (const [dx, dy] of inkDots) {
+    const dp = rotP(stampCX + dx, stampCY + dy);
+    page.drawEllipse({ x: dp.x, y: dp.y, xScale: 0.7, yScale: 0.7, color: stampClr, opacity: 0.05 });
+  }
 
   return doc.save();
 }
