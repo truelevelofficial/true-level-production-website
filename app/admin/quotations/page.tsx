@@ -41,29 +41,29 @@ export default async function QuotationsPage({ searchParams }: { searchParams: P
           <p className="mt-2 text-sm text-[#06111F]/40">{hasFilters ? "حاول تغيير الفلتر" : "أنشئ أول عرض سعر للبدء"}</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-[2rem] border border-[#06111F]/10 bg-white shadow-sm" dir="rtl">
+        <div className="overflow-x-auto rounded-[2rem] border border-[#06111F]/10 bg-white shadow-sm pb-32" dir="rtl">
           <table className="w-full text-right text-sm">
             <thead>
               <tr className="border-b border-[#06111F]/10 text-xs font-black uppercase tracking-[0.1em] text-[#06111F]/40">
-                <th className="p-4">الرقم</th>
-                <th className="p-4">العميل</th>
-                <th className="p-4">المبلغ</th>
-                <th className="p-4">الحالة</th>
-                <th className="p-4">تاريخ الإنشاء</th>
-                <th className="p-4">تاريخ الصلاحية</th>
-                <th className="p-4">إجراءات</th>
+                <th className="py-5 px-4">الرقم</th>
+                <th className="py-5 px-4">العميل</th>
+                <th className="py-5 px-4">المبلغ</th>
+                <th className="py-5 px-4">الحالة</th>
+                <th className="py-5 px-4">تاريخ الإنشاء</th>
+                <th className="py-5 px-4">تاريخ الصلاحية</th>
+                <th className="py-5 px-4">إجراءات</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((q) => (
                 <tr className="border-b border-[#06111F]/5" key={q.id}>
-                  <td className="p-4 font-bold">{q.quotationNo || "---"}</td>
-                  <td className="blur-sensitive p-4">{q.client?.fullName || "---"}</td>
-                  <td className="blur-sensitive p-4 font-bold">{Number(q.grandTotal || q.totalAmount).toLocaleString()} EGP</td>
-                  <td className="p-4"><span className={`rounded-full px-2 py-0.5 text-xs font-bold ${q.status === "ACCEPTED" ? "bg-green-100 text-green-700" : q.status === "REJECTED" || q.status === "EXPIRED" ? "bg-red-100 text-red-700" : q.status === "SENT" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>{quotationStatusArabic[q.status]}</span></td>
-                  <td className="p-4 text-[#06111F]/55">{new Date(q.createdAt).toLocaleDateString("ar-EG")}</td>
-                  <td className="p-4 text-[#06111F]/55">{q.validUntil ? new Date(q.validUntil).toLocaleDateString("ar-EG") : "---"}</td>
-                  <td className="p-4"><QuotationActions quotation={q} /></td>
+                  <td className="py-6 px-4 font-bold">{q.quotationNo || "---"}</td>
+                  <td className="blur-sensitive py-6 px-4">{q.client?.fullName || "---"}</td>
+                  <td className="blur-sensitive py-6 px-4 font-bold">{Number(q.grandTotal || q.totalAmount).toLocaleString()} EGP</td>
+                  <td className="py-6 px-4"><span className={`rounded-full px-2 py-0.5 text-xs font-bold ${q.status === "ACCEPTED" ? "bg-green-100 text-green-700" : q.status === "REJECTED" || q.status === "EXPIRED" ? "bg-red-100 text-red-700" : q.status === "SENT" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>{quotationStatusArabic[q.status]}</span></td>
+                  <td className="py-6 px-4 text-[#06111F]/55">{new Date(q.createdAt).toLocaleDateString("ar-EG")}</td>
+                  <td className="py-6 px-4 text-[#06111F]/55">{q.validUntil ? new Date(q.validUntil).toLocaleDateString("ar-EG") : "---"}</td>
+                  <td className="py-6 px-4 overflow-visible"><QuotationActions quotation={q} /></td>
                 </tr>
               ))}
             </tbody>
