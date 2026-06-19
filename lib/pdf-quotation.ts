@@ -326,76 +326,55 @@ export async function generateQuotationPdf(quotation: any): Promise<Uint8Array> 
   drawText(page, COMPANY_INFO.address2, margin, footerY - 40, { font: arabicFont, size: 8, color: midGray, rightAlign: hasArabic(COMPANY_INFO.address2), rightEdge });
 
   // ══════════════════════════════════════════════════════
-  // COMPANY STAMP (watermark, bottom-right corner)
+  // COMPANY SEAL (logo stamp, bottom-right corner)
   // ══════════════════════════════════════════════════════
-  const stampCX = rightEdge - 74;
-  const stampCY = footerY + 48;
-  const stampR = 40;
-  const stampClr = rgb(0.18, 0.18, 0.18);
-  const sOp = 0.16;
-  const sRot = 5;
+  const sealCX = rightEdge - 72;
+  const sealCY = footerY + 48;
+  const sealR = 50;
+  const sealClr = rgb(0.15, 0.15, 0.15);
+  const sealOp = 0.2;
+  const sealRot = 5;
 
-  const rotP = (x: number, y: number): { x: number; y: number } => {
-    const rad = (sRot * Math.PI) / 180;
+  const rotP2 = (x: number, y: number): { x: number; y: number } => {
+    const rad = (sealRot * Math.PI) / 180;
     const c = Math.cos(rad), s = Math.sin(rad);
-    const dx = x - stampCX, dy = y - stampCY;
-    return { x: stampCX + dx * c - dy * s, y: stampCY + dx * s + dy * c };
+    const dx = x - sealCX, dy = y - sealCY;
+    return { x: sealCX + dx * c - dy * s, y: sealCY + dx * s + dy * c };
   };
 
-  // Outer circle border
+  // Outer circle — stamp ring border
   page.drawEllipse({
-    x: stampCX, y: stampCY, xScale: stampR, yScale: stampR,
-    borderColor: stampClr, borderWidth: 1.5,
-    opacity: sOp, borderOpacity: sOp,
-    rotate: degrees(sRot),
+    x: sealCX, y: sealCY, xScale: sealR, yScale: sealR,
+    borderColor: sealClr, borderWidth: 1.5,
+    opacity: sealOp, borderOpacity: sealOp,
+    rotate: degrees(sealRot),
   });
 
-  // Inner circle (double-ring rubber stamp effect)
+  // Inner circle — double-ring effect for realistic seal look
   page.drawEllipse({
-    x: stampCX, y: stampCY, xScale: stampR - 4.5, yScale: stampR - 4.5,
-    borderColor: stampClr, borderWidth: 0.8,
-    opacity: sOp, borderOpacity: sOp,
-    rotate: degrees(sRot),
+    x: sealCX, y: sealCY, xScale: sealR - 4, yScale: sealR - 4,
+    borderColor: sealClr, borderWidth: 0.8,
+    opacity: sealOp, borderOpacity: sealOp,
+    rotate: degrees(sealRot),
   });
 
-  // Center approval text
-  const t1 = "APPROVED";
-  const t1s = 10;
-  const t1w = helvBold.widthOfTextAtSize(t1, t1s);
-  const t1p = rotP(stampCX - t1w / 2, stampCY + 3);
-  page.drawText(t1, { x: t1p.x, y: t1p.y, size: t1s, font: helvBold, color: stampClr, opacity: sOp, rotate: degrees(sRot) });
+  // Logo as the seal artwork (centered within the ring)
+  if (logoImage) {
+    const sealLogoDims = logoImage.scaleToFit(72, 72);
+    const slp = rotP2(sealCX - sealLogoDims.width / 2, sealCY - sealLogoDims.height / 2);
+    page.drawImage(logoImage, {
+      x: slp.x, y: slp.y,
+      width: sealLogoDims.width,
+      height: sealLogoDims.height,
+      opacity: sealOp,
+    });
+  }
 
-  // TRUE LEVEL above center
-  const t2 = "TRUE LEVEL";
-  const t2s = 5.5;
-  const t2w = helvBold.widthOfTextAtSize(t2, t2s);
-  const t2p = rotP(stampCX - t2w / 2, stampCY + 17);
-  page.drawText(t2, { x: t2p.x, y: t2p.y, size: t2s, font: helvBold, color: stampClr, opacity: sOp, rotate: degrees(sRot) });
-
-  // PRODUCTION below center
-  const t3 = "PRODUCTION";
-  const t3s = 5.5;
-  const t3w = helvBold.widthOfTextAtSize(t3, t3s);
-  const t3p = rotP(stampCX - t3w / 2, stampCY - 8);
-  page.drawText(t3, { x: t3p.x, y: t3p.y, size: t3s, font: helvBold, color: stampClr, opacity: sOp, rotate: degrees(sRot) });
-
-  // Separator line before OFFICIAL DOCUMENT
-  const l1 = rotP(stampCX - 18, stampCY - 14);
-  const l2 = rotP(stampCX + 18, stampCY - 14);
-  page.drawLine({ start: { x: l1.x, y: l1.y }, end: { x: l2.x, y: l2.y }, thickness: 0.4, color: stampClr, opacity: sOp });
-
-  // OFFICIAL DOCUMENT at bottom
-  const t4 = "OFFICIAL DOCUMENT";
-  const t4s = 4.5;
-  const t4w = helv.widthOfTextAtSize(t4, t4s);
-  const t4p = rotP(stampCX - t4w / 2, stampCY - 20);
-  page.drawText(t4, { x: t4p.x, y: t4p.y, size: t4s, font: helv, color: stampClr, opacity: sOp, rotate: degrees(sRot) });
-
-  // Subtle ink texture dots (deterministic pattern)
-  const inkDots: [number, number][] = [[-12,-8],[10,4],[-4,14],[16,-7],[-10,-16],[7,-13],[-18,6],[13,-10],[-6,-4],[4,-16],[-16,-2],[2,8],[-8,10],[10,-2],[-2,-10],[14,8],[-14,0],[0,12],[8,-6],[-8,2]];
-  for (const [dx, dy] of inkDots) {
-    const dp = rotP(stampCX + dx, stampCY + dy);
-    page.drawEllipse({ x: dp.x, y: dp.y, xScale: 0.7, yScale: 0.7, color: stampClr, opacity: 0.05 });
+  // Subtle ink texture (deterministic pattern for distressed-rubber effect)
+  const inkDots2: [number, number][] = [[-14,-9],[11,5],[-5,16],[18,-8],[-12,-18],[8,-15],[-20,7],[15,-12],[-7,-5],[5,-18],[-18,-3],[3,11],[-9,13],[13,-3],[-3,-13],[16,9],[-16,1],[1,14],[9,-7],[-9,3]];
+  for (const [dx, dy] of inkDots2) {
+    const dp = rotP2(sealCX + dx, sealCY + dy);
+    page.drawEllipse({ x: dp.x, y: dp.y, xScale: 0.7, yScale: 0.7, color: sealClr, opacity: 0.05 });
   }
 
   return doc.save();
