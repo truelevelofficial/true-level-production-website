@@ -322,8 +322,6 @@ export async function generateQuotationPdf(quotation: any): Promise<Uint8Array> 
 
   drawText(page, COMPANY_INFO.name, margin, footerY + 2, { font: helvBold, size: 9, color: nearBlack });
   drawText(page, COMPANY_INFO.phone, margin, footerY - 12, { font: helv, size: 8, color: midGray });
-  drawText(page, COMPANY_INFO.address1, margin, footerY - 26, { font: arabicFont, size: 8, color: midGray, rightAlign: hasArabic(COMPANY_INFO.address1), rightEdge });
-  drawText(page, COMPANY_INFO.address2, margin, footerY - 40, { font: arabicFont, size: 8, color: midGray, rightAlign: hasArabic(COMPANY_INFO.address2), rightEdge });
 
   // ══════════════════════════════════════════════════════
   // COMPANY SEAL (logo stamp, bottom-right corner)
