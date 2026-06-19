@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
 const navGroups = [
@@ -46,7 +47,8 @@ const navGroups = [
 ];
 
 
-export function SidebarNav({ currentPath, totalNotifs }: { currentPath: string; totalNotifs: number }) {
+export function SidebarNav({ totalNotifs }: { totalNotifs: number }) {
+  const pathname = usePathname();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -74,8 +76,8 @@ export function SidebarNav({ currentPath, totalNotifs }: { currentPath: string; 
   }));
 
   const isActive = (href: string) => {
-    if (href === "/admin/dashboard") return currentPath === href;
-    return currentPath.startsWith(href);
+    if (href === "/admin/dashboard") return pathname === href;
+    return pathname === href || pathname.startsWith(href + "/");
   };
 
   return (
@@ -119,7 +121,7 @@ export function SidebarNav({ currentPath, totalNotifs }: { currentPath: string; 
                           key={link.href}
                           href={link.href}
                           onClick={() => setMobileOpen(false)}
-                          className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold transition-colors ${active ? "bg-[#0B7CFF]/10 text-[#0B7CFF]" : "text-[#06111F]/70 hover:bg-[#06111F]/5 hover:text-[#06111F]"}`}
+                          className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold transition-all duration-200 ${active ? "bg-[#0B7CFF] text-white shadow-md" : "text-[#06111F]/70 hover:bg-[#06111F]/5 hover:text-[#06111F]"}`}
                         >
                           <span className="flex-1">{link.label}</span>
                           {link.badge ? (
@@ -139,7 +141,7 @@ export function SidebarNav({ currentPath, totalNotifs }: { currentPath: string; 
           <Link
             href="/admin/notifications"
             onClick={() => setMobileOpen(false)}
-            className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold transition-colors ${isActive("/admin/notifications") ? "bg-[#0B7CFF]/10 text-[#0B7CFF]" : "text-[#06111F]/70 hover:bg-[#06111F]/5 hover:text-[#06111F]"}`}
+            className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold transition-all duration-200 ${isActive("/admin/notifications") ? "bg-[#0B7CFF] text-white shadow-md" : "text-[#06111F]/70 hover:bg-[#06111F]/5 hover:text-[#06111F]"}`}
           >
             <span className="flex-1">Notifications</span>
             {totalNotifs > 0 ? (

@@ -23,7 +23,7 @@ export async function AdminShell({ title, children }: { title: string; children:
     currentPath = h.get("x-invoke-path") || h.get("next-url") || "";
   } catch {
     // headers() throws if called during static generation or SSR without request context.
-    // Safe fallback — SidebarNav and breadcrumbs work with empty path.
+    // Safe fallback — breadcrumbs work with empty path.
   }
   const breadcrumbs = getAdminBreadcrumbs(currentPath);
 
@@ -36,7 +36,7 @@ export async function AdminShell({ title, children }: { title: string; children:
 
   return (
     <div className="flex min-h-screen bg-[#F7F8FB] text-[#06111F]">
-      <SidebarNav currentPath={currentPath} totalNotifs={totalNotifs} />
+      <SidebarNav totalNotifs={totalNotifs} />
 
       <div className="flex min-w-0 flex-1 flex-col lg:ml-0">
         <header className="sticky top-0 z-30 border-b border-[#06111F]/10 bg-white/95 backdrop-blur-sm">
