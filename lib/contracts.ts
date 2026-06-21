@@ -31,27 +31,12 @@ function partySection(data: ContractInput) {
   return `${SEP}
 أطراف العقد:
 
-الطرف الأول
-
-True Level Production
-
-الاسم: عبدالرحمن محمد
-
-______________________
-
-الصفة:
-ممثل الشركة
-
-التوقيع:
-
-
-
-
-______________________
-
-التاريخ:
-
-____ / ____ / 20__
+الطرف الأول:
+الاسم: شركة True Level Production
+الممثل القانوني: السيد/ ${data.representativeName}
+العنوان: جمهورية مصر العربية - القاهرة
+الهاتف: (يتم إرفاقه عند التثبيت)
+(يشار إليها فيما بعد باسم "الشركة".)
 
 الطرف الثاني:
 الاسم: ${data.clientName}${data.clientCompanyName ? `\nممثل عن شركة/مؤسسة: ${data.clientCompanyName}` : ""}${data.clientTaxId ? `\nالرقم القومي/البطاقة الضريبية: ${data.clientTaxId}` : ""}${data.clientAddress ? `\nالعنوان: ${data.clientAddress}` : ""}
