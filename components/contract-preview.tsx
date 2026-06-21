@@ -74,23 +74,24 @@ export function ContractPreview({
                       <p className="sig-company">True Level Production</p>
                       <div className="sig-field">
                         <span className="sig-label">الاسم:</span>
-                        <span className="sig-value">{representativeName || "______________________"}</span>
+                        <span className="sig-value">عبدالرحمن محمد</span>
                       </div>
+                      <div className="sig-separator" />
                       <div className="sig-field">
                         <span className="sig-label">الصفة:</span>
                         <span className="sig-value">ممثل الشركة</span>
                       </div>
-                      <div className="sig-field">
+                      <div className="sig-field sig-field-tawqee">
                         <span className="sig-label">التوقيع:</span>
                         <span className="sig-line-draw" />
+                      </div>
+                      <div className="sig-blank-space" />
+                      <div className="sig-seal-container">
+                        <img alt="" src="/true-level-logo-black.png" className="sig-seal-stamp" />
                       </div>
                       <div className="sig-field">
                         <span className="sig-label">التاريخ:</span>
                         <span className="sig-value">____ / ____ / 20__</span>
-                      </div>
-                      <div className="sig-field">
-                        <span className="sig-label">الختم:</span>
-                        <span className="sig-stamp" />
                       </div>
                     </div>
                   </td>
@@ -222,12 +223,24 @@ const printStyles = `
   border-bottom: 1.5px solid #0d0d0d;
   margin-right: 4px;
 }
-.sig-stamp {
-  display: inline-block;
-  width: 180px;
-  height: 56px;
-  border: 1.5px dashed #888;
-  border-radius: 4px;
-  margin-right: 4px;
+.sig-separator {
+  width: 100%;
+  height: 0;
+  border-bottom: 1.5px solid #0d0d0d;
+  margin: 16px 0;
+}
+.sig-blank-space {
+  height: 40px;
+}
+.sig-seal-container {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 12px 0;
+}
+.sig-seal-stamp {
+  width: 100px;
+  height: auto;
+  opacity: 0.18;
+  transform: rotate(-10deg);
 }
 `;
