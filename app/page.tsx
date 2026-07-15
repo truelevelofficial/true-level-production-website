@@ -34,6 +34,7 @@ type Service = {
   number: string;
   text: string;
   image: string;
+  video: string;
 };
 
 const services: Service[] = [
@@ -43,6 +44,7 @@ const services: Service[] = [
     number: "01",
     text: "Launch films, campaign videos, product stories, interviews, reels, and social-first edits.",
     image: "",
+    video: "",
   },
   {
     icon: Lightbulb,
@@ -50,6 +52,7 @@ const services: Service[] = [
     number: "02",
     text: "Concepts, scripts, shot lists, moodboards, campaign angles, and full production direction.",
     image: "",
+    video: "",
   },
   {
     icon: Users,
@@ -57,6 +60,7 @@ const services: Service[] = [
     number: "03",
     text: "Creator-led videos that feel native, build trust, and give brands ad-ready content.",
     image: "",
+    video: "",
   },
   {
     icon: Camera,
@@ -64,6 +68,7 @@ const services: Service[] = [
     number: "04",
     text: "Cyclorama, ready-made setups, product shooting, creator sessions, and lighting support.",
     image: "",
+    video: "",
   },
   {
     icon: Radio,
@@ -71,6 +76,7 @@ const services: Service[] = [
     number: "05",
     text: "Live coverage, interviews, instant reels, recap videos, and on-ground production teams.",
     image: "",
+    video: "",
   },
   {
     icon: Megaphone,
@@ -78,6 +84,7 @@ const services: Service[] = [
     number: "06",
     text: "Social designs, ad creatives, campaign visuals, thumbnails, banners, and digital assets.",
     image: "",
+    video: "",
   },
 ];
 
@@ -266,8 +273,12 @@ export default async function Home() {
             const Icon = service.icon;
             return (
               <div key={service.title} className="group relative min-h-[420px] overflow-hidden rounded-[2.2rem] border border-[#06111F]/10 bg-white shadow-sm transition hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-950/10">
-                {service.image ? (
-                  <SafeImage alt={service.title} className="absolute inset-0 h-full w-full transition duration-500 group-hover:scale-105" fallback="blue" src={service.image} />
+                {service.video ? (
+                  <video autoPlay muted loop playsInline poster={service.image || undefined} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105">
+                    <source src={service.video} type="video/mp4" />
+                  </video>
+                ) : service.image ? (
+                  <SafeImage alt={service.title} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" fallback="blue" src={service.image} />
                 ) : (
                   <div className="absolute inset-0 bg-gradient-to-br from-[#0B7CFF]/10 to-[#06111F]/5" />
                 )}

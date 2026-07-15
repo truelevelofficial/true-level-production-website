@@ -35,12 +35,18 @@ const siteMedia: MediaAsset[] = [
   { key: "hero-set-location", path: "/images/hero-set-location.png", label: "Hero Set Location", description: "Decorative set location background", usage: "Homepage hero — right side decorative", recommendedWidth: 420, recommendedHeight: 420, type: "image", group: "hero-cards" },
 
   // ── Services Section ──
-  { key: "service-brand-films", path: "/images/service-brand-films.png", label: "Service — Brand Films", description: "Brand films service card image", usage: "Homepage services — Brand Films card", recommendedWidth: 400, recommendedHeight: 300, type: "image", group: "services" },
-  { key: "service-creative-direction", path: "/images/service-creative-direction.png", label: "Service — Creative Direction", description: "Creative direction service card image", usage: "Homepage services — Creative Direction card", recommendedWidth: 400, recommendedHeight: 300, type: "image", group: "services" },
-  { key: "service-ugc-content", path: "/images/service-ugc-content.png", label: "Service — UGC Content", description: "UGC content service card image", usage: "Homepage services — UGC Content card", recommendedWidth: 400, recommendedHeight: 300, type: "image", group: "services" },
-  { key: "service-studio-shoots", path: "/images/service-studio-shoots.png", label: "Service — Studio Shoots", description: "Studio shoots service card image", usage: "Homepage services — Studio Shoots card", recommendedWidth: 400, recommendedHeight: 300, type: "image", group: "services" },
-  { key: "service-event-coverage", path: "/images/service-event-coverage.png", label: "Service — Event Coverage", description: "Event coverage service card image", usage: "Homepage services — Event Coverage card", recommendedWidth: 400, recommendedHeight: 300, type: "image", group: "services" },
-  { key: "service-campaign-assets", path: "/images/service-campaign-assets.png", label: "Service — Campaign Assets", description: "Campaign assets service card image", usage: "Homepage services — Campaign Assets card", recommendedWidth: 400, recommendedHeight: 300, type: "image", group: "services" },
+  { key: "service-brand-films-image", path: "/images/service-brand-films.png", label: "Svc Image — Brand Films", description: "Brand films service card image (poster for video if used)", usage: "Homepage services — Brand Films card", recommendedWidth: 400, recommendedHeight: 300, type: "image", group: "services" },
+  { key: "service-brand-films-video", path: "/videos/service-brand-films.mp4", label: "Svc Video — Brand Films", description: "Brand films background video (auto-plays muted on card)", usage: "Homepage services — Brand Films card", recommendedWidth: 1080, recommendedHeight: 1920, type: "video", group: "services" },
+  { key: "service-creative-direction-image", path: "/images/service-creative-direction.png", label: "Svc Image — Creative Direction", description: "Creative direction service card image", usage: "Homepage services — Creative Direction card", recommendedWidth: 400, recommendedHeight: 300, type: "image", group: "services" },
+  { key: "service-creative-direction-video", path: "/videos/service-creative-direction.mp4", label: "Svc Video — Creative Direction", description: "Creative direction background video (auto-plays muted)", usage: "Homepage services — Creative Direction card", recommendedWidth: 1080, recommendedHeight: 1920, type: "video", group: "services" },
+  { key: "service-ugc-content-image", path: "/images/service-ugc-content.png", label: "Svc Image — UGC Content", description: "UGC content service card image", usage: "Homepage services — UGC Content card", recommendedWidth: 400, recommendedHeight: 300, type: "image", group: "services" },
+  { key: "service-ugc-content-video", path: "/videos/service-ugc-content.mp4", label: "Svc Video — UGC Content", description: "UGC content background video (auto-plays muted)", usage: "Homepage services — UGC Content card", recommendedWidth: 1080, recommendedHeight: 1920, type: "video", group: "services" },
+  { key: "service-studio-shoots-image", path: "/images/service-studio-shoots.png", label: "Svc Image — Studio Shoots", description: "Studio shoots service card image", usage: "Homepage services — Studio Shoots card", recommendedWidth: 400, recommendedHeight: 300, type: "image", group: "services" },
+  { key: "service-studio-shoots-video", path: "/videos/service-studio-shoots.mp4", label: "Svc Video — Studio Shoots", description: "Studio shoots background video (auto-plays muted)", usage: "Homepage services — Studio Shoots card", recommendedWidth: 1080, recommendedHeight: 1920, type: "video", group: "services" },
+  { key: "service-event-coverage-image", path: "/images/service-event-coverage.png", label: "Svc Image — Event Coverage", description: "Event coverage service card image", usage: "Homepage services — Event Coverage card", recommendedWidth: 400, recommendedHeight: 300, type: "image", group: "services" },
+  { key: "service-event-coverage-video", path: "/videos/service-event-coverage.mp4", label: "Svc Video — Event Coverage", description: "Event coverage background video (auto-plays muted)", usage: "Homepage services — Event Coverage card", recommendedWidth: 1080, recommendedHeight: 1920, type: "video", group: "services" },
+  { key: "service-campaign-assets-image", path: "/images/service-campaign-assets.png", label: "Svc Image — Campaign Assets", description: "Campaign assets service card image", usage: "Homepage services — Campaign Assets card", recommendedWidth: 400, recommendedHeight: 300, type: "image", group: "services" },
+  { key: "service-campaign-assets-video", path: "/videos/service-campaign-assets.mp4", label: "Svc Video — Campaign Assets", description: "Campaign assets background video (auto-plays muted)", usage: "Homepage services — Campaign Assets card", recommendedWidth: 1080, recommendedHeight: 1920, type: "video", group: "services" },
 
   // ── Studio Setups Section ──
   { key: "studio-cyclorama", path: "/images/studio-cyclorama.jpg", label: "Studio — Cyclorama", description: "Cyclorama studio setup photo", usage: "Homepage studio setups — Cyclorama card", recommendedWidth: 600, recommendedHeight: 400, type: "image", group: "studio-setups" },
@@ -66,7 +72,7 @@ const groupNames: Record<string, { label: string; description: string }> = {
   "logos": { label: "Logos", description: "Company logos used across the site" },
   "hero-slider": { label: "Hero Slider", description: "Background images for the auto-rotating hero slider — ALL currently missing (add 1920×1080 images)" },
   "hero-cards": { label: "Hero Visual Cards", description: "Card images in the main hero section" },
-  "services": { label: "Services Section", description: "Card images for the 6 services — ALL currently empty, no image assigned" },
+  "services": { label: "Services Section", description: "Card images (posters) and background videos for the 6 services — each can have an image, a video, or both" },
   "studio-setups": { label: "Studio Setups", description: "Studio setup cards — only Cyclorama has an image" },
   "packages": { label: "Package Menu Images", description: "Images for the footer packages menu — ALL currently empty" },
   "favicon": { label: "Favicons", description: "Browser tab icons" },
@@ -141,10 +147,20 @@ function AssetCard({ asset }: { asset: MediaAsset }) {
         </div>
         <div className="flex items-center justify-center rounded-2xl border border-[#06111F]/10 bg-[#F7F8FB] p-4">
           {info?.exists ? (
-            <img alt={asset.label} src={asset.path} className="max-h-44 max-w-full rounded-xl object-contain shadow-sm" />
+            asset.type === "video" ? (
+              <video muted loop playsInline className="max-h-44 max-w-full rounded-xl object-contain shadow-sm">
+                <source src={asset.path} type="video/mp4" />
+              </video>
+            ) : (
+              <img alt={asset.label} src={asset.path} className="max-h-44 max-w-full rounded-xl object-contain shadow-sm" />
+            )
           ) : (
             <div className="flex flex-col items-center gap-2 p-8 text-[#06111F]/30">
-              <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              {asset.type === "video" ? (
+                <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+              ) : (
+                <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              )}
               <p className="text-xs font-bold">No file uploaded yet</p>
               <p className="text-[10px]">{asset.recommendedWidth}×{asset.recommendedHeight}px recommended</p>
             </div>
@@ -199,11 +215,11 @@ export default async function ManagementPage() {
         ))}
       </div>
 
-      {siteMedia.filter((a) => a.type === "video").length === 0 && (
+      {siteMedia.filter((a) => a.type === "video").length > 0 && (
         <div className="mt-10 rounded-[1.6rem] border border-dashed border-[#06111F]/10 p-8 text-center">
           <p className="text-xs font-black uppercase tracking-[0.16em] text-[#06111F]/30">Videos</p>
           <p className="mt-2 text-sm text-[#06111F]/50">
-            No videos are currently used on the site. If you add videos in the future, they will appear here.
+            Upload MP4 files (1080×1920 recommended for vertical/social, 1920×1080 for landscape). Videos auto-play muted as card backgrounds.
           </p>
         </div>
       )}
