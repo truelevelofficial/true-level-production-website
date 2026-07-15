@@ -8,6 +8,8 @@ import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
 import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingDeleteSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, companySettingsSchema, contractDeleteSchema, contractSchema, contractUpdateSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, invoiceDeleteSchema, invoicePaymentSchema, invoiceSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, quotationDeleteSchema, quotationSchema, quotationUpdateSchema, studioBookingSchema } from "./validation";
 import { generateArabicContract } from "./contracts";
+import fs from "fs";
+import path from "path";
 import { createCalendarEvent, updateCalendarEvent, cancelCalendarEvent } from "./google-calendar";
 import { notifyNewBooking, notifyBookingStatusChange } from "./notifications";
 
@@ -1603,4 +1605,20 @@ export async function autoLogActivity(entityType: string, entityId: string, acti
       data: { action, entityType, entityId, metadata: metadata ? JSON.stringify(metadata) : null, userName: "System" },
     });
   } catch { /* silent */ }
+}
+
+export async function uploadSiteMediaAction(formData: FormData) {
+  await requireAdmin();
+  const file = formData.get("file") as File | null;
+  const assetPath = formData.get("assetPath") as string;
+  if (!file || !assetPath?.trim()) return { error: "Missing file or path" };
+  try {
+    const bytes = Buffer.from(await file.arrayBuffer());
+    const fullPath = path.join(process.cwd(), "public", assetPath.trim());
+    fs.writeFileSync(fullPath, bytes);
+    revalidatePath("/admin/management");
+    return { success: true };
+  } catch {
+    return { error: "Failed to upload file" };
+  }
 }

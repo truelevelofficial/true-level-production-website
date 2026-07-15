@@ -41,6 +41,7 @@ const navGroups = [
     label: "SYSTEM", key: "sys",
     links: [
       { href: "/admin/automation", label: "Automation", badge: null },
+      { href: "/admin/management", label: "Management", badge: null },
       { href: "/admin/settings", label: "Settings", badge: null },
     ],
   },
