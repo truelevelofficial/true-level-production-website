@@ -1615,7 +1615,9 @@ export async function uploadSiteMediaAction(formData: FormData) {
   try {
     const bytes = Buffer.from(await file.arrayBuffer());
     const fullPath = path.join(process.cwd(), "public", assetPath.trim());
+    fs.mkdirSync(path.dirname(fullPath), { recursive: true });
     fs.writeFileSync(fullPath, bytes);
     revalidatePath("/admin/management");
   } catch { /* silent */ }
+  redirect("/admin/management");
 }
