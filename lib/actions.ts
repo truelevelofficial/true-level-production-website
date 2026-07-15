@@ -1611,14 +1611,11 @@ export async function uploadSiteMediaAction(formData: FormData) {
   await requireAdmin();
   const file = formData.get("file") as File | null;
   const assetPath = formData.get("assetPath") as string;
-  if (!file || !assetPath?.trim()) return { error: "Missing file or path" };
+  if (!file || !assetPath?.trim()) return;
   try {
     const bytes = Buffer.from(await file.arrayBuffer());
     const fullPath = path.join(process.cwd(), "public", assetPath.trim());
     fs.writeFileSync(fullPath, bytes);
     revalidatePath("/admin/management");
-    return { success: true };
-  } catch {
-    return { error: "Failed to upload file" };
-  }
+  } catch { /* silent */ }
 }
