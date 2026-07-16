@@ -198,7 +198,7 @@ function AssetCard({ asset, currentUrl }: { asset: MediaAsset; currentUrl?: stri
 export default async function ManagementPage(props: { searchParams?: Promise<{ success?: string; error?: string }> }) {
   await requireAdmin();
   const sp = await props.searchParams ?? {};
-  const videoUrls = getServiceVideoUrls();
+  const videoUrls = await getServiceVideoUrls();
 
   const grouped = groupOrder.map((gk) => ({
     group: gk,

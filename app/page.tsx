@@ -177,7 +177,7 @@ function VisualCard({ title, label, className = "", imageSrc }: { title: string;
 export default async function Home() {
   const sessionEmail = await getSessionEmail();
   const isAdmin = sessionEmail ? await isAdminAuthenticated() : false;
-  const videoUrls = getServiceVideoUrls();
+  const videoUrls = await getServiceVideoUrls();
   const activeServices = services.map((s) => ({ ...s, video: videoUrls[s.title] || s.video }));
 
   return (

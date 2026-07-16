@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     if (!title?.trim()) {
       return NextResponse.redirect(new URL("/admin/management?error=missing", request.url));
     }
-    setServiceVideoUrl(title.trim(), url?.trim() ?? "");
+    await setServiceVideoUrl(title.trim(), url?.trim() ?? "");
     return NextResponse.redirect(new URL("/admin/management?success=1", request.url));
   } catch {
     return NextResponse.redirect(new URL("/admin/management?error=failed", request.url));

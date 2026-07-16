@@ -1,25 +1,36 @@
-import fs from "fs";
-import path from "path";
+import { getPrisma } from "./prisma";
 
-const configPath = path.join(process.cwd(), "config", "services-videos.json");
-
-export function getServiceVideoUrls(): Record<string, string> {
+export async function getServiceVideoUrls(): Promise<Record<string, string>> {
   try {
-    if (!fs.existsSync(configPath)) return {};
-    const raw = fs.readFileSync(configPath, "utf-8");
-    return JSON.parse(raw);
+    const prisma = getPrisma();
+    if (!prisma) return {};
+    const rows = await prisma.companySettings.findMany({
+      where: { key: { startsWith: "service_video_" } },
+    });
+    const result: Record<string, string> = {};
+    for (const row of rows) {
+      const title = row.key.replace("service_video_", "");
+      if (row.value) result[title] = row.value;
+    }
+    return result;
   } catch {
     return {};
   }
 }
 
-export function setServiceVideoUrl(serviceTitle: string, url: string) {
-  const data = getServiceVideoUrls();
-  if (!url.trim()) {
-    delete data[serviceTitle];
-  } else {
-    data[serviceTitle] = url.trim();
-  }
-  fs.mkdirSync(path.dirname(configPath), { recursive: true });
-  fs.writeFileSync(configPath, JSON.stringify(data, null, 2));
+export async function setServiceVideoUrl(title: string, url: string) {
+  const prisma = getPrisma();
+  if (!prisma) return;
+  const key = `service_video_${title}`;
+  try {
+    if (!url.trim()) {
+      await prisma.companySettings.deleteMany({ where: { key } });
+    } else {
+      await prisma.companySettings.upsert({
+        where: { key },
+        update: { value: url.trim() },
+        create: { key, value: url.trim() },
+      });
+    }
+  } catch { /* silent */ }
 }
