@@ -21,6 +21,7 @@ import { UserMenu } from "@/components/user-menu";
 import { SafeImage } from "@/components/safe-image";
 import TrueFocus from "@/components/TrueFocus";
 import FlowingMenu from "@/components/FlowingMenu";
+import { getServiceVideoUrls } from "@/lib/site-media-config";
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -175,6 +176,8 @@ function VisualCard({ title, label, className = "", imageSrc }: { title: string;
 export default async function Home() {
   const sessionEmail = await getSessionEmail();
   const isAdmin = sessionEmail ? await isAdminAuthenticated() : false;
+  const videoUrls = getServiceVideoUrls();
+  const activeServices = services.map((s) => ({ ...s, video: videoUrls[s.title] || s.video }));
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#F7F8FB] text-[#06111F] selection:bg-[#0B7CFF] selection:text-white">
@@ -269,7 +272,7 @@ export default async function Home() {
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {services.map((service) => {
+          {activeServices.map((service) => {
             const Icon = service.icon;
             return (
               <div key={service.title} className="group relative min-h-[420px] overflow-hidden rounded-[2.2rem] border border-[#06111F]/10 bg-white shadow-sm transition hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-950/10">
