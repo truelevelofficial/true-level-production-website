@@ -1,6 +1,7 @@
 import { AdminShell } from "@/components/admin-shell";
 import { requireAdmin } from "@/lib/auth";
 import { getServiceVideoUrls } from "@/lib/site-media-config";
+import { isYouTubeUrl, getYouTubeEmbedUrl } from "@/lib/video-utils";
 import fs from "fs";
 import path from "path";
 
@@ -165,9 +166,13 @@ function AssetCard({ asset, currentUrl }: { asset: MediaAsset; currentUrl?: stri
         <div className="flex items-center justify-center rounded-2xl border border-[#06111F]/10 bg-[#F7F8FB] p-4">
           {asset.type === "video" ? (
             currentUrl ? (
-              <video muted loop playsInline controls className="max-h-44 max-w-full rounded-xl object-contain shadow-sm">
-                <source src={currentUrl} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
-              </video>
+              isYouTubeUrl(currentUrl) ? (
+                <iframe src={getYouTubeEmbedUrl(currentUrl) || currentUrl} allow="autoplay; muted" className="max-h-44 max-w-full rounded-xl shadow-sm" />
+              ) : (
+                <video muted loop playsInline controls className="max-h-44 max-w-full rounded-xl object-contain shadow-sm">
+                  <source src={currentUrl} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
+                </video>
+              )
             ) : (
               <div className="flex flex-col items-center gap-2 p-8 text-[#06111F]/30">
                 <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>

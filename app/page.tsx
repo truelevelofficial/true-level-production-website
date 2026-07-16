@@ -22,6 +22,7 @@ import { SafeImage } from "@/components/safe-image";
 import TrueFocus from "@/components/TrueFocus";
 import FlowingMenu from "@/components/FlowingMenu";
 import { getServiceVideoUrls } from "@/lib/site-media-config";
+import { isYouTubeUrl, getYouTubeEmbedUrl } from "@/lib/video-utils";
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -277,9 +278,13 @@ export default async function Home() {
             return (
               <div key={service.title} className="group relative min-h-[420px] overflow-hidden rounded-[2.2rem] border border-[#06111F]/10 bg-white shadow-sm transition hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-950/10">
                 {service.video ? (
-                  <video autoPlay muted loop playsInline poster={service.image || undefined} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105">
-                    <source src={service.video} type="video/mp4" />
-                  </video>
+                  isYouTubeUrl(service.video) ? (
+                    <iframe src={getYouTubeEmbedUrl(service.video) || service.video} allow="autoplay; muted" className="absolute inset-0 h-full w-full transition duration-500 group-hover:scale-105" />
+                  ) : (
+                    <video autoPlay muted loop playsInline poster={service.image || undefined} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105">
+                      <source src={service.video} type="video/mp4" />
+                    </video>
+                  )
                 ) : service.image ? (
                   <SafeImage alt={service.title} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" fallback="blue" src={service.image} />
                 ) : (
