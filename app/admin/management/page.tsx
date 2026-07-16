@@ -1,6 +1,5 @@
 import { AdminShell } from "@/components/admin-shell";
 import { requireAdmin } from "@/lib/auth";
-import { uploadSiteMediaAction } from "@/lib/actions";
 import fs from "fs";
 import path from "path";
 
@@ -132,7 +131,7 @@ function AssetCard({ asset }: { asset: MediaAsset }) {
           </div>
           <div className="mt-5 rounded-2xl border border-dashed border-[#06111F]/15 bg-[#F7F8FB] p-4">
             <p className="mb-2 text-[10px] font-black uppercase tracking-[0.1em] text-[#06111F]/40">Upload new {asset.type}</p>
-            <form action={uploadSiteMediaAction} className="flex flex-wrap items-end gap-3">
+            <form action="/api/upload" method="POST" encType="multipart/form-data" className="flex flex-wrap items-end gap-3">
               <input type="hidden" name="assetPath" value={asset.path} />
               <input
                 type="file"
@@ -171,8 +170,9 @@ function AssetCard({ asset }: { asset: MediaAsset }) {
   );
 }
 
-export default async function ManagementPage() {
+export default async function ManagementPage(props: { searchParams?: Promise<{ success?: string; error?: string }> }) {
   await requireAdmin();
+  const sp = await props.searchParams ?? {};
 
   const grouped = groupOrder.map((gk) => ({
     group: gk,
@@ -188,6 +188,16 @@ export default async function ManagementPage() {
 
   return (
     <AdminShell title="Site Media">
+      {sp.success && (
+        <div className="mb-5 rounded-2xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-800">File uploaded successfully!</div>
+      )}
+      {sp.error === "missing" && (
+        <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-bold text-red-800">Missing file or path.</div>
+      )}
+      {sp.error === "failed" && (
+        <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-bold text-red-800">Upload failed. Try again.</div>
+      )}
+
       <div className="mb-6 flex items-baseline justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.16em] text-[#06111F]/40">

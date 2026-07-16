@@ -8,8 +8,6 @@ import { combineDateTime, dateOnly, endAfterHours } from "./dates";
 import { getPrisma } from "./prisma";
 import { adminBookingSchema, adminMeetingSchema, adminStudioBookingSchema, bookingDeleteSchema, bookingStatusUpdateSchema, clientDeleteSchema, clientUpdateSchema, companySettingsSchema, contractDeleteSchema, contractSchema, contractUpdateSchema, expenseDeleteSchema, expenseSchema, expenseUpdateSchema, invoiceDeleteSchema, invoicePaymentSchema, invoiceSchema, manualClientSchema, meetingBookingSchema, paymentDeleteSchema, paymentSchema, paymentUpdateSchema, quotationDeleteSchema, quotationSchema, quotationUpdateSchema, studioBookingSchema } from "./validation";
 import { generateArabicContract } from "./contracts";
-import fs from "fs";
-import path from "path";
 import { createCalendarEvent, updateCalendarEvent, cancelCalendarEvent } from "./google-calendar";
 import { notifyNewBooking, notifyBookingStatusChange } from "./notifications";
 
@@ -1607,17 +1605,4 @@ export async function autoLogActivity(entityType: string, entityId: string, acti
   } catch { /* silent */ }
 }
 
-export async function uploadSiteMediaAction(formData: FormData) {
-  await requireAdmin();
-  const file = formData.get("file") as File | null;
-  const assetPath = formData.get("assetPath") as string;
-  if (!file || !assetPath?.trim()) return;
-  try {
-    const bytes = Buffer.from(await file.arrayBuffer());
-    const fullPath = path.join(process.cwd(), "public", assetPath.trim());
-    fs.mkdirSync(path.dirname(fullPath), { recursive: true });
-    fs.writeFileSync(fullPath, bytes);
-    revalidatePath("/admin/management");
-  } catch { /* silent */ }
-  redirect("/admin/management");
-}
+
