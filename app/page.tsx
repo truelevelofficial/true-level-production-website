@@ -279,7 +279,9 @@ export default async function Home() {
               <div key={service.title} className="group relative min-h-[420px] overflow-hidden rounded-[2.2rem] border border-[#06111F]/10 bg-white shadow-sm transition hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-950/10">
                 {service.video ? (
                   isYouTubeUrl(service.video) ? (
-                    <iframe src={getYouTubeEmbedUrl(service.video) || service.video} allow="autoplay; muted" className="absolute inset-0 h-full w-full transition duration-500 group-hover:scale-105" />
+                    <div className="absolute inset-0 overflow-hidden">
+                      <iframe src={getYouTubeEmbedUrl(service.video) || service.video} allow="autoplay; muted" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition duration-500 group-hover:scale-[1.12]" style={{ width: "250%", height: "250%", maxWidth: "none", pointerEvents: "none" }} />
+                    </div>
                   ) : (
                     <video autoPlay muted loop playsInline poster={service.image || undefined} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105">
                       <source src={service.video} type="video/mp4" />

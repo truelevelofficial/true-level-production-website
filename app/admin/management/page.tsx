@@ -167,7 +167,9 @@ function AssetCard({ asset, currentUrl }: { asset: MediaAsset; currentUrl?: stri
           {asset.type === "video" ? (
             currentUrl ? (
               isYouTubeUrl(currentUrl) ? (
-                <iframe src={getYouTubeEmbedUrl(currentUrl) || currentUrl} allow="autoplay; muted" className="max-h-44 max-w-full rounded-xl shadow-sm" />
+                <div className="flex h-44 w-full items-center justify-center overflow-hidden rounded-xl">
+                  <iframe src={getYouTubeEmbedUrl(currentUrl) || currentUrl} allow="autoplay; muted" className="h-full w-full" />
+                </div>
               ) : (
                 <video muted loop playsInline controls className="max-h-44 max-w-full rounded-xl object-contain shadow-sm">
                   <source src={currentUrl} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
