@@ -277,4 +277,5 @@ export const contractSchema = z.object({
    monthlyFee: z.coerce.number().min(0).optional().default(0),
   creatorPercentage: z.coerce.number().min(0).max(100).optional().default(25),
   penaltyAmount: z.coerce.number().min(0).optional().default(50000),
+  clauses: z.string().optional().or(z.literal("")),
 });

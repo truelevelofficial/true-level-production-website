@@ -1,8 +1,9 @@
 "use client";
 
-import { useTransition, useState, useEffect, useRef } from "react";
+import { useTransition, useState, useEffect, useRef, useMemo } from "react";
 import { Field, inputClass } from "./form-fields";
 import { createContractAction } from "@/lib/actions";
+import { contentCreatorsDefaultClauses, contentCreatorsNdaDefaultClauses } from "@/lib/contracts";
 
 export function ContractFormFields({ defaultRep, defaultPaymentTerms, defaultCancellationPolicy, services }: { defaultRep: string; defaultPaymentTerms: string; defaultCancellationPolicy: string; services: readonly string[] }) {
   const [isPending, startTransition] = useTransition();
@@ -10,6 +11,19 @@ export function ContractFormFields({ defaultRep, defaultPaymentTerms, defaultCan
   const [contractType, setContractType] = useState("VIDEO_PRODUCTION");
   const msgRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+
+  const emptyInput = useMemo(() => ({
+    representativeName: defaultRep,
+    clientName: "",
+    clientTaxId: "",
+    projectStartDate: "",
+    creatorPercentage: 25,
+    penaltyAmount: 50000,
+    platforms: "",
+  }), [defaultRep]);
+
+  const ccDefaults = useMemo(() => contentCreatorsDefaultClauses(emptyInput), [emptyInput]);
+  const ndaDefaults = useMemo(() => contentCreatorsNdaDefaultClauses(emptyInput), [emptyInput]);
 
   useEffect(() => {
     if (result && msgRef.current) {
@@ -20,6 +34,18 @@ export function ContractFormFields({ defaultRep, defaultPaymentTerms, defaultCan
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+
+    if (contractType === "CONTENT_CREATORS" || contractType === "CONTENT_CREATORS_NDA") {
+      const clauses: string[] = [];
+      let i = 0;
+      while (formData.has(`clause_${i}`)) {
+        clauses.push(formData.get(`clause_${i}`) as string || "");
+        i++;
+      }
+      formData.set("clauses", JSON.stringify(clauses));
+      for (let j = 0; j < i; j++) formData.delete(`clause_${j}`);
+    }
+
     setResult(null);
     startTransition(async () => {
       const res = await createContractAction(formData);
@@ -28,6 +54,47 @@ export function ContractFormFields({ defaultRep, defaultPaymentTerms, defaultCan
         formRef.current?.reset();
       }
     });
+  };
+
+  const clauseLabels: Record<string, string[]> = {
+    CONTENT_CREATORS: [
+      "البند الأول: أطراف العقد",
+      "البند الثاني: موضوع العقد",
+      "البند الثالث: مدة العقد",
+      "البند الرابع: التزامات الطرف الأول",
+      "البند الخامس: التزامات الطرف الثاني",
+      "البند السادس: ملكية القناة",
+      "البند السابع: ملكية المحتوى",
+      "البند الثامن: المقابل المالي",
+      "البند التاسع: الرعايات والإعلانات",
+      "البند العاشر: سرية المعلومات",
+      "البند الحادي عشر: عدم المنافسة",
+      "البند الثاني عشر: استخدام الاسم والصورة",
+      "البند الثالث عشر: إنهاء العقد",
+      "البند الرابع عشر: الشرط الجزائي",
+      "البند الخامس عشر: القوة القاهرة",
+      "البند السادس عشر: القانون المختص",
+      "البند السابع عشر: النسخ",
+    ],
+    CONTENT_CREATORS_NDA: [
+      "التمهيد وبيانات الأطراف",
+      "البند الأول: التمهيد",
+      "البند الثاني: تعريف المعلومات السرية",
+      "البند الثالث: الالتزام بالسرية",
+      "البند الرابع: سرية الحسابات والبيانات",
+      "البند الخامس: ملكية القنوات والحسابات",
+      "البند السادس: نقل الملكية الفكرية",
+      "البند السابع: نطاق الملكية الفكرية",
+      "البند الثامن: حق الاستغلال",
+      "البند التاسع: استخدام الاسم والصورة",
+      "البند العاشر: عدم المطالبة بالحذف",
+      "البند الحادي عشر: عدم المنافسة",
+      "البند الثاني عشر: إعادة استخدام المحتوى",
+      "البند الثالث عشر: مدة الالتزامات",
+      "البند الرابع عشر: الإخلال بالاتفاقية",
+      "البند الخامس عشر: القانون الواجب التطبيق",
+      "البند السادس عشر: النسخ",
+    ],
   };
 
   return (
@@ -134,23 +201,30 @@ export function ContractFormFields({ defaultRep, defaultPaymentTerms, defaultCan
         <div><Field label="المنصات"><input className={inputClass} name="platforms" placeholder="اختياري" /></Field></div>
       </>}
 
-      {contractType === "CONTENT_CREATORS" && <>
-        <div className="md:col-span-2"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">خيارات عقد صناع المحتوى</p></div>
-        <div><Field label="نسبة صانع المحتوى (%)"><input className={inputClass} defaultValue="25" name="creatorPercentage" type="number" min="1" max="100" /></Field></div>
-        <div><Field label="الشرط الجزائي (جنيه)"><input className={inputClass} defaultValue="50000" name="penaltyAmount" type="number" min="0" /></Field></div>
-        <div><Field label="المنصات المستهدفة"><input className={inputClass} name="platforms" placeholder="YouTube, Facebook, Instagram, TikTok, Snapchat" /></Field></div>
+      {(contractType === "CONTENT_CREATORS" || contractType === "CONTENT_CREATORS_NDA") && <>
+        <div className="md:col-span-2">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">
+            {contractType === "CONTENT_CREATORS" ? "بنود عقد صناع المحتوى" : "بنود اتفاقية السرية (NDA)"}
+          </p>
+          <p className="mt-1 text-xs text-gray-500">قم بتعديل نصوص البنود مباشرة. سيتم توليد العقد تلقائيا بناء على ما تكتبه.</p>
+        </div>
       </>}
 
-      {contractType === "CONTENT_CREATORS_NDA" && <>
-        <div className="md:col-span-2"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">خيارات اتفاقية السرية (NDA)</p></div>
-        <div><Field label="المنصات"><input className={inputClass} name="platforms" placeholder="YouTube, Facebook, Instagram, TikTok" /></Field></div>
-      </>}
-      {contractType === "CONTENT_CREATORS" && <>
-        <div className="md:col-span-2"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">خيارات عقد صناع المحتوى</p></div>
-        <div><Field label="نسبة صانع المحتوى (%)"><input className={inputClass} defaultValue="25" name="creatorPercentage" type="number" min="1" max="100" /></Field></div>
-        <div><Field label="الشرط الجزائي (جنيه)"><input className={inputClass} defaultValue="50000" name="penaltyAmount" type="number" min="0" /></Field></div>
-        <div><Field label="المنصات المستهدفة"><input className={inputClass} name="platforms" placeholder="YouTube, Facebook, Instagram, TikTok, Snapchat" /></Field></div>
-      </>}
+      {contractType === "CONTENT_CREATORS" && ccDefaults.map((_, i) => (
+        <div key={i} className="md:col-span-2">
+          <Field label={clauseLabels.CONTENT_CREATORS[i]}>
+            <textarea className={inputClass} name={`clause_${i}`} rows={i >= 7 && i <= 8 ? 16 : i === 12 ? 14 : 6} defaultValue={ccDefaults[i]} />
+          </Field>
+        </div>
+      ))}
+
+      {contractType === "CONTENT_CREATORS_NDA" && ndaDefaults.map((_, i) => (
+        <div key={i} className="md:col-span-2">
+          <Field label={clauseLabels.CONTENT_CREATORS_NDA[i]}>
+            <textarea className={inputClass} name={`clause_${i}`} rows={i === 2 ? 16 : i === 7 || i === 8 ? 12 : 6} defaultValue={ndaDefaults[i]} />
+          </Field>
+        </div>
+      ))}
 
       <div className="md:col-span-2">
         <button type="submit" disabled={isPending} className="rounded-full bg-[#0B7CFF] px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50">

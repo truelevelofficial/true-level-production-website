@@ -643,6 +643,7 @@ export async function createContractAction(formData: FormData) {
         totalPrice: input.totalPrice,
         deposit: input.depositAmount,
         remaining: input.remainingAmount,
+        clauses: input.clauses || null,
       },
     });
     revalidatePath("/admin/contracts");

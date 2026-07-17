@@ -297,7 +297,8 @@ model Contract {
   totalPrice Decimal?       @db.Decimal(12, 2)
   deposit    Decimal?       @db.Decimal(12, 2)
   remaining  Decimal?       @db.Decimal(12, 2)
-  signedAt  DateTime?
+  signedAt   DateTime?
+  clauses    String?
   projects   Project[]
   invoices   Invoice[]
   createdAt  DateTime       @default(now())
