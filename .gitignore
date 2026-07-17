@@ -11,3 +11,5 @@ build/
 *service-account*.json
 google-credentials*.json
 true-level-*.json
+
+tsconfig.tsbuildinfo
