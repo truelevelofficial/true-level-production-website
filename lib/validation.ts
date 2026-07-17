@@ -274,5 +274,7 @@ export const contractSchema = z.object({
   numberOfPosts: z.coerce.number().int().min(0).max(999).optional().default(0),
   postingIncluded: z.string().trim().max(20).optional().or(z.literal("")),
   mediaBuyingIncluded: z.string().trim().max(20).optional().or(z.literal("")),
-  monthlyFee: z.coerce.number().min(0).optional().default(0),
+   monthlyFee: z.coerce.number().min(0).optional().default(0),
+  creatorPercentage: z.coerce.number().min(0).max(100).optional().default(25),
+  penaltyAmount: z.coerce.number().min(0).optional().default(50000),
 });
