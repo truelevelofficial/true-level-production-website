@@ -50,6 +50,7 @@ export function ContractFormFields({ defaultRep, defaultPaymentTerms, defaultCan
             <option value="EVENT_COVERAGE">عقد تغطية فعالية</option>
             <option value="MONTHLY_CONTENT_MANAGEMENT">عقد إدارة محتوى شهري</option>
             <option value="STUDIO_RENTAL">عقد تأجير استوديو</option>
+            <option value="CONTENT_CREATORS_NDA">اتفاقية سرية وملكية فكرية (NDA)</option>
             <option value="CONTENT_CREATORS">عقد صناع المحتوى</option>
             <option value="GENERAL_SERVICE">عقد خدمات عام</option>
           </select>
@@ -133,6 +134,17 @@ export function ContractFormFields({ defaultRep, defaultPaymentTerms, defaultCan
         <div><Field label="المنصات"><input className={inputClass} name="platforms" placeholder="اختياري" /></Field></div>
       </>}
 
+      {contractType === "CONTENT_CREATORS" && <>
+        <div className="md:col-span-2"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">خيارات عقد صناع المحتوى</p></div>
+        <div><Field label="نسبة صانع المحتوى (%)"><input className={inputClass} defaultValue="25" name="creatorPercentage" type="number" min="1" max="100" /></Field></div>
+        <div><Field label="الشرط الجزائي (جنيه)"><input className={inputClass} defaultValue="50000" name="penaltyAmount" type="number" min="0" /></Field></div>
+        <div><Field label="المنصات المستهدفة"><input className={inputClass} name="platforms" placeholder="YouTube, Facebook, Instagram, TikTok, Snapchat" /></Field></div>
+      </>}
+
+      {contractType === "CONTENT_CREATORS_NDA" && <>
+        <div className="md:col-span-2"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">خيارات اتفاقية السرية (NDA)</p></div>
+        <div><Field label="المنصات"><input className={inputClass} name="platforms" placeholder="YouTube, Facebook, Instagram, TikTok" /></Field></div>
+      </>}
       {contractType === "CONTENT_CREATORS" && <>
         <div className="md:col-span-2"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">خيارات عقد صناع المحتوى</p></div>
         <div><Field label="نسبة صانع المحتوى (%)"><input className={inputClass} defaultValue="25" name="creatorPercentage" type="number" min="1" max="100" /></Field></div>

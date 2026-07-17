@@ -98,9 +98,10 @@ export const contractTypes = [
   ["MONTHLY_CONTENT_MANAGEMENT", "عقد إدارة محتوى شهري"],
   ["GENERAL_SERVICE", "عقد خدمات عام"],
   ["CONTENT_CREATORS", "عقد صناع المحتوى"],
+  ["CONTENT_CREATORS_NDA", "اتفاقية سرية وملكية فكرية (NDA)"],
 ] as const;
 
-export const contractTypeValues = ["STUDIO_RENTAL", "VIDEO_PRODUCTION", "UGC_CREATOR_CAMPAIGN", "EVENT_COVERAGE", "MONTHLY_CONTENT_MANAGEMENT", "GENERAL_SERVICE", "CONTENT_CREATORS"] as const;
+export const contractTypeValues = ["STUDIO_RENTAL", "VIDEO_PRODUCTION", "UGC_CREATOR_CAMPAIGN", "EVENT_COVERAGE", "MONTHLY_CONTENT_MANAGEMENT", "GENERAL_SERVICE", "CONTENT_CREATORS", "CONTENT_CREATORS_NDA"] as const;
 
 export const invoiceStatuses = ["DRAFT", "SENT", "CANCELLED"] as const;
 export const invoicePaymentStatuses = ["UNPAID", "PARTIALLY_PAID", "PAID", "OVERDUE", "REFUNDED"] as const;
