@@ -2,7 +2,7 @@ export function PrintButton({ contractId }: { contractId: string }) {
   return (
     <a
       className="rounded-full bg-[#06111F] px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white no-print"
-      href={`/api/contracts/${contractId}/pdf`}
+      href={`/admin/contracts/${contractId}/print`}
       target="_blank"
       rel="noopener noreferrer"
     >
