@@ -105,7 +105,7 @@ export function ContractPreview({
                       </div>
                       <div className="sig-field">
                         <span className="sig-label">الصفة:</span>
-                        <span className="sig-value">{clientCompanyName ? `ممثل ${clientCompanyName}` : "عميل"}</span>
+                        <span className="sig-value">{clientCompanyName ? `ممثل ${clientCompanyName}` : ""}</span>
                       </div>
                       <div className="sig-field">
                         <span className="sig-label">التوقيع:</span>
