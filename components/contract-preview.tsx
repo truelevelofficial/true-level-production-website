@@ -135,7 +135,13 @@ const printStyles = `
 @media print {
   @page {
     size: A4;
-    margin: 14mm 18mm 20mm 18mm;
+    margin: 14mm 18mm 24mm 18mm;
+    @bottom-center {
+      content: counter(page) " / " counter(pages);
+      font-family: var(--font-cairo), 'Traditional Arabic', 'Noto Naskh Arabic', Tahoma, sans-serif;
+      font-size: 9pt;
+      color: #555;
+    }
   }
   * { font-family: var(--font-cairo), 'Traditional Arabic', 'Noto Naskh Arabic', Tahoma, sans-serif; }
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
