@@ -228,30 +228,30 @@ export const quotationDeleteSchema = z.object({ quotationId: z.string().min(1) }
 export const contractSchema = z.object({
   type: z.enum(contractTypeValues),
   status: z.enum(contractStatuses).default("DRAFT"),
-  clientName: requiredText,
-  clientCompanyName: z.string().trim().max(200).optional().or(z.literal("")),
-  clientTaxId: z.string().trim().max(100).optional().or(z.literal("")),
-  clientAddress: z.string().trim().max(300).optional().or(z.literal("")),
-  clientPhone: z.string().trim().min(7).max(40),
-  clientEmail: z.string().trim().email().max(200),
-  representativeName: requiredText,
-  serviceType: requiredText,
-  projectDescription: requiredText,
-  deliverables: requiredText,
-  projectStartDate: z.string().trim().min(10),
-  projectEndDate: z.string().trim().min(10),
-  shootingDate: z.string().trim().min(10),
-  location: requiredText,
-  totalPrice: z.coerce.number().min(0),
-  depositAmount: z.coerce.number().min(0),
-  remainingAmount: z.coerce.number().min(0),
-  paymentTerms: requiredText,
-  cancellationPolicy: requiredText,
-  deliveryTimeline: requiredText,
-  usageRights: requiredText,
-  revisionRounds: z.coerce.number().int().min(0).max(20),
-  confidentialityClause: requiredText,
-  latePaymentClause: requiredText,
+  clientName: optionalText,
+  clientCompanyName: optionalText,
+  clientTaxId: optionalText,
+  clientAddress: optionalText,
+  clientPhone: optionalText,
+  clientEmail: optionalText,
+  representativeName: optionalText,
+  serviceType: optionalText,
+  projectDescription: optionalText,
+  deliverables: optionalText,
+  projectStartDate: optionalText,
+  projectEndDate: optionalText,
+  shootingDate: optionalText,
+  location: optionalText,
+  totalPrice: z.coerce.number().min(0).optional(),
+  depositAmount: z.coerce.number().min(0).optional(),
+  remainingAmount: z.coerce.number().min(0).optional(),
+  paymentTerms: optionalText,
+  cancellationPolicy: optionalText,
+  deliveryTimeline: optionalText,
+  usageRights: optionalText,
+  revisionRounds: z.coerce.number().int().min(0).max(20).optional(),
+  confidentialityClause: optionalText,
+  latePaymentClause: optionalText,
   additionalNotes: optionalText,
   bodyOverride: z.string().trim().max(30000).optional().or(z.literal("")),
   /* Type-specific optional fields */
@@ -278,4 +278,41 @@ export const contractSchema = z.object({
   creatorPercentage: z.coerce.number().min(0).max(100).optional().default(25),
   penaltyAmount: z.coerce.number().min(0).optional().default(50000),
   clauses: z.string().optional().or(z.literal("")),
+}).superRefine((data, ctx) => {
+  const clauseTypes = ["CONTENT_CREATORS", "CONTENT_CREATORS_NDA"];
+  if (clauseTypes.includes(data.type)) {
+    if (!data.clauses) {
+      ctx.addIssue({ code: "custom", path: ["clauses"], message: "بنود العقد مطلوبة" });
+    }
+  } else {
+    const required: [string, string, (s: string) => number][] = [
+      ["clientName", "اسم العميل مطلوب", (s) => s.length],
+      ["clientPhone", "رقم الهاتف مطلوب", (s) => s.length],
+      ["clientEmail", "البريد الإلكتروني مطلوب", (s) => s.length],
+      ["representativeName", "ممثل الشركة مطلوب", (s) => s.length],
+      ["serviceType", "نوع الخدمة مطلوب", (s) => s.length],
+      ["projectDescription", "وصف المشروع مطلوب", (s) => s.length],
+      ["deliverables", "التسليمات مطلوبة", (s) => s.length],
+      ["projectStartDate", "تاريخ البداية مطلوب", (s) => s.length],
+      ["projectEndDate", "تاريخ النهاية مطلوب", (s) => s.length],
+      ["shootingDate", "تاريخ التصوير مطلوب", (s) => s.length],
+      ["location", "مكان التنفيذ مطلوب", (s) => s.length],
+      ["totalPrice", "السعر مطلوب", (s) => Number(s) || 0],
+      ["depositAmount", "الدفعة المقدمة مطلوبة", (s) => Number(s) || 0],
+      ["remainingAmount", "المبلغ المتبقي مطلوب", (s) => Number(s) || 0],
+      ["deliveryTimeline", "مدة التسليم مطلوبة", (s) => s.length],
+      ["paymentTerms", "شروط الدفع مطلوبة", (s) => s.length],
+      ["revisionRounds", "عدد التعديلات مطلوب", (s) => Number(s) || 0],
+      ["cancellationPolicy", "سياسة الإلغاء مطلوبة", (s) => s.length],
+      ["usageRights", "حقوق الاستخدام مطلوبة", (s) => s.length],
+      ["confidentialityClause", "السرية مطلوبة", (s) => s.length],
+      ["latePaymentClause", "التأخير في الدفع مطلوب", (s) => s.length],
+    ];
+    for (const [field, msg] of required) {
+      const val = (data as Record<string, unknown>)[field];
+      if (!val || (typeof val === "string" && val.length < 1) || (typeof val === "number" && val <= 0)) {
+        ctx.addIssue({ code: "custom", path: [field], message: msg });
+      }
+    }
+  }
 });

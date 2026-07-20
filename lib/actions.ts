@@ -627,19 +627,24 @@ export async function createContractAction(formData: FormData) {
   if (!prisma) return { error: "Database is not configured." };
   try {
     const generated = generateArabicContract(input);
-    const client = await upsertClient({
-      fullName: input.clientName,
-      companyName: input.clientCompanyName,
-      phone: input.clientPhone,
-      email: input.clientEmail,
-    });
+    const clauseTypes = ["CONTENT_CREATORS", "CONTENT_CREATORS_NDA"];
+    let clientId: string | null = null;
+    if (!clauseTypes.includes(input.type)) {
+      const client = await upsertClient({
+        fullName: input.clientName || "",
+        companyName: input.clientCompanyName,
+        phone: input.clientPhone || "",
+        email: input.clientEmail || "",
+      });
+      clientId = client.id;
+    }
     await prisma.contract.create({
       data: {
         type: input.type,
         status: input.status,
         title: generated.title,
         body: input.bodyOverride || generated.body,
-        clientId: client.id,
+        clientId,
         totalPrice: input.totalPrice,
         deposit: input.depositAmount,
         remaining: input.remainingAmount,

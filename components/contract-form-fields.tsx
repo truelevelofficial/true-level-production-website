@@ -31,11 +31,14 @@ export function ContractFormFields({ defaultRep, defaultPaymentTerms, defaultCan
     }
   }, [result]);
 
+  const clauseTypes = ["CONTENT_CREATORS", "CONTENT_CREATORS_NDA"];
+  const isClauseType = clauseTypes.includes(contractType);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    if (contractType === "CONTENT_CREATORS" || contractType === "CONTENT_CREATORS_NDA") {
+    if (isClauseType) {
       const clauses: string[] = [];
       let i = 0;
       while (formData.has(`clause_${i}`)) {
@@ -44,6 +47,7 @@ export function ContractFormFields({ defaultRep, defaultPaymentTerms, defaultCan
       }
       formData.set("clauses", JSON.stringify(clauses));
       for (let j = 0; j < i; j++) formData.delete(`clause_${j}`);
+      formData.set("status", "DRAFT");
     }
 
     setResult(null);
@@ -123,6 +127,8 @@ export function ContractFormFields({ defaultRep, defaultPaymentTerms, defaultCan
           </select>
         </Field>
       </div>
+
+      {!isClauseType && <>
       <div>
         <Field label="الحالة">
           <select className={inputClass} name="status">
@@ -160,6 +166,7 @@ export function ContractFormFields({ defaultRep, defaultPaymentTerms, defaultCan
       <div><Field label="التأخير في الدفع"><textarea className={inputClass} name="latePaymentClause" required /></Field></div>
       <div><Field label="ملاحظات إضافية"><textarea className={inputClass} name="additionalNotes" /></Field></div>
       <div><Field label="تعديل نص العقد قبل الحفظ"><textarea className={inputClass} name="bodyOverride" rows={8} placeholder="اختياري: اتركه فارغا ليتم توليد المسودة تلقائيا من القالب." /></Field></div>
+      </>}
 
       {contractType === "VIDEO_PRODUCTION" && <>
         <div className="md:col-span-2"><p className="text-xs font-black uppercase tracking-[0.18em] text-[#0B7CFF]">خيارات إنتاج الفيديو</p></div>
